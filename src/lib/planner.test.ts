@@ -7,6 +7,8 @@ import {
   bandOf,
   calibration,
   coreProgress,
+  addMonths,
+  daysLeft,
   daysUntil,
   depthFor,
   dueForRevision,
@@ -30,12 +32,15 @@ import {
   groupBAtRisk,
   questionsForTopic,
   unitExposure,
+  windowEnd,
+  windowLabel,
 } from "./planner";
 import { PYQS } from "../data/pyq";
 
 const WEEKLY_HOURS = 10;
 const settings = on.settings({
-  examDate: "2027-01-01",
+  startDate: "2026-09-01",
+  windowMonths: 4,
   weeklyHours: WEEKLY_HOURS,
   targetCoverage: 0.8,
 });
@@ -409,7 +414,54 @@ describe("attempts", () => {
 });
 
 describe("dates", () => {
-  it("never goes negative after the exam", () => {
+  it("never goes negative once the window has passed", () => {
     expect(daysUntil("2020-01-01")).toBe(0);
+  });
+});
+
+describe("the preparation window", () => {
+  it("adds whole calendar months", () => {
+    expect(addMonths("2026-08-29", 5)).toBe("2027-01-29");
+    expect(addMonths("2026-11-15", 4)).toBe("2027-03-15");
+  });
+
+  it("clamps to the last day when the target month is shorter", () => {
+    expect(addMonths("2026-01-31", 1)).toBe("2026-02-28"); // not 3 March
+    expect(addMonths("2028-01-31", 1)).toBe("2028-02-29"); // leap year
+    expect(addMonths("2026-08-31", 6)).toBe("2027-02-28");
+  });
+
+  it("ends the stated number of months after the start", () => {
+    const w = (months: 4 | 5 | 6) =>
+      windowEnd({ startDate: "2026-08-29", windowMonths: months, weeklyHours: 10, targetCoverage: 0.8 });
+    expect(w(4)).toBe("2026-12-29");
+    expect(w(5)).toBe("2027-01-29");
+    expect(w(6)).toBe("2027-02-28");
+  });
+
+  it("still honours an exam date saved before windows existed", () => {
+    expect(windowEnd({ examDate: "2027-01-01", weeklyHours: 10, targetCoverage: 0.8 })).toBe(
+      "2027-01-01",
+    );
+  });
+
+  it("has no end, and no days left, when nothing is set", () => {
+    expect(windowEnd(null)).toBe(null);
+    expect(daysLeft(null)).toBe(null);
+    expect(windowEnd({ weeklyHours: 10, targetCoverage: 0.8 })).toBe(null);
+  });
+
+  it("counts the full length on day one and zero after the end", () => {
+    const s = { startDate: "2026-08-29", windowMonths: 5 as const, weeklyHours: 10, targetCoverage: 0.8 };
+    expect(daysLeft(s, new Date("2026-08-29T09:00:00"))).toBe(153);
+    expect(daysLeft(s, new Date("2026-08-30T00:01:00"))).toBe(152);
+    expect(daysLeft(s, new Date("2027-03-15T12:00:00"))).toBe(0);
+  });
+
+  it("names the window in plain words", () => {
+    expect(windowLabel({ startDate: "2026-08-29", windowMonths: 5, weeklyHours: 10, targetCoverage: 0.8 })).toBe(
+      "5-month plan",
+    );
+    expect(windowLabel(null)).toBe("plan");
   });
 });

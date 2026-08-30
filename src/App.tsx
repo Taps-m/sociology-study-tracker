@@ -2,12 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { TOPICS } from "./data/syllabus";
 import { on, project } from "./lib/events";
-import type { CheckId, Derived, Settings, StudyEvent } from "./lib/events";
+import type {
+  CheckId,
+  Derived,
+  Settings,
+  StudyEvent,
+  WindowMonths,
+} from "./lib/events";
 import {
   attemptStats,
   calibration,
   coreProgress,
-  daysUntil,
+  addMonths,
+  daysLeft,
   effectivePace,
   freshness,
   observedPace,
@@ -15,6 +22,7 @@ import {
   progress,
   projection,
   requiredPace,
+  windowEnd,
 } from "./lib/planner";
 import { exportJson, importJson, load, save } from "./lib/storage";
 import { clearAdvice } from "./lib/ai";
@@ -221,7 +229,7 @@ function Telemetry({ d }: { d: Derived }) {
   const measured = observedPace(d);
   const answers = attemptStats(d);
   const fresh = freshness(d);
-  const days = daysUntil(settings.examDate);
+  const days = daysLeft(settings);
   const targetPct = Math.round(settings.targetCoverage * 100);
 
   return (
@@ -230,7 +238,9 @@ function Telemetry({ d }: { d: Derived }) {
         <span style={{ fontSize: 12.5, letterSpacing: "0.12em", color: C.muted }}>
           sociology · wbcs
         </span>
-        <span style={{ fontSize: 14.5, color: C.accent }}>T-{days}d</span>
+        <span style={{ fontSize: 14.5, color: C.accent }}>
+          {days === null ? "no window set" : `${days}d left`}
+        </span>
       </Row>
 
       <div style={{ display: "flex", alignItems: "flex-end", gap: 8, margin: "20px 0 4px" }}>
@@ -396,6 +406,8 @@ function PaceControl({
   onChange: (patch: Partial<Settings>) => void;
 }) {
   const s = d.settings as Settings;
+  const end = windowEnd(s);
+  const left = daysLeft(s);
   return (
     <Section title="Hours a week you can give">
       <input
@@ -406,8 +418,45 @@ function PaceControl({
         onChange={(e) => onChange({ weeklyHours: +e.target.value })}
         style={{ width: "100%", accentColor: C.accent, marginTop: 10 }}
       />
+      <Note>{s.weeklyHours} hours a week</Note>
+
+      <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
+        How long this run is
+      </div>
+      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+        {([4, 5, 6] as WindowMonths[]).map((m) => (
+          <button
+            key={m}
+            onClick={() =>
+              onChange({
+                startDate: s.startDate ?? new Date().toISOString().slice(0, 10),
+                windowMonths: m,
+              })
+            }
+            aria-pressed={s.windowMonths === m}
+            style={{
+              flex: 1,
+              minHeight: 40,
+              borderRadius: 8,
+              cursor: "pointer",
+              fontFamily: C.sans,
+              fontSize: 14.5,
+              fontWeight: s.windowMonths === m ? 600 : 400,
+              background: s.windowMonths === m ? C.accent : C.surface,
+              color: s.windowMonths === m ? C.surface : C.text,
+              border: `1px solid ${s.windowMonths === m ? C.accent : C.line}`,
+            }}
+          >
+            {m} months
+          </button>
+        ))}
+      </div>
       <Note>
-        {s.weeklyHours} hours a week · exam on {s.examDate}
+        {end === null
+          ? "No preparation window set."
+          : left === 0
+            ? `This run ended on ${end}. Pick a length to start another.`
+            : `Started ${s.startDate ?? "earlier"}, ends ${end} — ${left} days left. Lengthening the run does not reset anything you have already covered.`}
       </Note>
 
       <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
@@ -566,7 +615,7 @@ function Backup({
 function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
   const [name, setName] = useState("");
   const [startUnit, setStartUnit] = useState("");
-  const [months, setMonths] = useState(5);
+  const [months, setMonths] = useState<WindowMonths>(5);
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
   const [known, setKnown] = useState<string[]>([]);
@@ -576,10 +625,9 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
     units: [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))],
   }));
 
-  const targetDate = new Date();
-  targetDate.setMonth(targetDate.getMonth() + months);
-  const examDate = targetDate.toISOString().slice(0, 10);
-  const readable = targetDate.toLocaleDateString("en-GB", {
+  const startDate = new Date().toISOString().slice(0, 10);
+  const endDate = addMonths(startDate, months);
+  const readable = new Date(`${endDate}T00:00:00`).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -641,15 +689,35 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
             />
           </section>
 
-          <Field label="How long until your exam?" value={months} unit={months === 1 ? "month" : "months"} sub={readable}>
-            <input
-              type="range"
-              min={1}
-              max={24}
-              value={months}
-              onChange={(e) => setMonths(+e.target.value)}
-              aria-label="Months until exam"
-            />
+          <Field
+            label="How many months are you planning for?"
+            value={months}
+            unit="months"
+            sub={`a run to ${readable} — these exams come round every year, so a window that ends without a pass still leaves you further ahead for the next one`}
+          >
+            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+              {([4, 5, 6] as WindowMonths[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMonths(m)}
+                  aria-pressed={months === m}
+                  style={{
+                    flex: 1,
+                    minHeight: 46,
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    fontFamily: C.sans,
+                    fontSize: 15.5,
+                    fontWeight: months === m ? 600 : 400,
+                    background: months === m ? C.accent : C.surface,
+                    color: months === m ? C.surface : C.text,
+                    border: `1px solid ${months === m ? C.accent : C.line}`,
+                  }}
+                >
+                  {m} months
+                </button>
+              ))}
+            </div>
           </Field>
 
           <Field label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
@@ -805,7 +873,8 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
               {
                 name: name.trim() || undefined,
                 startUnit: startUnit || undefined,
-                examDate,
+                startDate,
+                windowMonths: months,
                 weeklyHours: hours,
                 targetCoverage: target / 100,
               },

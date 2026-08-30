@@ -9,7 +9,14 @@ export const DEFAULT_SUBJECT: SubjectId = "sociology";
 
 export type CheckId = "read" | "notes" | "pyq" | "revised";
 
+/** 4, 5 or 6 months. Shorter does not work; longer stops being a plan. */
+export type WindowMonths = 4 | 5 | 6;
+
 export interface Settings {
+  /** The day this round of preparation began. YYYY-MM-DD. */
+  startDate?: string;
+  /** How long you are committing to. */
+  windowMonths?: WindowMonths;
   /** What to call you on the first screen. Optional: older saves predate it. */
   name?: string;
   /**
@@ -19,7 +26,12 @@ export interface Settings {
    * leave the queue and normal ordering resumes.
    */
   startUnit?: string;
-  examDate: string;
+  /**
+   * Legacy. The tracker measured a countdown to a fixed date before it measured
+   * a window; saves from that period still carry one, and windowEnd() falls
+   * back to it so they keep working.
+   */
+  examDate?: string;
   weeklyHours: number;
   targetCoverage: number;
 }

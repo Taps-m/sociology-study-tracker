@@ -4,7 +4,8 @@ import { TOPICS } from "../../data/syllabus";
 import type { CheckId, Derived, Settings } from "../../lib/events";
 import {
   CHECKS,
-  daysUntil,
+  daysLeft,
+  windowLabel,
   hoursFor,
   progress,
   standingOf,
@@ -120,7 +121,7 @@ export function DashboardScreen({
   const standing = standingOf(d, p.percent);
   const quote = quoteOfTheDay();
   const run = streak(d);
-  const days = daysUntil(settings.examDate);
+  const days = daysLeft(settings);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
@@ -131,7 +132,16 @@ export function DashboardScreen({
           {greeting}.
         </h1>
         <p style={{ fontSize: 14, color: C.muted, margin: "6px 0 0" }}>
-          <span className="num">{days}</span> days until your exam ·{" "}
+          {days === null ? (
+            "No preparation window set"
+          ) : days === 0 ? (
+            <>Your {windowLabel(settings)} has finished</>
+          ) : (
+            <>
+              <span className="num">{days}</span> {days === 1 ? "day" : "days"} left in your{" "}
+              {windowLabel(settings)}
+            </>
+          )}{" · "}
           {run.current > 0 ? (
             <span className="num">{run.current}-day streak</span>
           ) : (

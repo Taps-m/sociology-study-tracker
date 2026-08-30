@@ -171,21 +171,73 @@ export function coreProgress(d: Derived) {
 
 // ── time ──────────────────────────────────────────────────────────────────
 
-export function daysUntil(examDate: string, today = new Date()): number {
+/**
+ * Add whole calendar months, clamping when the target month is shorter.
+ * 31 January plus one month is 28 February, not 3 March.
+ */
+export function addMonths(day: string, months: number): string {
+  const [y, m, d] = day.split("-").map(Number) as [number, number, number];
+  const target = new Date(Date.UTC(y, m - 1 + months, 1));
+  const last = new Date(
+    Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  return new Date(
+    Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), Math.min(d, last)),
+  )
+    .toISOString()
+    .slice(0, 10);
+}
+
+/**
+ * The end of the preparation window.
+ *
+ * These exams run every year, so a plan anchored to one date resets to zero if
+ * that date is missed. The tracker commits to four to six months instead, and a
+ * round that does not end in a pass leaves you further ahead for the next one.
+ *
+ * Saves written before this change carry an examDate and no window; those still
+ * work, which is why the fallback stays.
+ */
+export function windowEnd(settings: Settings | null): string | null {
+  if (!settings) return null;
+  if (settings.startDate && settings.windowMonths) {
+    return addMonths(settings.startDate, settings.windowMonths);
+  }
+  return settings.examDate ?? null;
+}
+
+/** Whole calendar days from today to `day`, floored at zero. */
+export function daysUntil(day: string, today = new Date()): number {
   const a = new Date(today);
   a.setHours(0, 0, 0, 0);
-  const b = new Date(examDate);
+  const b = new Date(day);
   b.setHours(0, 0, 0, 0);
   return Math.max(0, Math.ceil((b.getTime() - a.getTime()) / 86400000));
 }
 
-export function weeksUntil(examDate: string, today = new Date()): number {
-  return Math.max(0, daysUntil(examDate, today) / 7);
+export function weeksUntil(day: string, today = new Date()): number {
+  return Math.max(0, daysUntil(day, today) / 7);
+}
+
+/**
+ * Calendar days left in the preparation window, or null if no window is set.
+ * Never negative: a finished window reads zero, not a debt.
+ */
+export function daysLeft(settings: Settings | null, today = new Date()): number | null {
+  const end = windowEnd(settings);
+  return end === null ? null : daysUntil(end, today);
+}
+
+/** How the window reads in a sentence: "5-month plan", for labels. */
+export function windowLabel(settings: Settings | null): string {
+  const months = settings?.windowMonths;
+  return months ? `${months}-month plan` : "plan";
 }
 
 export function requiredPace(d: Derived, today = new Date()): number {
-  if (!d.settings) return 0;
-  const weeks = weeksUntil(d.settings.examDate, today);
+  const end = windowEnd(d.settings);
+  if (!end) return 0;
+  const weeks = weeksUntil(end, today);
   if (weeks <= 0) return 0;
   return Math.round((coreProgress(d).remainingHours / weeks) * 10) / 10;
 }
@@ -217,8 +269,11 @@ export function effectivePace(d: Derived, today = new Date()): number {
 }
 
 export function projection(d: Derived, today = new Date()) {
-  if (!d.settings) return { percent: 0, margin: 0, feasible: false, ofSyllabus: 0 };
-  const weeks = weeksUntil(d.settings.examDate, today);
+  const end = windowEnd(d.settings);
+  if (!d.settings || !end) {
+    return { percent: 0, margin: 0, feasible: false, ofSyllabus: 0, measured: false };
+  }
+  const weeks = weeksUntil(end, today);
   const core = coreProgress(d);
   const reachable = Math.min(core.totalHours, core.doneHours + effectivePace(d, today) * weeks);
   const percent = core.totalHours === 0 ? 0 : Math.round((reachable / core.totalHours) * 1000) / 10;
@@ -444,9 +499,10 @@ export function elapsedFraction(d: Derived, today = new Date()): number {
   if (!start) return 0;
   const from = Date.parse(start);
   const now = today.getTime();
-  const exam = Date.parse(d.settings.examDate);
-  if (!(exam > from)) return 1;
-  return Math.min(1, Math.max(0, (now - from) / (exam - from)));
+  const end = windowEnd(d.settings);
+  const finish = end ? Date.parse(end) : NaN;
+  if (!(finish > from)) return 1;
+  return Math.min(1, Math.max(0, (now - from) / (finish - from)));
 }
 
 export type Standing = "none" | "ahead" | "close" | "behind";
@@ -614,7 +670,9 @@ export interface Option {
 /** Three arithmetic ways to close the gap. Consequences, not advice. */
 export function options(d: Derived, today = new Date()): Option[] {
   if (!d.settings) return [];
-  const weeks = weeksUntil(d.settings.examDate, today);
+  const end = windowEnd(d.settings);
+  if (!end) return [];
+  const weeks = weeksUntil(end, today);
   const proj = projection(d, today);
   if (proj.feasible || weeks <= 0) return [];
 
@@ -644,7 +702,7 @@ export function options(d: Derived, today = new Date()): Option[] {
   return [
     { label: `Study ${extraMinutes} more minutes a day`, outcome: "reaches your target" },
     { label: `Go shallower on ${count} low-yield topics`, outcome: `covers ${keptPercent}%` },
-    { label: `Move the exam ${extraWeeks} weeks later`, outcome: "reaches your target" },
+    { label: `Extend the window by ${extraWeeks} weeks`, outcome: "reaches your target" },
   ];
 }
 
