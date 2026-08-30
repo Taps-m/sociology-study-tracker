@@ -5,6 +5,7 @@ import { on, project } from "./lib/events";
 import type {
   CheckId,
   Derived,
+  Level,
   Settings,
   StudyEvent,
   WindowMonths,
@@ -15,6 +16,9 @@ import {
   coreProgress,
   addMonths,
   daysLeft,
+  LEVELS,
+  skippedTopics,
+  suggestedMonths,
   effectivePace,
   freshness,
   observedPace,
@@ -24,7 +28,7 @@ import {
   requiredPace,
   windowEnd,
 } from "./lib/planner";
-import { exportJson, importJson, load, save } from "./lib/storage";
+import { exportJson, importJson, load, save, sessionOpen, setSessionOpen } from "./lib/storage";
 import { clearAdvice } from "./lib/ai";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
@@ -42,15 +46,30 @@ import { PyqExplorer } from "./modules/pyq/PyqExplorer";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
+  const [signedIn, setSignedIn] = useState(sessionOpen);
   const [route, go] = useRoute();
   useEffect(() => save(events), [events]);
 
   const d = useMemo(() => project(events), [events]);
   const add = (e: StudyEvent) => setEvents((prev) => [...prev, e]);
 
+  const logOut = () => {
+    setSessionOpen(false);
+    setSignedIn(false);
+  };
+  const logIn = () => {
+    setSessionOpen(true);
+    setSignedIn(true);
+  };
+
+  if (!signedIn) {
+    return <LockScreen name={d.settings?.name?.trim() || undefined} started={!!d.settings} onIn={logIn} />;
+  }
+
   if (!d.settings) {
     return (
       <Setup
+        onExit={logOut}
         onDone={(settings, known) => {
           const batch: StudyEvent[] = [on.settings(settings)];
           for (const unit of known) {
@@ -82,7 +101,12 @@ export default function App() {
   const onRevise = (topicId: string) => add(on.check(topicId, "revised"));
 
   return (
-    <AppShell route={route} go={go} name={d.settings.name?.trim() || undefined}>
+    <AppShell
+      route={route}
+      go={go}
+      name={d.settings.name?.trim() || undefined}
+      onLogout={logOut}
+    >
       {route === "dashboard" && (
         <DashboardScreen d={d} go={go} onToggle={handlers.onToggle} />
       )}
@@ -408,6 +432,7 @@ function PaceControl({
   const s = d.settings as Settings;
   const end = windowEnd(s);
   const left = daysLeft(s);
+  const skipped = skippedTopics(d);
   return (
     <Section title="Hours a week you can give">
       <input
@@ -419,6 +444,44 @@ function PaceControl({
         style={{ width: "100%", accentColor: C.accent, marginTop: 10 }}
       />
       <Note>{s.weeklyHours} hours a week</Note>
+
+      <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
+        Where you are starting from
+      </div>
+      <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+        {LEVELS.map((l) => {
+          const on = (s.level ?? "guided") === l.id;
+          return (
+            <button
+              key={l.id}
+              onClick={() => onChange({ level: l.id })}
+              aria-pressed={on}
+              title={l.blurb}
+              style={{
+                flex: "1 1 140px",
+                minHeight: 40,
+                borderRadius: 8,
+                cursor: "pointer",
+                fontFamily: C.sans,
+                fontSize: 14,
+                fontWeight: on ? 600 : 400,
+                background: on ? C.accent : C.surface,
+                color: on ? C.surface : C.text,
+                border: `1px solid ${on ? C.accent : C.line}`,
+              }}
+            >
+              {l.label}
+            </button>
+          );
+        })}
+      </div>
+      <Note>
+        {LEVELS.find((l) => l.id === (s.level ?? "guided"))!.blurb}{" "}
+        {skipped.length === 0
+          ? "At this setting every topic is still in the plan."
+          : `At this setting ${skipped.length} of ${TOPICS.length} topics drop out of the plan — they stay visible in Chapters, but nothing counts them.`}{" "}
+        Moving this never unchecks anything you have already done.
+      </Note>
 
       <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
         How long this run is
@@ -612,10 +675,24 @@ function Backup({
   );
 }
 
-function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
+function Setup({
+  onDone,
+  onExit,
+}: {
+  onDone: (s: Settings, known: string[]) => void;
+  onExit: () => void;
+}) {
   const [name, setName] = useState("");
   const [startUnit, setStartUnit] = useState("");
+  const [level, setLevel] = useState<Level>("guided");
   const [months, setMonths] = useState<WindowMonths>(5);
+  /** Once you move the months yourself, the level stops moving them for you. */
+  const [monthsTouched, setMonthsTouched] = useState(false);
+
+  const chooseLevel = (next: Level) => {
+    setLevel(next);
+    if (!monthsTouched) setMonths(suggestedMonths(next));
+  };
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
   const [known, setKnown] = useState<string[]>([]);
@@ -657,7 +734,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
             Before we start
           </h1>
           <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.6 }}>
-            Four questions. All of it can be changed later.
+            Five questions. All of it can be changed later.
           </p>
         </header>
 
@@ -689,6 +766,58 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
             />
           </section>
 
+          <section style={panelStyle}>
+            <div style={{ fontSize: 14.5, color: C.text, marginBottom: 4 }}>
+              Where are you starting from?
+            </div>
+            <p style={{ fontSize: 13, color: C.muted, margin: "0 0 12px", lineHeight: 1.6 }}>
+              This picks a sensible length for the run and how deep to go on the topics WBCS
+              rarely asks. Both stay editable underneath.
+            </p>
+            <div style={{ display: "grid", gap: 8 }}>
+              {LEVELS.map((l) => {
+                const on = level === l.id;
+                return (
+                  <button
+                    key={l.id}
+                    onClick={() => chooseLevel(l.id)}
+                    aria-pressed={on}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "12px 14px",
+                      borderRadius: 9,
+                      cursor: "pointer",
+                      fontFamily: C.sans,
+                      background: on ? C.accentSoft : C.surface,
+                      border: `1px solid ${on ? C.accent : C.line}`,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 10,
+                      }}
+                    >
+                      <span style={{ fontSize: 15, fontWeight: on ? 600 : 500, color: C.text }}>
+                        {l.label}
+                      </span>
+                      <span style={{ fontSize: 12.5, color: on ? C.accent : C.muted }}>
+                        {l.months} months
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 13, color: C.muted, marginTop: 4, lineHeight: 1.55 }}>
+                      {l.blurb}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           <Field
             label="How many months are you planning for?"
             value={months}
@@ -699,7 +828,10 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
               {([4, 5, 6] as WindowMonths[]).map((m) => (
                 <button
                   key={m}
-                  onClick={() => setMonths(m)}
+                  onClick={() => {
+                    setMonths(m);
+                    setMonthsTouched(true);
+                  }}
                   aria-pressed={months === m}
                   style={{
                     flex: 1,
@@ -875,6 +1007,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
                 startUnit: startUnit || undefined,
                 startDate,
                 windowMonths: months,
+                level,
                 weeklyHours: hours,
                 targetCoverage: target / 100,
               },
@@ -895,6 +1028,88 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
           }}
         >
           Start
+        </button>
+
+        <button
+          onClick={onExit}
+          style={{
+            display: "block",
+            margin: "14px auto 0",
+            background: "none",
+            border: "none",
+            color: C.muted,
+            fontFamily: C.sans,
+            fontSize: 13.5,
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+            cursor: "pointer",
+          }}
+        >
+          Not now — log out
+        </button>
+      </div>
+    </Shell>
+  );
+}
+
+/**
+ * What you see after logging out.
+ *
+ * There is no password, because there is no account: everything lives in this
+ * browser. Logging out closes the screen so the next person to pick up the
+ * laptop does not land in your dashboard. Nothing has been deleted, and the
+ * button below says so rather than making you find out.
+ */
+function LockScreen({
+  name,
+  started,
+  onIn,
+}: {
+  name?: string;
+  started: boolean;
+  onIn: () => void;
+}) {
+  return (
+    <Shell>
+      <div style={{ maxWidth: 420, width: "100%", fontFamily: C.sans, textAlign: "center" }}>
+        <div
+          style={{
+            fontFamily: C.mono,
+            fontSize: 12.5,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: C.muted,
+          }}
+        >
+          sociology · wbcs
+        </div>
+
+        <h1 style={{ fontSize: 23, fontWeight: 600, margin: "14px 0 8px", letterSpacing: "-0.01em" }}>
+          {started ? `Welcome back${name ? `, ${name}` : ""}.` : "Understand society. Write better."}
+        </h1>
+
+        <p style={{ fontSize: 14.5, color: C.muted, margin: "0 0 22px", lineHeight: 1.65 }}>
+          {started
+            ? "You are logged out, not erased. Every check, answer and hour you have logged is still on this device, exactly where you left it."
+            : "Everything stays on this device. There is no account to make and no password to lose."}
+        </p>
+
+        <button
+          onClick={onIn}
+          style={{
+            width: "100%",
+            minHeight: 50,
+            background: C.accent,
+            border: "none",
+            borderRadius: 8,
+            color: C.surface,
+            fontFamily: C.sans,
+            fontSize: 15.5,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          {started ? "Carry on" : "Set up"}
         </button>
       </div>
     </Shell>

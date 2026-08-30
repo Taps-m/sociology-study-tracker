@@ -1,7 +1,7 @@
 import { TOPICS, TOTAL_HOURS } from "../data/syllabus";
 import { PYQS } from "../data/pyq";
 import type { Topic } from "../data/syllabus";
-import type { CheckId, Derived, Settings } from "./events";
+import type { CheckId, Derived, Level, Settings, WindowMonths } from "./events";
 
 /** The four things that make a topic done, and what share of it each represents. */
 export const CHECKS = [
@@ -50,15 +50,74 @@ export function bandOf(topic: Topic): 1 | 2 | 3 {
 }
 
 /** How deep to go, given the topic's record and the student's ambition. */
+/**
+ * What each starting point is called, how long a run it suggests, and what it
+ * does to the plan. The last line of each is the honest part: the level is not
+ * a badge, it moves the depth table one step, and you can override both.
+ */
+export const LEVELS: {
+  id: Level;
+  label: string;
+  blurb: string;
+  months: WindowMonths;
+}[] = [
+  {
+    id: "beginner",
+    label: "New to sociology",
+    blurb: "Never studied it formally. The longest run, and nothing gets skipped.",
+    months: 6,
+  },
+  {
+    id: "guided",
+    label: "Have an overview",
+    blurb: "You know the ground but want guiding through it. The standard plan.",
+    months: 5,
+  },
+  {
+    id: "pro",
+    label: "Studied it before",
+    blurb: "Graduate, or a repeat attempt. Shortest run, and the rarely-asked tail is trimmed hardest.",
+    months: 4,
+  },
+];
+
+/**
+ * Topics the current level and coverage target leave out of the plan entirely.
+ * Surfaced in Settings because a dial that quietly removes a fifth of the
+ * syllabus should say so in a number, not in a blurb.
+ */
+export function skippedTopics(d: Derived): Topic[] {
+  return TOPICS.filter((t) => depthFor(d, t) === 0);
+}
+
+export function suggestedMonths(level: Level): WindowMonths {
+  return LEVELS.find((l) => l.id === level)!.months;
+}
+
+const BANDS = ["lean", "mid", "high"] as const;
+type Band = (typeof BANDS)[number];
+
+/**
+ * How deep to go on a topic, as a fraction of its full estimate.
+ *
+ * Two dials, and they compose. Your coverage target sets the base band; where
+ * you started shifts it one step, because a graduate re-reading Durkheim needs
+ * less of the low-yield tail than someone meeting him for the first time. The
+ * shift is capped at both ends, so no level can push a heavily-asked topic
+ * below full depth.
+ */
 export function depthFor(d: Derived, topic: Topic): number {
   const target = d.settings?.targetCoverage ?? 1;
-  const band = target >= 0.9 ? "high" : target >= 0.75 ? "mid" : "lean";
-  const table: Record<string, Record<number, number>> = {
+  const base: Band = target >= 0.9 ? "high" : target >= 0.75 ? "mid" : "lean";
+  const shift = d.settings?.level === "beginner" ? 1 : d.settings?.level === "pro" ? -1 : 0;
+  const band = BANDS[Math.min(2, Math.max(0, BANDS.indexOf(base) + shift))]!;
+
+  const table: Record<Band, Record<number, number>> = {
     high: { 3: DEPTHS.full, 2: DEPTHS.full, 1: DEPTHS.pyq },
     mid: { 3: DEPTHS.full, 2: DEPTHS.pyq, 1: DEPTHS.read },
     lean: { 3: DEPTHS.full, 2: DEPTHS.notes, 1: DEPTHS.none },
   };
-  return table[band][bandOf(topic)];
+  return table[band][bandOf(topic)]!;
 }
 
 // ── completion ────────────────────────────────────────────────────────────

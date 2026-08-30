@@ -19,12 +19,15 @@ export function Shell({
   route,
   go,
   name,
+  onLogout,
   children,
 }: {
   route: RouteId;
   go: (id: RouteId) => void;
   /** Shown beside the avatar. Undefined until the user gives one. */
   name?: string;
+  /** Closes the session. Deletes nothing — see LockScreen. */
+  onLogout: () => void;
   children: ReactNode;
 }) {
   const [theme, setTheme] = useState<ThemeName>(loadTheme);
@@ -135,6 +138,25 @@ export function Shell({
               {name ? initials(name) : "+"}
             </span>
             <span style={{ whiteSpace: "nowrap" }}>{name ?? "Add your name"}</span>
+          </button>
+
+          <button
+            onClick={onLogout}
+            title="Log out — nothing is deleted"
+            style={{
+              minHeight: 36,
+              padding: "0 12px",
+              borderRadius: 8,
+              border: "1px solid var(--rail-line)",
+              background: "var(--rail-2)",
+              color: "var(--rail-text)",
+              font: "inherit",
+              fontSize: 13.5,
+              cursor: "pointer",
+              flex: "0 0 auto",
+            }}
+          >
+            Log out
           </button>
 
           <button

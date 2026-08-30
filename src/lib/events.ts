@@ -12,11 +12,23 @@ export type CheckId = "read" | "notes" | "pyq" | "revised";
 /** 4, 5 or 6 months. Shorter does not work; longer stops being a plan. */
 export type WindowMonths = 4 | 5 | 6;
 
+/**
+ * Where you are starting from. Not a badge — it sets how long the run is
+ * suggested to be and how deep the low-yield end of the syllabus starts,
+ * and both of those stay editable afterwards.
+ */
+export type Level = "beginner" | "guided" | "pro";
+
 export interface Settings {
   /** The day this round of preparation began. YYYY-MM-DD. */
   startDate?: string;
   /** How long you are committing to. */
   windowMonths?: WindowMonths;
+  /**
+   * How much sociology you brought with you. Optional: saves written before
+   * this existed are treated as "guided", the middle setting.
+   */
+  level?: Level;
   /** What to call you on the first screen. Optional: older saves predate it. */
   name?: string;
   /**

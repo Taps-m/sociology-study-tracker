@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { TOPICS } from "../data/syllabus";
 import { on, project } from "./events";
-import type { StudyEvent } from "./events";
+import type { Settings, StudyEvent } from "./events";
 import {
   attemptStats,
   bandOf,
@@ -34,16 +34,21 @@ import {
   unitExposure,
   windowEnd,
   windowLabel,
+  LEVELS,
+  skippedTopics,
+  suggestedMonths,
+  DEPTHS,
 } from "./planner";
 import { PYQS } from "../data/pyq";
 
 const WEEKLY_HOURS = 10;
-const settings = on.settings({
+const SETTINGS = {
   startDate: "2026-09-01",
   windowMonths: 4,
   weeklyHours: WEEKLY_HOURS,
   targetCoverage: 0.8,
-});
+} satisfies Settings;
+const settings = on.settings(SETTINGS);
 
 const highYield = TOPICS.find((t) => t.pyq >= 3)!;
 /** Never asked, and in a unit that is also cold. */
@@ -87,6 +92,52 @@ describe("depth", () => {
     const d = build([]);
     expect(promotedTopic).toBeDefined();
     expect(depthFor(d, promotedTopic)).toBeGreaterThan(0.4);
+  });
+
+  it("goes deeper on the cold tail for a beginner and shallower for a graduate", () => {
+    const at = (level: "beginner" | "guided" | "pro") =>
+      project([on.settings({ ...SETTINGS, level })]);
+
+    // Heavily asked topics are full depth at every level. The level only ever
+    // moves the tail, which is the whole point of asking.
+    for (const level of ["beginner", "guided", "pro"] as const) {
+      expect(depthFor(at(level), highYield)).toBe(DEPTHS.full);
+    }
+
+    expect(depthFor(at("beginner"), coldTopic)).toBeGreaterThan(
+      depthFor(at("guided"), coldTopic),
+    );
+    expect(depthFor(at("pro"), coldTopic)).toBeLessThan(depthFor(at("guided"), coldTopic));
+  });
+
+  it("clamps rather than running off the end of the depth table", () => {
+    const lean = project([on.settings({ ...SETTINGS, targetCoverage: 0.5, level: "pro" })]);
+    const high = project([on.settings({ ...SETTINGS, targetCoverage: 1, level: "beginner" })]);
+    expect(depthFor(lean, coldTopic)).toBe(DEPTHS.none);
+    expect(depthFor(high, coldTopic)).toBe(DEPTHS.pyq);
+  });
+
+  it("treats a save written before levels existed as the middle setting", () => {
+    const legacy = project([on.settings(SETTINGS)]);
+    const guided = project([on.settings({ ...SETTINGS, level: "guided" })]);
+    expect(depthFor(legacy, coldTopic)).toBe(depthFor(guided, coldTopic));
+  });
+
+  it("suggests the longest run for a beginner and the shortest for a graduate", () => {
+    expect(suggestedMonths("beginner")).toBe(6);
+    expect(suggestedMonths("guided")).toBe(5);
+    expect(suggestedMonths("pro")).toBe(4);
+    expect(LEVELS).toHaveLength(3);
+  });
+
+  it("can say how many topics a level and target leave out", () => {
+    const guided = project([on.settings({ ...SETTINGS, level: "guided" })]);
+    const pro = project([on.settings({ ...SETTINGS, level: "pro" })]);
+    const beginner = project([on.settings({ ...SETTINGS, level: "beginner" })]);
+    expect(skippedTopics(guided)).toHaveLength(0);
+    expect(skippedTopics(beginner)).toHaveLength(0);
+    expect(skippedTopics(pro).length).toBeGreaterThan(0);
+    expect(skippedTopics(pro).every((t) => bandOf(t) === 1)).toBe(true);
   });
 
   it("promotes only a handful of never-asked topics", () => {

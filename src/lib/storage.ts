@@ -9,6 +9,32 @@ import { DEFAULT_SUBJECT, newId } from "./events";
 
 const KEY = "sociology-tracker-v2";
 const LEGACY_KEY = "sociology-tracker-v1";
+const SESSION_KEY = "sociology-tracker-session";
+
+/**
+ * Whether the app is open for use, kept deliberately apart from the log.
+ *
+ * There are no accounts here — everything is on this device. Logging out closes
+ * the screen and nothing else: it writes no event, deletes no work, and the
+ * next sign-in folds the same log it always did. Erasing is a different button
+ * that says what it does.
+ */
+export function sessionOpen(): boolean {
+  try {
+    return localStorage.getItem(SESSION_KEY) !== "closed";
+  } catch {
+    return true;
+  }
+}
+
+export function setSessionOpen(open: boolean): void {
+  try {
+    if (open) localStorage.removeItem(SESSION_KEY);
+    else localStorage.setItem(SESSION_KEY, "closed");
+  } catch {
+    // Nothing to do. Worst case the app forgets you logged out.
+  }
+}
 
 export function load(): StudyEvent[] {
   try {
