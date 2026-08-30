@@ -135,8 +135,12 @@ stays the figure of record when the two disagree wildly.
 ## Open questions
 
 1. ~~Paper or typed?~~ **Settled: paper, photographed.**
-2. **Is self-marking compulsory before the AI score is revealed?** Compulsory
-   makes the calibration data complete; optional makes the module lighter to use.
-3. **What threshold should send a topic back into the queue, and to what depth?**
-4. **Do we store the answer text?** It makes later comparison possible and the
-   event log much larger.
+2. ~~Self-marking compulsory?~~ **Settled: optional.** Offered every time,
+   never required. Calibration is then built from the attempts where it was
+   given, which is honest — a figure entered under duress on a tired evening
+   would be noise in the very statistic it was meant to produce.
+3. ~~Threshold?~~ **Settled.** Below 50% returns the topic to the queue at
+   revision depth. 50–65% flags it without reopening — visible, not demanding.
+   Above 65% is left alone.
+4. ~~Store the answer text?~~ **Settled: no.** Scores go in the log; the page
+   does not. Uploads may be a photograph or a PDF, and neither is kept.

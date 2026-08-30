@@ -29,6 +29,9 @@
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 const MONTHLY_CAP = Number(process.env.MONTHLY_CAP || 800);
 const MAX_BODY_BYTES = 24 * 1024;
+// An answer arrives as a photograph or a PDF of handwriting, so this task alone
+// needs room. The client resizes first; this is the ceiling, not the target.
+const MAX_EVAL_BODY_BYTES = 6 * 1024 * 1024;
 const PER_DEVICE_PER_HOUR = 20;
 const EVAL_PER_DEVICE_PER_DAY = 8;
 
@@ -141,14 +144,31 @@ Name the thinkers involved. Do not invent statistics, dates or case law.`;
     case "evaluate":
       return `${SYSTEM}
 
-The candidate's answer, and the question it answers:
+The candidate has written a 40-mark answer by hand and photographed or scanned
+it. The question, and anything else known about the attempt:
 ${json}
 
-Mark it against these criteria, each out of 10: structure (introduction, body,
-conclusion); sociological rather than general-studies content; thinkers cited by
-name and correctly; Indian examples; and coverage of what the question actually
-asked. Give a number for each with one line of justification, then one concrete
-rewrite suggestion for the weakest part. No praise.`;
+Read the page. Then mark it against these five criteria, each out of 10:
+
+structure  - an introduction that frames rather than repeats, body paragraphs
+             that follow one another, a conclusion that answers
+content    - sociological concepts and theory doing the work, not
+             general-studies commentary
+thinkers   - named, correctly attributed, and used rather than name-dropped
+examples   - Indian examples, concrete and placed where they carry an argument
+demand     - answers what was actually asked; "critically examine" is not
+             "describe"
+
+Reply with JSON and nothing else, in exactly this shape:
+
+{"readBack":"<the first 200 characters of the answer as you read it>",
+ "legible":true,
+ "scores":{"structure":0,"content":0,"thinkers":0,"examples":0,"demand":0},
+ "weakest":"<which criterion>",
+ "rewrite":"<one concrete rewrite of the weakest part, at most 60 words>"}
+
+Set legible to false if the handwriting cannot be read with confidence; a score
+built on a misreading is worse than no score. No praise anywhere.`;
 
     default:
       return null;
@@ -172,12 +192,13 @@ export default async function handler(req, res) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(500).json({ error: "GEMINI_API_KEY is not set" });
 
+  const { task, context, deviceId, file } = req.body || {};
+
   const raw = JSON.stringify(req.body || {});
-  if (raw.length > MAX_BODY_BYTES) {
+  const ceiling = task === "evaluate" ? MAX_EVAL_BODY_BYTES : MAX_BODY_BYTES;
+  if (raw.length > ceiling) {
     return res.status(413).json({ error: "payload too large" });
   }
-
-  const { task, context, deviceId } = req.body || {};
   if (!deviceId || typeof deviceId !== "string") {
     return res.status(400).json({ error: "deviceId required" });
   }
@@ -195,7 +216,17 @@ export default async function handler(req, res) {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                // A photograph or PDF of the handwritten page, when there is one.
+                ...(file?.data && file?.mimeType
+                  ? [{ inline_data: { mime_type: file.mimeType, data: file.data } }]
+                  : []),
+              ],
+            },
+          ],
           generationConfig: {
             temperature: 0.4,
             // Generous on purpose. Newer models spend part of this budget

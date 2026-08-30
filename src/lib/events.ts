@@ -41,13 +41,14 @@ export type StudyEvent =
       prior?: boolean;
     })
   | (EventBase & { type: "uncheck"; topicId: string; check: CheckId })
-  | (EventBase & {
-      type: "attempt";
-      topicId: string;
-      marks: number;
-      outOf: number;
-      minutes: number;
-    })
+  | (EventBase &
+      AttemptDetail & {
+        type: "attempt";
+        topicId: string;
+        marks: number;
+        outOf: number;
+        minutes: number;
+      })
   | (EventBase & { type: "settings"; patch: Partial<Settings> });
 
 export function newId(): string {
@@ -65,8 +66,14 @@ export const on = {
   uncheck(topicId: string, check: CheckId): StudyEvent {
     return { ...base(), type: "uncheck", topicId, check };
   },
-  attempt(topicId: string, marks: number, outOf: number, minutes: number): StudyEvent {
-    return { ...base(), type: "attempt", topicId, marks, outOf, minutes };
+  attempt(
+    topicId: string,
+    marks: number,
+    outOf: number,
+    minutes: number,
+    detail: AttemptDetail = {},
+  ): StudyEvent {
+    return { ...base(), type: "attempt", topicId, marks, outOf, minutes, ...detail };
   },
   settings(patch: Partial<Settings>): StudyEvent {
     return { ...base(), type: "settings", patch };
@@ -85,7 +92,27 @@ export interface TimeRecord {
   minutes: number;
 }
 
-export interface AttemptRecord {
+/** The five criteria, each out of 10. Fixed wording, so scores stay comparable. */
+export interface RubricScores {
+  structure: number;
+  content: number;
+  thinkers: number;
+  examples: number;
+  demand: number;
+}
+
+export interface AttemptDetail {
+  /** What the candidate thought before any score was revealed. Optional. */
+  selfMark?: number;
+  /** The question answered, where it came from the corpus or was pasted. */
+  questionText?: string;
+  group?: "A" | "B";
+  scores?: RubricScores;
+  /** The opening of what the model read back, so a misreading is visible. */
+  readBack?: string;
+}
+
+export interface AttemptRecord extends AttemptDetail {
   at: string;
   topicId: string;
   marks: number;
@@ -149,6 +176,11 @@ export function project(events: StudyEvent[]): Derived {
           marks: e.marks,
           outOf: e.outOf,
           minutes: e.minutes,
+          selfMark: e.selfMark,
+          questionText: e.questionText,
+          group: e.group,
+          scores: e.scores,
+          readBack: e.readBack,
         });
         break;
     }

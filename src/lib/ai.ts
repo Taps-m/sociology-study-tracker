@@ -92,6 +92,97 @@ export interface AskResult {
   error: string | null;
 }
 
+export interface Upload {
+  mimeType: string;
+  /** base64, no data: prefix. */
+  data: string;
+}
+
+export interface Evaluation {
+  readBack: string;
+  legible: boolean;
+  scores: {
+    structure: number;
+    content: number;
+    thinkers: number;
+    examples: number;
+    demand: number;
+  };
+  weakest: string;
+  rewrite: string;
+}
+
+/**
+ * A photograph of a page is several megabytes; a page of handwriting is legible
+ * at about 1400px wide. Resizing in the browser keeps the upload small and the
+ * cost down. PDFs are sent as they are — they are already compressed, and
+ * re-rendering one in the browser would need a PDF library we do not want.
+ */
+export async function prepareUpload(file: File): Promise<Upload> {
+  const asBase64 = (blob: Blob) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+      reader.onerror = () => reject(new Error("could not read the file"));
+      reader.readAsDataURL(blob);
+    });
+
+  if (file.type === "application/pdf") {
+    return { mimeType: "application/pdf", data: await asBase64(file) };
+  }
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1400 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+  const blob = await new Promise<Blob | null>((r) =>
+    canvas.toBlob(r, "image/jpeg", 0.82),
+  );
+  if (!blob) throw new Error("could not prepare the image");
+  return { mimeType: "image/jpeg", data: await asBase64(blob) };
+}
+
+/** Ask for a page to be read and scored. Returns null if the reply was not usable. */
+export async function evaluate(
+  context: unknown,
+  file: Upload,
+): Promise<{ result: Evaluation | null; error: string | null }> {
+  try {
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: "evaluate", context, file, deviceId: deviceId() }),
+    });
+
+    const payload = (await res.json().catch(() => ({}))) as {
+      body?: string;
+      error?: string;
+      detail?: string;
+    };
+
+    if (!res.ok) {
+      return {
+        result: null,
+        error: [payload.error ?? `request failed (${res.status})`, payload.detail]
+          .filter(Boolean)
+          .join(" — "),
+      };
+    }
+
+    // The model was asked for JSON alone, but a stray fence is common enough
+    // to be worth surviving.
+    const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
+    const parsed = JSON.parse(text) as Evaluation;
+    if (!parsed?.scores) return { result: null, error: "the reply was not a score" };
+    return { result: parsed, error: null };
+  } catch {
+    return { result: null, error: "could not read the reply" };
+  }
+}
+
 export async function ask(
   key: string,
   task: AiTask,

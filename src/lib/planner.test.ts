@@ -21,6 +21,11 @@ import {
   revisionLoad,
   revisionQueue,
   revisionState,
+  answerVerdict,
+  needsRework,
+  rubricAverages,
+  selfMarkGap,
+  CHECKS,
 } from "./planner";
 
 const WEEKLY_HOURS = 10;
@@ -241,6 +246,79 @@ describe("revision reaches the week plan", () => {
 
   it("still leaves coverage untouched", () => {
     expect(progress(overdue(5)).percent).toBe(progress(overdue(5, 1)).percent);
+  });
+});
+
+describe("answers feed back into the plan", () => {
+  /** Tick every check a topic's planned depth calls for. */
+  function atDepth(topic: (typeof TOPICS)[number], extra: StudyEvent[] = []) {
+    const events: StudyEvent[] = [];
+    let cumulative = 0;
+    for (const c of CHECKS) {
+      cumulative += c.weight;
+      if (cumulative > depthFor(build([]), topic) + 0.001) break;
+      events.push(on.check(topic.id, c.id));
+    }
+    return build([...events, ...extra]);
+  }
+
+  it("says nothing about a topic with no answer", () => {
+    expect(answerVerdict(build([]), highYield.id)).toBe("none");
+  });
+
+  it("reworks below half marks, flags to 65%, leaves the rest alone", () => {
+    expect(answerVerdict(build([on.attempt(highYield.id, 19, 40, 35)]), highYield.id)).toBe("rework");
+    expect(answerVerdict(build([on.attempt(highYield.id, 20, 40, 35)]), highYield.id)).toBe("shaky");
+    expect(answerVerdict(build([on.attempt(highYield.id, 25, 40, 35)]), highYield.id)).toBe("shaky");
+    expect(answerVerdict(build([on.attempt(highYield.id, 26, 40, 35)]), highYield.id)).toBe("solid");
+  });
+
+  it("judges on the most recent answer, not the first", () => {
+    const d = build([
+      on.attempt(highYield.id, 12, 40, 35),
+      on.attempt(highYield.id, 32, 40, 35),
+    ]);
+    expect(answerVerdict(d, highYield.id)).toBe("solid");
+    expect(needsRework(d, highYield.id)).toBe(false);
+  });
+
+  it("puts a finished topic back in the queue when its answer was weak", () => {
+    const done = atDepth(highYield);
+    expect(queue(done).some((t) => t.id === highYield.id)).toBe(false);
+
+    const weak = atDepth(highYield, [on.attempt(highYield.id, 15, 40, 40)]);
+    expect(needsRework(weak, highYield.id)).toBe(true);
+    expect(queue(weak).some((t) => t.id === highYield.id)).toBe(true);
+  });
+
+  it("leaves a finished topic alone when the answer was good", () => {
+    const strong = atDepth(highYield, [on.attempt(highYield.id, 34, 40, 33)]);
+    expect(queue(strong).some((t) => t.id === highYield.id)).toBe(false);
+  });
+
+  it("averages each criterion only over the answers that were scored", () => {
+    const d = build([
+      on.attempt(highYield.id, 30, 40, 35, {
+        scores: { structure: 8, content: 6, thinkers: 4, examples: 7, demand: 5 },
+      }),
+      on.attempt(highYield.id, 20, 40, 35),
+    ]);
+    const byKey = Object.fromEntries(rubricAverages(d).map((r) => [r.key, r]));
+    expect(byKey.thinkers!.average).toBe(4);
+    expect(byKey.thinkers!.scored).toBe(1);
+  });
+
+  it("measures how far the self-mark misses, and ignores unscored attempts", () => {
+    expect(selfMarkGap(build([])).averageGap).toBeNull();
+    const d = build([
+      on.attempt(highYield.id, 24, 40, 35, {
+        selfMark: 32,
+        scores: { structure: 6, content: 6, thinkers: 6, examples: 6, demand: 6 },
+      }),
+      on.attempt(highYield.id, 20, 40, 35, { selfMark: 30 }),
+    ]);
+    expect(selfMarkGap(d).n).toBe(1);
+    expect(selfMarkGap(d).averageGap).toBe(8);
   });
 });
 

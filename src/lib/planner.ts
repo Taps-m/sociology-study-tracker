@@ -519,7 +519,11 @@ export function hoursLeftOn(d: Derived, topic: Topic): number {
 
 export function queue(d: Derived): Topic[] {
   const start = d.settings?.startUnit;
-  return TOPICS.filter((t) => depthFor(d, t) > 0 && !isAtDepth(d, t)).sort((a, b) => {
+  return TOPICS.filter(
+    // A topic whose boxes are ticked but whose last answer scored under 50% is
+    // not finished. Marks measure what the exam measures; checks do not.
+    (t) => depthFor(d, t) > 0 && (!isAtDepth(d, t) || needsRework(d, t.id)),
+  ).sort((a, b) => {
     if (start) {
       // A chosen starting unit outranks yield until it is finished, then stops
       // mattering by itself — its topics drop out of the queue at depth.
@@ -641,6 +645,74 @@ export function options(d: Derived, today = new Date()): Option[] {
     { label: `Go shallower on ${count} low-yield topics`, outcome: `covers ${keptPercent}%` },
     { label: `Move the exam ${extraWeeks} weeks later`, outcome: "reaches your target" },
   ];
+}
+
+// ── answers ───────────────────────────────────────────────────────────────
+
+/** Below this, the topic goes back into the queue. */
+export const RESURFACE_BELOW = 0.5;
+/** Between the two, it is flagged but not reopened. */
+export const FLAG_BELOW = 0.65;
+
+export type AnswerVerdict = "none" | "rework" | "shaky" | "solid";
+
+export function attemptsFor2(d: Derived, topicId: string) {
+  return d.attempts.filter((a) => a.topicId === topicId);
+}
+
+/** The most recent answer written on a topic, if any. */
+export function latestAttempt(d: Derived, topicId: string) {
+  const all = attemptsFor2(d, topicId);
+  return all.length === 0 ? null : all[all.length - 1]!;
+}
+
+/**
+ * What the last answer on a topic says about it.
+ *
+ * Marks are the only signal in this app that measures what the exam measures,
+ * so a topic whose boxes are ticked but whose answer scored 40% is not finished.
+ * Below 50% it returns to the queue; 50-65% is flagged and left alone; above
+ * that nothing happens.
+ */
+export function answerVerdict(d: Derived, topicId: string): AnswerVerdict {
+  const last = latestAttempt(d, topicId);
+  if (!last || last.outOf <= 0) return "none";
+  const share = last.marks / last.outOf;
+  if (share < RESURFACE_BELOW) return "rework";
+  if (share < FLAG_BELOW) return "shaky";
+  return "solid";
+}
+
+/** Topics whose last answer was weak enough to reopen them. */
+export function needsRework(d: Derived, topicId: string): boolean {
+  return answerVerdict(d, topicId) === "rework";
+}
+
+/** Every criterion averaged across scored attempts, for the trend. */
+export function rubricAverages(d: Derived) {
+  const keys = ["structure", "content", "thinkers", "examples", "demand"] as const;
+  const sums: Record<string, { n: number; total: number }> = {};
+  for (const a of d.attempts) {
+    if (!a.scores) continue;
+    for (const k of keys) {
+      sums[k] = sums[k] ?? { n: 0, total: 0 };
+      sums[k].n++;
+      sums[k].total += a.scores[k];
+    }
+  }
+  return keys.map((k) => ({
+    key: k,
+    scored: sums[k]?.n ?? 0,
+    average: sums[k]?.n ? Math.round((sums[k]!.total / sums[k]!.n) * 10) / 10 : null,
+  }));
+}
+
+/** How close the candidate's own estimate has been to the score. */
+export function selfMarkGap(d: Derived): { n: number; averageGap: number | null } {
+  const pairs = d.attempts.filter((a) => a.selfMark !== undefined && a.scores);
+  if (pairs.length === 0) return { n: 0, averageGap: null };
+  const total = pairs.reduce((s, a) => s + (a.selfMark! - a.marks), 0);
+  return { n: pairs.length, averageGap: Math.round((total / pairs.length) * 10) / 10 };
 }
 
 // ── what to do today ──────────────────────────────────────────────────────

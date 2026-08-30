@@ -20,7 +20,7 @@ import { exportJson, importJson, load, save } from "./lib/storage";
 import { clearAdvice } from "./lib/ai";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
-import { Shell as AppShell, Card } from "./app/Shell";
+import { Shell as AppShell } from "./app/Shell";
 import { useRoute } from "./app/routes";
 import { AskAI } from "./app/AskAI";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
@@ -29,6 +29,7 @@ import { PlanScreen } from "./modules/plan/PlanScreen";
 import { RevisionDeck } from "./modules/revision/RevisionDeck";
 import { RecentActivity } from "./modules/activity/RecentActivity";
 import { TodayScreen } from "./modules/today/TodayScreen";
+import { AnswerPractice } from "./modules/answers/AnswerPractice";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -81,7 +82,14 @@ export default function App() {
 
       {route === "revision" && <RevisionDeck d={d} onRevise={onRevise} />}
 
-      {route === "answers" && <AnswersScreen d={d} />}
+      {route === "answers" && (
+        <AnswerPractice
+          d={d}
+          onAttempt={(id, marks, outOf, minutes, detail) =>
+            add(on.attempt(id, marks, outOf, minutes, detail))
+          }
+        />
+      )}
 
       {route === "progress" && (
         <div className="grid" style={{ gap: 14 }}>
@@ -104,37 +112,6 @@ export default function App() {
   );
 }
 
-function AnswersScreen({ d }: { d: Derived }) {
-  const s = attemptStats(d);
-  return (
-    <div className="grid" style={{ gap: 14 }}>
-      <Card title="Answer practice">
-        {s.total === 0 ? (
-          <p style={{ fontSize: 15, color: C.muted, margin: 0, lineHeight: 1.7 }}>
-            No answers written yet — and that is the thing the exam actually scores.
-            Attempts are logged per topic: open a topic in Chapters and record the
-            marks and the minutes it took.
-          </p>
-        ) : (
-          <div style={{ display: "flex", gap: 28, flexWrap: "wrap" }}>
-            <div>
-              <div className="num" style={{ fontSize: 28 }}>
-                {s.total}
-              </div>
-              <div style={{ fontSize: 13.5, color: C.muted }}>answers written</div>
-            </div>
-            <div>
-              <div className="num" style={{ fontSize: 28, color: C.accent }}>
-                {s.averagePercent}%
-              </div>
-              <div style={{ fontSize: 13.5, color: C.muted }}>average score</div>
-            </div>
-          </div>
-        )}
-      </Card>
-    </div>
-  );
-}
 
 function Greeting({ d, onName }: { d: Derived; onName: (name: string) => void }) {
   const [draft, setDraft] = useState("");

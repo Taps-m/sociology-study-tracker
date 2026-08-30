@@ -1,0 +1,427 @@
+import { useEffect, useRef, useState } from "react";
+import { TOPICS } from "../../data/syllabus";
+import type { Topic } from "../../data/syllabus";
+import type { Derived } from "../../lib/events";
+import {
+  attemptStats,
+  queue,
+  rubricAverages,
+  selfMarkGap,
+} from "../../lib/planner";
+import { evaluate, prepareUpload, type Evaluation } from "../../lib/ai";
+import { C } from "../../lib/theme";
+import { Card } from "../../app/Shell";
+
+const TARGET_MINUTES = 35;
+const OUT_OF = 40;
+
+const CRITERION_LABEL: Record<string, string> = {
+  structure: "Structure",
+  content: "Sociological content",
+  thinkers: "Thinkers",
+  examples: "Indian examples",
+  demand: "Answered the demand",
+};
+
+function mmss(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/**
+ * Write one answer, by hand, against the clock.
+ *
+ * Paper is the medium on purpose: a keyboard allows copy and paste, and an
+ * answer that can be pasted is not an answer that can be written in a hall. The
+ * camera bridges the gap — the page is photographed and read, so the structured
+ * record survives without the shortcut.
+ */
+export function AnswerPractice({
+  d,
+  onAttempt,
+}: {
+  d: Derived;
+  onAttempt: (
+    topicId: string,
+    marks: number,
+    outOf: number,
+    minutes: number,
+    detail: {
+      selfMark?: number;
+      questionText?: string;
+      scores?: Evaluation["scores"];
+      readBack?: string;
+    },
+  ) => void;
+}) {
+  const suggested = queue(d).slice(0, 12);
+  const [topicId, setTopicId] = useState(suggested[0]?.id ?? TOPICS[0]!.id);
+  const [question, setQuestion] = useState("");
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [selfMark, setSelfMark] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<Evaluation | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  const topic = TOPICS.find((t) => t.id === topicId)!;
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  const over = seconds > TARGET_MINUTES * 60;
+  const stats = attemptStats(d);
+  const averages = rubricAverages(d);
+  const gap = selfMarkGap(d);
+
+  async function upload(file: File) {
+    setBusy(true);
+    setError(null);
+    try {
+      const prepared = await prepareUpload(file);
+      const res = await evaluate(
+        {
+          question: question.trim() || `A 40-mark question on: ${topic.name}`,
+          topic: topic.name,
+          unit: topic.unit,
+          paper: topic.paper === 1 ? "I" : "II",
+          minutesTaken: minutes,
+          targetMinutes: TARGET_MINUTES,
+        },
+        prepared,
+      );
+      setResult(res.result);
+      setError(res.error);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "could not read that file");
+    }
+    setBusy(false);
+  }
+
+  function save() {
+    const scored = result
+      ? Object.values(result.scores).reduce((s, n) => s + n, 0)
+      : undefined;
+    // Five criteria out of ten is a mark out of fifty; the paper is out of forty.
+    const marks = scored !== undefined ? Math.round((scored / 50) * OUT_OF) : Number(selfMark);
+    if (!Number.isFinite(marks)) return;
+
+    onAttempt(topic.id, marks, OUT_OF, minutes, {
+      selfMark: selfMark === "" ? undefined : Number(selfMark),
+      questionText: question.trim() || undefined,
+      scores: result?.scores,
+      readBack: result?.readBack?.slice(0, 200),
+    });
+
+    setSaved(true);
+    setRunning(false);
+    setSeconds(0);
+    setSelfMark("");
+    setResult(null);
+    setQuestion("");
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  return (
+    <div className="grid" style={{ gap: 13, maxWidth: 820 }}>
+      <Card title="Write one answer">
+        <label style={{ display: "block", fontSize: 14, color: C.muted, marginBottom: 6 }}>
+          Topic
+        </label>
+        <select
+          value={topicId}
+          onChange={(e) => setTopicId(e.target.value)}
+          style={{
+            width: "100%",
+            minHeight: 42,
+            padding: "0 10px",
+            borderRadius: 8,
+            background: C.raised,
+            border: `1px solid ${C.line}`,
+            color: C.text,
+            font: "inherit",
+            fontSize: 14.5,
+            marginBottom: 14,
+          }}
+        >
+          {suggested.length > 0 && (
+            <optgroup label="Next in your queue">
+              {suggested.map((t: Topic) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          <optgroup label="Everything else">
+            {TOPICS.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+
+        <label style={{ display: "block", fontSize: 14, color: C.muted, marginBottom: 6 }}>
+          The question (optional — paste a past question, or leave it)
+        </label>
+        <textarea
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          rows={2}
+          placeholder="e.g. Examine with appropriate examples how Durkheim and Merton explicate anomie. (40)"
+          style={{
+            width: "100%",
+            padding: 10,
+            borderRadius: 8,
+            background: C.raised,
+            border: `1px solid ${C.line}`,
+            color: C.text,
+            font: "inherit",
+            fontSize: 14.5,
+            resize: "vertical",
+          }}
+        />
+      </Card>
+
+      <Card title="The clock">
+        <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+          <span
+            className="num"
+            style={{ fontSize: 44, lineHeight: 1, color: over ? C.warn : C.text }}
+          >
+            {mmss(seconds)}
+          </span>
+          <span style={{ fontSize: 14, color: C.muted }}>
+            of {TARGET_MINUTES}:00
+            {over && <strong style={{ color: C.warn }}> · over the budget</strong>}
+          </span>
+
+          <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+            <button
+              onClick={() => setRunning(!running)}
+              style={{
+                minHeight: 44,
+                padding: "0 18px",
+                borderRadius: 9,
+                border: "none",
+                background: C.accent,
+                color: C.accentInk,
+                font: "inherit",
+                fontSize: 14.5,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {running ? "Pause" : seconds === 0 ? "Start writing" : "Resume"}
+            </button>
+            <button
+              onClick={() => {
+                setRunning(false);
+                setSeconds(0);
+              }}
+              style={{
+                minHeight: 44,
+                padding: "0 14px",
+                borderRadius: 9,
+                border: `1px solid ${C.line}`,
+                background: "transparent",
+                color: C.muted,
+                font: "inherit",
+                fontSize: 14.5,
+                cursor: "pointer",
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
+          Five answers in 180 minutes is 35 minutes each. Write on paper — the
+          constraint is the point.
+        </p>
+      </Card>
+
+      <Card title="What do you think you scored?">
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <input
+            type="number"
+            min={0}
+            max={OUT_OF}
+            value={selfMark}
+            onChange={(e) => setSelfMark(e.target.value)}
+            placeholder="out of 40"
+            style={{
+              width: 130,
+              minHeight: 42,
+              padding: "0 12px",
+              borderRadius: 8,
+              background: C.raised,
+              border: `1px solid ${C.line}`,
+              color: C.text,
+              font: "inherit",
+              fontSize: 15,
+            }}
+          />
+          <span style={{ fontSize: 13.5, color: C.muted }}>
+            Optional, and worth doing before the score appears.
+            {gap.averageGap !== null && (
+              <>
+                {" "}
+                So far you have been out by{" "}
+                <span className="num" style={{ color: C.text }}>
+                  {gap.averageGap > 0 ? "+" : ""}
+                  {gap.averageGap}
+                </span>{" "}
+                marks across {gap.n}.
+              </>
+            )}
+          </span>
+        </div>
+      </Card>
+
+      <Card title="Have it read">
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*,application/pdf"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) upload(f);
+          }}
+          style={{ fontSize: 14 }}
+        />
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0", lineHeight: 1.6 }}>
+          A photograph of the page, or a PDF. The image is resized in your browser,
+          sent to be read, and never stored — only the scores are kept.
+        </p>
+
+        {busy && (
+          <p style={{ fontSize: 14, color: C.muted, marginTop: 12 }}>Reading the page…</p>
+        )}
+        {error && (
+          <p style={{ fontSize: 13.5, color: C.warn, marginTop: 12, lineHeight: 1.6 }}>
+            {error}. You can still save the attempt with your own mark.
+          </p>
+        )}
+
+        {result && (
+          <div className="fade-in" style={{ marginTop: 16 }}>
+            {!result.legible && (
+              <p style={{ fontSize: 13.5, color: C.warn, lineHeight: 1.6 }}>
+                The handwriting could not be read with confidence. Treat these
+                scores as unreliable and keep your own mark as the record.
+              </p>
+            )}
+
+            <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.6 }}>
+              Read as: “{result.readBack}…”
+            </p>
+
+            <div style={{ marginTop: 12 }}>
+              {Object.entries(result.scores).map(([k, v]) => (
+                <div key={k} style={{ padding: "6px 0" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: 14,
+                      color: C.muted,
+                      marginBottom: 4,
+                    }}
+                  >
+                    <span>{CRITERION_LABEL[k] ?? k}</span>
+                    <span className="num" style={{ color: C.text }}>
+                      {v}/10
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      height: 6,
+                      borderRadius: 3,
+                      background: "var(--line)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${(v / 10) * 100}%`,
+                        height: "100%",
+                        background: v >= 7 ? "var(--good)" : v >= 5 ? "var(--warn)" : "#dc2626",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 14.5, lineHeight: 1.75, marginTop: 14 }}>
+              <strong>Weakest: {CRITERION_LABEL[result.weakest] ?? result.weakest}.</strong>{" "}
+              {result.rewrite}
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={save}
+          disabled={!result && selfMark === ""}
+          style={{
+            width: "100%",
+            minHeight: 46,
+            marginTop: 16,
+            borderRadius: 9,
+            border: "none",
+            background: !result && selfMark === "" ? C.line : C.accent,
+            color: !result && selfMark === "" ? C.muted : C.accentInk,
+            font: "inherit",
+            fontSize: 14.5,
+            fontWeight: 600,
+            cursor: !result && selfMark === "" ? "default" : "pointer",
+          }}
+        >
+          Save this attempt
+        </button>
+        {saved && (
+          <p style={{ fontSize: 13.5, color: "var(--good)", margin: "10px 0 0" }}>
+            Saved. Scores under 50% put the topic back in your queue.
+          </p>
+        )}
+      </Card>
+
+      {stats.total > 0 && (
+        <Card title={`${stats.total} answers written`}>
+          <p style={{ fontSize: 14.5, margin: "0 0 12px" }}>
+            Average <span className="num">{stats.averagePercent}%</span>
+          </p>
+          {averages.some((a) => a.average !== null) && (
+            <div>
+              {averages.map((a) => (
+                <div
+                  key={a.key}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                    padding: "5px 0",
+                    color: C.muted,
+                  }}
+                >
+                  <span>{CRITERION_LABEL[a.key]}</span>
+                  <span className="num" style={{ color: C.text }}>
+                    {a.average === null ? "—" : `${a.average}/10`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+    </div>
+  );
+}
