@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build tracker — sociology study tracker</title>
+<style>
+  :root {
+    --surface: #0A0E12;
+    --panel: #11171D;
+    --line: #1E2831;
+    --line-soft: #161D24;
+    --text: #E6EDF3;
+    --muted: #7D8B99;
+    --accent: #5FD3F3;
+    --active: #F2A93B;
+    --done: #2C4A5A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--line); padding-bottom: 12px;
+  }
+  header .name { font-size: 12px; letter-spacing: 0.14em; color: var(--muted); text-transform: lowercase; }
+  header .stamp { font-size: 12px; color: var(--accent); }
+
+  .hero { display: flex; gap: 32px; flex-wrap: wrap; margin: 28px 0 20px; }
+  .hero div { min-width: 120px; }
+  .hero .label { font-size: 11px; letter-spacing: 0.12em; color: var(--muted); }
+  .hero .value { font-size: 44px; line-height: 1.1; margin-top: 6px; }
+  .hero .value small { font-size: 14px; color: var(--muted); }
+  .hero .lead .value { color: var(--accent); }
+
+  .strip { display: flex; gap: 2px; margin: 4px 0 8px; }
+  .strip span { height: 8px; border-radius: 1px; background: #1A2027; }
+  .strip span.done { background: var(--done); }
+  .strip span.active { background: var(--active); }
+  .caption { font-size: 12px; color: var(--muted); margin-bottom: 28px; }
+
+  ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  li {
+    display: grid; grid-template-columns: 28px 1fr auto auto; gap: 12px; align-items: center;
+    padding: 14px 8px; border-bottom: 1px solid var(--line-soft);
+    cursor: pointer; min-height: 44px;
+  }
+  li:hover, li:focus-visible { background: var(--panel); outline: none; }
+  li:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
+  .idx { font-size: 12px; color: var(--muted); }
+  .step-name { font-size: 14px; }
+  .step-note { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .hrs { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .pill {
+    font-size: 11px; letter-spacing: 0.08em; padding: 3px 8px;
+    border: 1px solid var(--line); border-radius: 3px; white-space: nowrap;
+  }
+  .pill.todo { color: var(--muted); }
+  .pill.active { color: var(--active); border-color: var(--active); }
+  .pill.done { color: var(--accent); border-color: var(--done); }
+  li.is-done .step-name { color: var(--muted); }
+
+  footer { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 16px; }
+  button {
+    font: inherit; font-size: 12px; color: var(--text); background: transparent;
+    border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; cursor: pointer;
+    min-height: 44px;
+  }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+  textarea {
+    width: 100%; margin-top: 12px; background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); border-radius: 4px; font: inherit; font-size: 11px;
+    padding: 10px; min-height: 120px; display: none;
+  }
+  @media (prefers-reduced-motion: no-preference) { li { transition: background 120ms ease; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="name">build tracker · sociology study tracker</span>
+  <span class="stamp" id="stamp"></span>
+</header>
+
+<div class="hero">
+  <div class="lead">
+    <div class="label">remaining</div>
+    <div class="value" id="hoursLeft">—<small> h</small></div>
+  </div>
+  <div>
+    <div class="label">steps done</div>
+    <div class="value" id="stepsDone">—<small> / 10</small></div>
+  </div>
+  <div>
+    <div class="label">complete</div>
+    <div class="value" id="pct">—<small> %</small></div>
+  </div>
+</div>
+
+<div class="strip" id="strip"></div>
+<div class="caption" id="caption"></div>
+
+<ol id="list"></ol>
+
+<footer>
+  <button id="copyBtn">Copy updated status</button>
+  <div class="hint">
+    Tap a step to cycle it: remaining → in progress → done. Changes are live but not saved —
+    to keep them, copy the updated status and paste it over the <code>STEPS</code> array at the
+    top of this file, then commit. That way the tracker is versioned with the project.
+  </div>
+  <textarea id="out" readonly aria-label="Updated status to paste back"></textarea>
+</footer>
+
+</div>
+
+<script>
+const STEPS = [
+  { name: "Deploy skeleton",        hours: 3, note: "Blank app live on the subdomain",        status: "active" },
+  { name: "Syllabus data",          hours: 4, note: "104 topics, hours, yield weights",       status: "todo" },
+  { name: "Planner and tests",      hours: 3, note: "Pure functions, five test cases",        status: "todo" },
+  { name: "Storage and state",      hours: 2, note: "Event log, adapter, versioned save",     status: "todo" },
+  { name: "Today screen",           hours: 3, note: "One tap per stage",                      status: "todo" },
+  { name: "Plan screen",            hours: 3, note: "This week, next weeks, options",         status: "todo" },
+  { name: "Syllabus screen",        hours: 2, note: "Full map, filter by status",             status: "todo" },
+  { name: "Setup and onboarding",   hours: 2, note: "Three questions, no more",               status: "todo" },
+  { name: "Revision queue",         hours: 4, note: "Spaced resurfacing of studied topics",   status: "todo" },
+  { name: "AI proxy and critique",  hours: 5, note: "PHP endpoint, weekly review",            status: "todo" }
+];
+
+const ORDER = ["todo", "active", "done"];
+const LABEL = { todo: "remaining", active: "in progress", done: "done" };
+const list = document.getElementById("list");
+
+function render() {
+  const total = STEPS.reduce((s, x) => s + x.hours, 0);
+  const doneHours = STEPS.filter(s => s.status === "done").reduce((s, x) => s + x.hours, 0);
+  const doneSteps = STEPS.filter(s => s.status === "done").length;
+  const activeName = STEPS.find(s => s.status === "active");
+
+  document.getElementById("hoursLeft").innerHTML = (total - doneHours) + "<small> h</small>";
+  document.getElementById("stepsDone").innerHTML = doneSteps + "<small> / " + STEPS.length + "</small>";
+  document.getElementById("pct").innerHTML = Math.round((doneHours / total) * 100) + "<small> %</small>";
+
+  document.getElementById("caption").textContent = activeName
+    ? "In progress: " + activeName.name.toLowerCase() + ". Everything behind it is settled — ignore it."
+    : (doneSteps === STEPS.length ? "All ten steps done." : "Nothing in progress. Pick the next step.");
+
+  const strip = document.getElementById("strip");
+  strip.innerHTML = "";
+  STEPS.forEach(s => {
+    const cell = document.createElement("span");
+    cell.style.flex = s.hours;
+    if (s.status !== "todo") cell.className = s.status;
+    strip.appendChild(cell);
+  });
+
+  list.innerHTML = "";
+  STEPS.forEach((s, i) => {
+    const li = document.createElement("li");
+    li.tabIndex = 0;
+    li.setAttribute("role", "button");
+    li.setAttribute("aria-label", s.name + ", " + LABEL[s.status] + ". Activate to change status.");
+    if (s.status === "done") li.classList.add("is-done");
+    li.innerHTML =
+      '<span class="idx">' + String(i + 1).padStart(2, "0") + '</span>' +
+      '<span><span class="step-name"></span><span class="step-note"></span></span>' +
+      '<span class="hrs">' + s.hours + ' h</span>' +
+      '<span class="pill ' + s.status + '">' + LABEL[s.status] + '</span>';
+    li.querySelector(".step-name").textContent = s.name;
+    const note = li.querySelector(".step-note");
+    note.textContent = s.note;
+    note.style.display = "block";
+    li.addEventListener("click", () => cycle(i));
+    li.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cycle(i); }
+    });
+    list.appendChild(li);
+  });
+}
+
+function cycle(i) {
+  const next = ORDER[(ORDER.indexOf(STEPS[i].status) + 1) % ORDER.length];
+  STEPS[i].status = next;
+  render();
+}
+
+document.getElementById("stamp").textContent = new Date().toISOString().slice(0, 10);
+
+document.getElementById("copyBtn").addEventListener("click", () => {
+  const text = "const STEPS = [\n" + STEPS.map(s =>
+    '  { name: "' + s.name + '", hours: ' + s.hours + ', note: "' + s.note + '", status: "' + s.status + '" }'
+  ).join(",\n") + "\n];";
+  const out = document.getElementById("out");
+  out.value = text;
+  out.style.display = "block";
+  out.select();
+  try { navigator.clipboard.writeText(text); } catch (e) {}
+});
+
+render();
+</script>
+</body>
+</html>
