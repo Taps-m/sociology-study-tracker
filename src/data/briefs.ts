@@ -10,6 +10,8 @@
 
 export interface FlowStage {
   title: string;
+  /** One line, always visible. The detail stays folded until asked for. */
+  summary: string;
   items: string[];
   /** Which tint to use, 0-3, so a stage keeps its colour across themes. */
   tint: 0 | 1 | 2 | 3;
@@ -32,42 +34,40 @@ export const BRIEFS: UnitBrief[] = [
     flow: [
       {
         tint: 0,
-        title: "Traditional European society",
+        title: "Before",
+        summary: "Land, church and birth decided everything.",
         items: ["Feudalism", "Religion and tradition", "Agrarian economy", "Fixed hierarchy"],
       },
       {
         tint: 1,
-        title: "Major transformations",
+        title: "What changed",
+        summary: "Four revolutions in thought, trade, industry and politics.",
         items: [
-          "Renaissance",
-          "Scientific Revolution",
-          "Enlightenment",
-          "Commercial Revolution",
-          "Industrial Revolution",
+          "Enlightenment and the Scientific Revolution",
+          "Commercial and Industrial Revolution",
           "French Revolution",
           "Urbanisation and capitalism",
         ],
       },
       {
         tint: 2,
-        title: "New social problems",
+        title: "What broke",
+        summary: "The new cities produced problems nobody had language for.",
         items: [
-          "Urbanisation",
           "New class relations",
           "Poverty and exploitation",
-          "Social inequality",
           "Social disorder",
           "Political instability",
         ],
       },
       {
         tint: 3,
-        title: "Need for systematic understanding",
+        title: "What was needed",
+        summary: "A way to study society as rigorously as nature.",
         items: [
           "What is happening to society?",
-          "Why is it changing?",
-          "What creates order?",
-          "How can society be studied scientifically?",
+          "Why is it changing, and what holds it together?",
+          "Can it be studied scientifically?",
         ],
       },
     ],

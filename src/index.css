@@ -273,3 +273,60 @@ input[type="range"]::-moz-range-thumb {
     align-items: start;
   }
 }
+
+/*
+ * Motion. Small, and only where it explains something: a card lifting under the
+ * cursor says it is pressable, and detail sliding in says where it came from.
+ * All of it is off for anyone who has asked their system for less motion —
+ * PLAN.md's accessibility floor.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .stage {
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      filter 180ms ease;
+  }
+  .stage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 27, 61, 0.1);
+  }
+  .stage:active {
+    transform: translateY(0);
+  }
+
+  .reveal {
+    animation: reveal 200ms ease both;
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .fade-in {
+    animation: fade-in 240ms ease both;
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .rail-item,
+  .tabstrip button {
+    transition:
+      background 140ms ease,
+      color 140ms ease;
+  }
+}

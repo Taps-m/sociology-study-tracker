@@ -209,7 +209,8 @@ export function PlanScreen({ d }: { d: Derived }) {
             ))}
           </div>
 
-          {active === "Mind map" && brief && <MindMap brief={brief} />}
+          <div key={active} className="fade-in">
+            {active === "Mind map" && brief && <MindMap brief={brief} />}
 
           {active === "Overview" && (
             <>
@@ -250,7 +251,8 @@ export function PlanScreen({ d }: { d: Derived }) {
             </>
           )}
 
-          {active === "Insight" && <WeekInsight d={d} week={week} />}
+            {active === "Insight" && <WeekInsight d={d} week={week} />}
+          </div>
 
         </Card>
 
