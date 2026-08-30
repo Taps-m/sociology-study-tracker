@@ -9,4 +9,5 @@ export const C = {
   warn: "#F2A93B",
   dim: "#1A2027",
   mono: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+  sans: 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
 };

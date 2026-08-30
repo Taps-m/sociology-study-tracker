@@ -419,87 +419,180 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
   const [known, setKnown] = useState<string[]>([]);
-  const units = [...new Set(TOPICS.map((t) => t.unit))];
+
+  const papers = [1, 2].map((paper) => ({
+    paper,
+    units: [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))],
+  }));
 
   const targetDate = new Date();
   targetDate.setMonth(targetDate.getMonth() + months);
   const examDate = targetDate.toISOString().slice(0, 10);
+  const readable = targetDate.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   const totalHours = TOPICS.reduce((s, t) => s + t.estHours, 0);
   const reachable = Math.min(100, Math.round(((hours * months * 4.345) / totalHours) * 100));
   const meetsTarget = reachable >= target;
+  const weeklyNeeded = Math.ceil((totalHours * (target / 100)) / (months * 4.345));
 
   return (
-    <Shell>
-      <div style={{ maxWidth: 440, width: "100%" }}>
-        <h1 style={{ fontSize: 16, fontWeight: 400, marginBottom: 4 }}>Before we start</h1>
-        <p style={{ fontSize: 12, color: C.muted, marginTop: 0, marginBottom: 28 }}>
-          All of this can be changed later.
-        </p>
+    <Shell align="flex-start">
+      <div style={{ maxWidth: 560, width: "100%", fontFamily: C.sans }}>
+        <header style={{ marginBottom: 24 }}>
+          <div
+            style={{
+              fontFamily: C.mono,
+              fontSize: 11,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: C.muted,
+            }}
+          >
+            sociology · wbcs
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 600, margin: "10px 0 6px", letterSpacing: "-0.01em" }}>
+            Before we start
+          </h1>
+          <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.6 }}>
+            Four questions. All of it can be changed later.
+          </p>
+        </header>
 
-        <Field label="How many months until your exam?">
-          <input type="range" min={1} max={24} value={months} onChange={(e) => setMonths(+e.target.value)} style={{ width: "100%", accentColor: C.accent }} />
-          <Readout value={months} unit={months === 1 ? "month" : "months"} sub={examDate} />
-        </Field>
+        <div style={{ display: "grid", gap: 12 }}>
+          <Field label="How long until your exam?" value={months} unit={months === 1 ? "month" : "months"} sub={readable}>
+            <input
+              type="range"
+              min={1}
+              max={24}
+              value={months}
+              onChange={(e) => setMonths(+e.target.value)}
+              aria-label="Months until exam"
+            />
+          </Field>
 
-        <Field label="How many hours a week can you give sociology?">
-          <input type="range" min={1} max={40} value={hours} onChange={(e) => setHours(+e.target.value)} style={{ width: "100%", accentColor: C.accent }} />
-          <Readout value={hours} unit="hours a week" />
-        </Field>
+          <Field label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
+            <input
+              type="range"
+              min={1}
+              max={40}
+              value={hours}
+              onChange={(e) => setHours(+e.target.value)}
+              aria-label="Hours a week"
+            />
+          </Field>
 
-        <Field label="How much of the syllabus are you aiming to cover?">
-          <input type="range" min={50} max={100} step={5} value={target} onChange={(e) => setTarget(+e.target.value)} style={{ width: "100%", accentColor: C.accent }} />
-          <Readout value={target} unit="% target" sub="the rest stays visible as optional" />
-        </Field>
+          <Field label="How much of the syllabus are you aiming to cover?" value={target} unit="%" sub="the rest stays visible as optional">
+            <input
+              type="range"
+              min={50}
+              max={100}
+              step={5}
+              value={target}
+              onChange={(e) => setTarget(+e.target.value)}
+              aria-label="Target coverage"
+            />
+          </Field>
 
-        <Field label="Any of this you already know? Tick those units.">
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-            {units.map((u) => {
-              const isOn = known.includes(u);
-              return (
-                <button
-                  key={u}
-                  onClick={() => setKnown(isOn ? known.filter((k) => k !== u) : [...known, u])}
+          <section style={panelStyle}>
+            <div style={{ fontSize: 13, color: C.text, marginBottom: 4 }}>
+              Already know any of this?
+            </div>
+            <div style={{ fontSize: 12, color: C.muted, marginBottom: 14, lineHeight: 1.6 }}>
+              Tick the units you have studied before. They start part-complete instead of at zero.
+            </div>
+
+            {papers.map(({ paper, units }) => (
+              <div key={paper} style={{ marginBottom: 14 }}>
+                <div
                   style={{
-                    font: "inherit",
-                    fontSize: 11,
-                    padding: "7px 10px",
-                    minHeight: 34,
-                    borderRadius: 4,
-                    cursor: "pointer",
-                    background: "transparent",
-                    color: isOn ? C.accent : C.muted,
-                    border: `1px solid ${isOn ? C.accent : C.line}`,
+                    fontFamily: C.mono,
+                    fontSize: 10,
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: C.muted,
+                    marginBottom: 8,
                   }}
                 >
-                  {isOn ? "✓ " : ""}
-                  {u}
-                </button>
-              );
-            })}
-          </div>
-        </Field>
+                  Paper {paper === 1 ? "I" : "II"}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {units.map((u) => {
+                    const isOn = known.includes(u);
+                    return (
+                      <button
+                        key={u}
+                        onClick={() => setKnown(isOn ? known.filter((k) => k !== u) : [...known, u])}
+                        aria-pressed={isOn}
+                        style={{
+                          fontFamily: C.sans,
+                          fontSize: 12,
+                          padding: "8px 12px",
+                          minHeight: 36,
+                          borderRadius: 999,
+                          cursor: "pointer",
+                          background: isOn ? "rgba(95, 211, 243, 0.12)" : "transparent",
+                          color: isOn ? C.accent : C.muted,
+                          border: `1px solid ${isOn ? C.accent : C.line}`,
+                        }}
+                      >
+                        {isOn ? "✓ " : ""}
+                        {u}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <div style={{ fontSize: 11, color: C.muted }}>
+              {known.length === 0 ? "Nothing ticked — starting from zero." : `${known.length} ticked.`}
+            </div>
+          </section>
 
-        <div style={{ border: `1px solid ${C.line}`, borderRadius: 6, padding: 14, fontSize: 12, color: C.muted, lineHeight: 1.7, marginBottom: 24 }}>
-          At that pace you reach{" "}
-          <strong style={{ color: meetsTarget ? C.accent : C.warn, fontSize: 15 }}>{reachable}%</strong>{" "}
-          of the syllabus.{" "}
-          {meetsTarget
-            ? `That clears your ${target}% target.`
-            : `That falls short of ${target}%. Change it now, or close the gap later.`}
+          <section
+            style={{
+              ...panelStyle,
+              borderLeft: `3px solid ${meetsTarget ? C.accent : C.warn}`,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+              <span
+                style={{
+                  fontFamily: C.mono,
+                  fontSize: 34,
+                  lineHeight: 1,
+                  color: meetsTarget ? C.accent : C.warn,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {reachable}%
+              </span>
+              <span style={{ fontSize: 13, color: C.muted }}>of the syllabus at this pace</span>
+            </div>
+            <p style={{ fontSize: 12, color: C.muted, lineHeight: 1.7, margin: "10px 0 0" }}>
+              {meetsTarget
+                ? `That clears your ${target}% target with room to spare.`
+                : `That falls short of your ${target}% target. Reaching it needs about ${weeklyNeeded} hours a week — or a longer run-up. You can also leave it and close the gap later.`}
+            </p>
+          </section>
         </div>
 
         <button
           onClick={() => onDone({ examDate, weeklyHours: hours, targetCoverage: target / 100 }, known)}
           style={{
             width: "100%",
-            minHeight: 48,
-            background: "transparent",
-            border: `1px solid ${C.accent}`,
-            borderRadius: 6,
-            color: C.accent,
-            font: "inherit",
-            fontSize: 13,
+            minHeight: 50,
+            marginTop: 18,
+            background: C.accent,
+            border: "none",
+            borderRadius: 8,
+            color: C.surface,
+            fontFamily: C.sans,
+            fontSize: 14,
+            fontWeight: 600,
             cursor: "pointer",
           }}
         >
@@ -507,6 +600,52 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
         </button>
       </div>
     </Shell>
+  );
+}
+
+const panelStyle = {
+  background: C.panel,
+  border: `1px solid ${C.line}`,
+  borderRadius: 10,
+  padding: "16px 18px",
+} as const;
+
+function Field({
+  label,
+  value,
+  unit,
+  sub,
+  children,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  sub?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section style={panelStyle}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+        <span style={{ fontSize: 13, color: C.text, lineHeight: 1.4 }}>{label}</span>
+        <span style={{ whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              fontFamily: C.mono,
+              fontSize: 26,
+              color: C.accent,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {value}
+          </span>
+          <span style={{ fontSize: 12, color: C.muted, marginLeft: 5 }}>{unit}</span>
+        </span>
+      </div>
+      <div style={{ marginTop: 10 }}>{children}</div>
+      {sub && (
+        <div style={{ fontFamily: C.mono, fontSize: 11, color: C.muted, marginTop: 8 }}>{sub}</div>
+      )}
+    </section>
   );
 }
 
@@ -550,24 +689,7 @@ function Tab({ on: isOn, onClick, children }: { on: boolean; onClick: () => void
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{ fontSize: 12, color: C.muted, marginBottom: 12 }}>{label}</div>
-      {children}
-    </div>
-  );
-}
 
-function Readout({ value, unit, sub }: { value: number; unit: string; sub?: string }) {
-  return (
-    <div style={{ marginTop: 8 }}>
-      <span style={{ fontSize: 24, color: C.accent }}>{value}</span>
-      <span style={{ fontSize: 12, color: C.muted }}> {unit}</span>
-      {sub && <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{sub}</div>}
-    </div>
-  );
-}
 
 function Cell({ label, value, unit, warn }: { label: string; value: number | string; unit: string; warn?: boolean }) {
   return (
