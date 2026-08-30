@@ -51,6 +51,10 @@ export default function App() {
             }
           }
           setEvents(batch);
+          // Setup decides where you land, not whichever page you happened to
+          // erase from. Without this the hash still points at Settings and the
+          // first thing a new user sees is the reset button.
+          go("dashboard");
         }}
       />
     );
