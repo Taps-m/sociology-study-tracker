@@ -189,7 +189,15 @@ export default async function handler(req, res) {
         headers: { "Content-Type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 700 },
+          generationConfig: {
+            temperature: 0.4,
+            // Generous on purpose. Newer models spend part of this budget
+            // thinking before they write, so a ceiling sized for the visible
+            // answer truncates it mid-sentence. The cap is not a charge — only
+            // tokens actually produced are billed, and the prompts ask for
+            // short answers.
+            maxOutputTokens: 2048,
+          },
         }),
       },
     );
@@ -200,10 +208,24 @@ export default async function handler(req, res) {
     }
 
     const data = await r.json();
-    const body = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!body) return res.status(502).json({ error: "empty response from model" });
+    const candidate = data?.candidates?.[0];
+    const body = candidate?.content?.parts?.[0]?.text;
 
-    return res.status(200).json({ body, model: MODEL, generatedAt: new Date().toISOString() });
+    if (!body) {
+      // A model that spent its whole budget thinking returns no text at all.
+      return res.status(502).json({
+        error: "empty response from model",
+        detail: candidate?.finishReason ? `finishReason: ${candidate.finishReason}` : undefined,
+      });
+    }
+
+    return res.status(200).json({
+      body,
+      model: MODEL,
+      generatedAt: new Date().toISOString(),
+      // MAX_TOKENS here means the answer was cut short, not that it failed.
+      truncated: candidate?.finishReason === "MAX_TOKENS",
+    });
   } catch (e) {
     return res.status(502).json({ error: "model call failed", detail: String(e).slice(0, 200) });
   }

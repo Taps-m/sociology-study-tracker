@@ -109,10 +109,17 @@ export async function ask(
       return { advice: loadAdvice(key), error: reason };
     }
 
-    const data = (await res.json()) as { body: string; generatedAt: string };
+    const data = (await res.json()) as {
+      body: string;
+      generatedAt: string;
+      truncated?: boolean;
+    };
     const advice: Advice = { task, generatedAt: data.generatedAt, basis, body: data.body };
     saveAdvice(key, advice);
-    return { advice, error: null };
+    return {
+      advice,
+      error: data.truncated ? "the answer was cut short — ask again" : null,
+    };
   } catch {
     return { advice: loadAdvice(key), error: "no connection" };
   }
