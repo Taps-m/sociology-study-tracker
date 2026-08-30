@@ -17,6 +17,7 @@ export const ROUTES = [
   { id: "revision", label: "Quick Revision", icon: "↻" },
   { id: "notes", label: "My Notes", icon: "✐" },
   { id: "progress", label: "Progress", icon: "▲" },
+  { id: "guide", label: "How this works", icon: "?" },
   { id: "settings", label: "Settings", icon: "⚙" },
 ] as const;
 

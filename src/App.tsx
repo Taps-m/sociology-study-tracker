@@ -54,6 +54,7 @@ import { TodayScreen } from "./modules/today/TodayScreen";
 import { AnswerPractice } from "./modules/answers/AnswerPractice";
 import { PyqExplorer } from "./modules/pyq/PyqExplorer";
 import { NotesScreen } from "./modules/notes/NotesScreen";
+import { GuideScreen } from "./modules/guide/GuideScreen";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -136,6 +137,8 @@ export default function App() {
       {route === "revision" && <RevisionDeck d={d} onRevise={onRevise} />}
 
       {route === "notes" && <NotesScreen d={d} onSave={handlers.onNote} />}
+
+      {route === "guide" && <GuideScreen go={go} />}
 
       {route === "answers" && (
         <AnswerPractice
@@ -1195,6 +1198,25 @@ function LockScreen({
         >
           {started ? "Carry on" : "Set up"}
         </button>
+
+        {/* The person who built this. It is his name on the copyright line at
+            the foot of every page; the door is the right place to say it
+            plainly rather than in small print. */}
+        <p
+          style={{
+            fontSize: 13,
+            color: C.muted,
+            margin: "26px 0 0",
+            lineHeight: 1.7,
+          }}
+        >
+          Designed and built by{" "}
+          <span style={{ color: C.text, fontWeight: 600 }}>Tapomoy</span>
+          <br />
+          <span style={{ fontSize: 12.5 }}>
+            for candidates preparing Sociology for the WBCS Main examination
+          </span>
+        </p>
       </div>
     </Shell>
   );
