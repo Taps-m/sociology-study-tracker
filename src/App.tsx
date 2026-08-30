@@ -23,10 +23,14 @@ import { exportJson, importJson, load, save } from "./lib/storage";
 import { C } from "./lib/theme";
 import { TopicRow } from "./components/TopicRow";
 import { quoteOfTheDay } from "./data/quotes";
+import { Shell as AppShell, Card, NotBuiltYet } from "./app/Shell";
+import { useRoute } from "./app/routes";
+import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
+import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
-  const [tab, setTab] = useState<"week" | "syllabus">("week");
+  const [route, go] = useRoute();
   useEffect(() => save(events), [events]);
 
   const d = useMemo(() => project(events), [events]);
@@ -62,29 +66,155 @@ export default function App() {
   const onRevise = (topicId: string) => add(on.check(topicId, "revised"));
 
   return (
-    <Shell align="flex-start">
-      <div style={{ maxWidth: 560, width: "100%" }}>
-        <Greeting d={d} onName={(name) => add(on.settings({ name }))} />
+    <AppShell route={route} go={go}>
+      {route === "dashboard" && <DashboardScreen d={d} go={go} />}
 
-        <Telemetry d={d} />
+      {route === "chapters" && <ChaptersScreen d={d} {...handlers} />}
 
-        <DueForRevision d={d} onRevise={onRevise} />
+      {route === "plan" && <PlanScreen d={d} />}
 
-        <div style={{ display: "flex", gap: 6, marginTop: 24 }}>
-          <Tab on={tab === "week"} onClick={() => setTab("week")}>
-            This week
-          </Tab>
-          <Tab on={tab === "syllabus"} onClick={() => setTab("syllabus")}>
-            Full syllabus
-          </Tab>
+      {route === "today" && (
+        <div className="grid" style={{ gap: 14 }}>
+          <ThisWeek d={d} {...handlers} />
         </div>
+      )}
 
-        {tab === "week" ? <ThisWeek d={d} {...handlers} /> : <FullSyllabus d={d} {...handlers} />}
+      {route === "revision" && (
+        <div className="grid" style={{ gap: 14 }}>
+          <DueForRevision d={d} onRevise={onRevise} />
+        </div>
+      )}
 
-        <PaceControl d={d} onChange={(patch) => add(on.settings(patch))} />
-        <Backup events={events} setEvents={setEvents} />
-      </div>
-    </Shell>
+      {route === "answers" && <AnswersScreen d={d} />}
+
+      {route === "progress" && (
+        <div className="grid" style={{ gap: 14 }}>
+          <Telemetry d={d} />
+        </div>
+      )}
+
+      {route === "settings" && (
+        <div className="grid" style={{ gap: 14 }}>
+          <Greeting d={d} onName={(name) => add(on.settings({ name }))} />
+          <PaceControl d={d} onChange={(patch) => add(on.settings(patch))} />
+          <Backup events={events} setEvents={setEvents} />
+        </div>
+      )}
+
+      {route === "pyq" && (
+        <NotBuiltYet
+          label="PYQ Explorer"
+          needs={[
+            "The text of the 91 tagged questions. syllabus.ts stores only how many times each topic was asked, not what was asked.",
+            "Ten years rather than six — 2014-2017 and 2024-2026 are still missing.",
+          ]}
+        />
+      )}
+
+      {route === "flashcards" && (
+        <NotBuiltYet
+          label="Flashcards"
+          needs={[
+            "Cards for 85 topics. The screen is an afternoon; the cards are the work.",
+            "A decision on whether they are written by hand or generated once and committed.",
+          ]}
+        />
+      )}
+
+      {route === "notes" && (
+        <NotBuiltYet
+          label="My Notes"
+          needs={[
+            "A per-topic note store. The event log can carry it, so this is small.",
+            "A decision on plain text or rich text before anything is stored.",
+          ]}
+        />
+      )}
+
+      {route === "mindmaps" && (
+        <NotBuiltYet
+          label="Mind Maps"
+          needs={[
+            "A diagram per unit. Nineteen units, drawn by hand or authored as data.",
+            "This is the most expensive module in the design and the least urgent.",
+          ]}
+        />
+      )}
+    </AppShell>
+  );
+}
+
+function PlanScreen({ d }: { d: Derived }) {
+  const weeks = packWeeks(d, 8);
+  if (weeks.length === 0) {
+    return <Card title="Study plan">Nothing to schedule yet.</Card>;
+  }
+  return (
+    <div className="grid" style={{ gap: 12 }}>
+      {weeks.map((w) => (
+        <Card
+          key={w.weekIndex}
+          title={w.weekIndex === 0 ? "This week" : `Week ${w.weekIndex + 1}`}
+          action={
+            <span className="num" style={{ fontSize: 12, color: C.muted }}>
+              {w.totalHours} h
+            </span>
+          }
+        >
+          {w.topics.length === 0 && w.revisions.length === 0 ? (
+            <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>Clear.</p>
+          ) : (
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, lineHeight: 1.9 }}>
+              {w.topics.map((t) => (
+                <li key={t.id}>{t.name}</li>
+              ))}
+              {w.revisions.map((r) => (
+                <li key={`r-${r.topic.id}`} style={{ color: C.warn }}>
+                  Revise: {r.topic.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      ))}
+      <p style={{ fontSize: 12, color: C.muted, lineHeight: 1.7 }}>
+        Only this week is fixed. Every week after it is recomputed from what is
+        actually left each time you open the app, so falling behind reshapes the
+        plan instead of breaking it.
+      </p>
+    </div>
+  );
+}
+
+function AnswersScreen({ d }: { d: Derived }) {
+  const s = attemptStats(d);
+  return (
+    <div className="grid" style={{ gap: 14 }}>
+      <Card title="Answer practice">
+        {s.total === 0 ? (
+          <p style={{ fontSize: 13.5, color: C.muted, margin: 0, lineHeight: 1.7 }}>
+            No answers written yet — and that is the thing the exam actually scores.
+            Attempts are logged per topic: open a topic in Chapters and record the
+            marks and the minutes it took.
+          </p>
+        ) : (
+          <div style={{ display: "flex", gap: 28, flexWrap: "wrap" }}>
+            <div>
+              <div className="num" style={{ fontSize: 28 }}>
+                {s.total}
+              </div>
+              <div style={{ fontSize: 12, color: C.muted }}>answers written</div>
+            </div>
+            <div>
+              <div className="num" style={{ fontSize: 28, color: C.accent }}>
+                {s.averagePercent}%
+              </div>
+              <div style={{ fontSize: 12, color: C.muted }}>average score</div>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }
 
@@ -377,23 +507,6 @@ function ThisWeek({ d, ...h }: { d: Derived } & Handlers) {
   );
 }
 
-function FullSyllabus({ d, ...h }: { d: Derived } & Handlers) {
-  const units = [...new Set(TOPICS.map((t) => `${t.paper}|${t.unit}`))];
-  return (
-    <div style={{ marginTop: 8 }}>
-      {units.map((key) => {
-        const [paper, unit] = key.split("|");
-        return (
-          <Section key={key} title={`paper ${paper === "1" ? "i" : "ii"} · ${unit}`}>
-            {TOPICS.filter((t) => `${t.paper}|${t.unit}` === key).map((t) => (
-              <TopicRow key={t.id} topic={t} d={d} {...h} optional={isOptional(d, t.id)} />
-            ))}
-          </Section>
-        );
-      })}
-    </div>
-  );
-}
 
 function PaceControl({
   d,
@@ -794,26 +907,6 @@ function Shell({ children, align = "center" }: { children: ReactNode; align?: st
   );
 }
 
-function Tab({ on: isOn, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        font: "inherit",
-        fontSize: 12,
-        padding: "9px 14px",
-        minHeight: 40,
-        borderRadius: 4,
-        cursor: "pointer",
-        background: "transparent",
-        color: isOn ? C.accent : C.muted,
-        border: `1px solid ${isOn ? C.accent : C.line}`,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
 
 
 

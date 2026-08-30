@@ -1,3 +1,65 @@
+/*
+ * Theme tokens.
+ *
+ * Every colour in the app is a CSS variable, and theme.ts hands components
+ * `var(--x)` strings rather than hex. That means a component written with inline
+ * styles is theme-aware for free, and switching themes is one attribute on <html>
+ * — no re-render, no context, no prop drilling.
+ *
+ * Light is the default. Dark is the old mission-control palette, kept intact.
+ */
+
+:root {
+  --page: #f4f6fb;
+  --surface: #ffffff;
+  --panel: #ffffff;
+  --raised: #f8fafc;
+  --line: #e3e8f2;
+  --hair: #eef1f7;
+  --text: #16203a;
+  --muted: #6b7690;
+  --accent: #2563eb;
+  --accent-soft: #eff4ff;
+  --accent-ink: #ffffff;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --good: #16a34a;
+  --good-soft: #dcfce7;
+  --shadow: 0 1px 2px rgba(16, 27, 61, 0.06), 0 4px 12px rgba(16, 27, 61, 0.04);
+
+  /* The rail and header stay dark in both themes, as in the design. */
+  --rail: #101b3d;
+  --rail-2: #16234a;
+  --rail-text: #e8ecf7;
+  --rail-muted: #8f9ab8;
+  --rail-line: #23315c;
+}
+
+[data-theme="dark"] {
+  --page: #0a0e12;
+  --surface: #0a0e12;
+  --panel: #11171d;
+  --raised: #161d24;
+  --line: #1e2831;
+  --hair: #161d24;
+  --text: #e6edf3;
+  --muted: #7d8b99;
+  --accent: #5fd3f3;
+  --accent-soft: rgba(95, 211, 243, 0.12);
+  --accent-ink: #0a0e12;
+  --warn: #f2a93b;
+  --warn-soft: rgba(242, 169, 59, 0.14);
+  --good: #4ade80;
+  --good-soft: rgba(74, 222, 128, 0.14);
+  --shadow: none;
+
+  --rail: #0d131a;
+  --rail-2: #11171d;
+  --rail-text: #e6edf3;
+  --rail-muted: #7d8b99;
+  --rail-line: #1e2831;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -7,8 +69,26 @@ body,
 #root {
   margin: 0;
   padding: 0;
-  height: 100%;
-  background: #0A0E12;
+  min-height: 100%;
+  background: var(--page);
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Sliders. The browser default reads as an unfinished form; these do not. */
@@ -23,7 +103,7 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
-  background: #1E2831;
+  background: var(--line);
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -32,22 +112,135 @@ input[type="range"]::-webkit-slider-thumb {
   height: 18px;
   margin-top: -7px;
   border-radius: 50%;
-  background: #5FD3F3;
-  border: 3px solid #0A0E12;
-  box-shadow: 0 0 0 1px #5FD3F3;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 input[type="range"]::-moz-range-track {
   height: 4px;
   border-radius: 2px;
-  background: #1E2831;
+  background: var(--line);
 }
 input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #5FD3F3;
-  border: 2px solid #0A0E12;
+  background: var(--accent);
+  border: 2px solid var(--surface);
 }
-input[type="range"]:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 1px #5FD3F3, 0 0 0 4px rgba(95, 211, 243, 0.3);
+
+/* App shell: rail on the left from 900px up, stacked below it. */
+.shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+}
+@media (min-width: 900px) {
+  .shell {
+    grid-template-columns: 232px 1fr;
+  }
+}
+
+.rail {
+  background: var(--rail);
+  border-right: 1px solid var(--rail-line);
+  padding: 16px 12px;
+  display: none;
+}
+@media (min-width: 900px) {
+  .rail {
+    display: block;
+  }
+}
+
+.rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rail-muted);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.rail-item:hover {
+  background: var(--rail-2);
+  color: var(--rail-text);
+}
+.rail-item[aria-current="page"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.topbar {
+  background: var(--rail);
+  border-bottom: 1px solid var(--rail-line);
+  color: var(--rail-text);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabstrip {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabstrip::-webkit-scrollbar {
+  display: none;
+}
+.tabstrip button {
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  color: var(--rail-muted);
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  min-height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tabstrip button[aria-current="page"] {
+  color: var(--rail-text);
+  background: var(--rail-2);
+}
+
+.main {
+  padding: 20px 16px 64px;
+}
+@media (min-width: 900px) {
+  .main {
+    padding: 24px 28px 64px;
+  }
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 1100px) {
+  .grid-main {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+  }
 }
