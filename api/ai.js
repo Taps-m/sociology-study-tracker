@@ -42,9 +42,40 @@ const MAX_EVAL_BODY_BYTES = 6 * 1024 * 1024;
 const PER_DEVICE_PER_HOUR = 20;
 const EVAL_PER_DEVICE_PER_DAY = 8;
 
-const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
-const REDIS_TOKEN =
-  process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+/**
+ * Find the Redis credentials whatever they ended up being called.
+ *
+ * The Vercel marketplace installer offers a "custom prefix" for the variables
+ * it injects, and providers have renamed them before — KV_REST_API_* under
+ * Vercel KV, UPSTASH_REDIS_REST_* under Upstash's own naming. Matching two
+ * hard-coded names means a dropdown nobody thinks about silently turns the
+ * durable cap back into the in-memory one, which is the failure this whole
+ * thing exists to prevent and the failure least likely to be noticed.
+ *
+ * So: take any pair of variables ending _REST_API_URL and _REST_API_TOKEN that
+ * share a prefix. The known names are tried first so behaviour does not change
+ * for a store that is already wired up.
+ */
+function findRedisCredentials(env) {
+  const known = [
+    ["KV_REST_API_URL", "KV_REST_API_TOKEN"],
+    ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+  ];
+  for (const [u, t] of known) {
+    if (env[u] && env[t]) return { url: env[u], token: env[t], via: u };
+  }
+
+  for (const key of Object.keys(env)) {
+    if (!key.endsWith("_REST_API_URL") || !env[key]) continue;
+    const tokenKey = `${key.slice(0, -"_URL".length)}_TOKEN`;
+    if (env[tokenKey]) return { url: env[key], token: env[tokenKey], via: key };
+  }
+  return { url: "", token: "", via: null };
+}
+
+const CREDS = findRedisCredentials(process.env);
+const REDIS_URL = CREDS.url;
+const REDIS_TOKEN = CREDS.token;
 export const REDIS_CONFIGURED = Boolean(REDIS_URL && REDIS_TOKEN);
 
 const hits = { month: currentMonth(), total: 0, devices: new Map() };
@@ -282,6 +313,8 @@ export default async function handler(req, res) {
       model: MODEL,
       monthlyCap: MONTHLY_CAP,
       durableLimits: REDIS_CONFIGURED,
+      // The variable name only — never the value.
+      limitsVia: CREDS.via,
       originLocked: Boolean(process.env.ALLOWED_ORIGIN),
       note: REDIS_CONFIGURED
         ? "Limits are counted in Redis and survive cold starts."
