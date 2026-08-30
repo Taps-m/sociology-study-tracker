@@ -100,6 +100,7 @@ export default function App() {
       {route === "settings" && (
         <div className="grid" style={{ gap: 14 }}>
           <Greeting d={d} onName={(name) => add(on.settings({ name }))} />
+          <StartUnitControl d={d} onChange={(patch) => add(on.settings(patch))} />
           <PaceControl d={d} onChange={(patch) => add(on.settings(patch))} />
           <Backup events={events} setEvents={setEvents} />
         </div>
@@ -432,6 +433,57 @@ function ThisWeek({ d, ...h }: { d: Derived } & Handlers) {
 }
 
 
+function StartUnitControl({
+  d,
+  onChange,
+}: {
+  d: Derived;
+  onChange: (patch: Partial<Settings>) => void;
+}) {
+  const s = d.settings as Settings;
+  const papers = [1, 2].map((paper) => ({
+    paper,
+    units: [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))],
+  }));
+
+  return (
+    <Section title="Where to start">
+      <select
+        value={s.startUnit ?? ""}
+        onChange={(e) => onChange({ startUnit: e.target.value || undefined })}
+        aria-label="Unit to work through first"
+        style={{
+          width: "100%",
+          minHeight: 42,
+          padding: "0 10px",
+          borderRadius: 8,
+          background: C.surface,
+          border: `1px solid ${C.line}`,
+          color: C.text,
+          fontFamily: C.sans,
+          fontSize: 14.5,
+        }}
+      >
+        <option value="">Highest-yield topics first (recommended)</option>
+        {papers.map(({ paper, units }) => (
+          <optgroup key={paper} label={`Paper ${paper === 1 ? "I" : "II"}`}>
+            {units.map((u) => (
+              <option key={`${paper}|${u}`} value={u}>
+                {u}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      <Note>
+        {s.startUnit
+          ? `${s.startUnit} leads the queue until it is finished, then ordering returns to yield.`
+          : "The queue leads with whatever has been asked most since 2018."}
+      </Note>
+    </Section>
+  );
+}
+
 function PaceControl({
   d,
   onChange,
@@ -548,6 +600,7 @@ function Backup({
 
 function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
   const [name, setName] = useState("");
+  const [startUnit, setStartUnit] = useState("");
   const [months, setMonths] = useState(5);
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
@@ -712,6 +765,48 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
             </div>
           </section>
 
+          <section style={panelStyle}>
+            <label
+              htmlFor="setup-start"
+              style={{ display: "block", fontSize: 14.5, color: C.text, marginBottom: 6 }}
+            >
+              Where would you like to start?
+            </label>
+            <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 12px", lineHeight: 1.6 }}>
+              Not everyone begins at the beginning. Pick a unit to work through
+              first, or leave it and the app will lead with the highest-yield
+              topics. Either way you can change it later, and it stops applying
+              once that unit is done.
+            </p>
+            <select
+              id="setup-start"
+              value={startUnit}
+              onChange={(e) => setStartUnit(e.target.value)}
+              style={{
+                width: "100%",
+                minHeight: 42,
+                padding: "0 10px",
+                borderRadius: 8,
+                background: C.surface,
+                border: `1px solid ${C.line}`,
+                color: C.text,
+                fontFamily: C.sans,
+                fontSize: 14.5,
+              }}
+            >
+              <option value="">Highest-yield topics first (recommended)</option>
+              {papers.map(({ paper, units }) => (
+                <optgroup key={paper} label={`Paper ${paper === 1 ? "I" : "II"}`}>
+                  {units.map((u) => (
+                    <option key={`${paper}|${u}`} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          </section>
+
           <section
             style={{
               ...panelStyle,
@@ -742,7 +837,13 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
 
         <button
           onClick={() => onDone(
-              { name: name.trim() || undefined, examDate, weeklyHours: hours, targetCoverage: target / 100 },
+              {
+                name: name.trim() || undefined,
+                startUnit: startUnit || undefined,
+                examDate,
+                weeklyHours: hours,
+                targetCoverage: target / 100,
+              },
               known,
             )}
           style={{

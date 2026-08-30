@@ -473,9 +473,16 @@ export function hoursLeftOn(d: Derived, topic: Topic): number {
 }
 
 export function queue(d: Derived): Topic[] {
-  return TOPICS.filter((t) => depthFor(d, t) > 0 && !isAtDepth(d, t)).sort(
-    (a, b) => bandOf(b) - bandOf(a) || a.estHours - b.estHours,
-  );
+  const start = d.settings?.startUnit;
+  return TOPICS.filter((t) => depthFor(d, t) > 0 && !isAtDepth(d, t)).sort((a, b) => {
+    if (start) {
+      // A chosen starting unit outranks yield until it is finished, then stops
+      // mattering by itself — its topics drop out of the queue at depth.
+      const first = (t: Topic) => (t.unit === start ? 0 : 1);
+      if (first(a) !== first(b)) return first(a) - first(b);
+    }
+    return bandOf(b) - bandOf(a) || a.estHours - b.estHours;
+  });
 }
 
 export interface WeekPlan {

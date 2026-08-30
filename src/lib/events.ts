@@ -12,6 +12,13 @@ export type CheckId = "read" | "notes" | "pyq" | "revised";
 export interface Settings {
   /** What to call you on the first screen. Optional: older saves predate it. */
   name?: string;
+  /**
+   * A unit to work through first. Not everyone starts at the beginning: a
+   * returning candidate may be halfway, or want to open on their weakest area.
+   * Optional, and it expires on its own — once the unit is at depth its topics
+   * leave the queue and normal ordering resumes.
+   */
+  startUnit?: string;
   examDate: string;
   weeklyHours: number;
   targetCoverage: number;
