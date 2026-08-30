@@ -3,213 +3,166 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Build tracker — sociology study tracker</title>
+<title>Build tracker — WBCS Sociology tracker</title>
 <style>
   :root {
-    --surface: #0A0E12;
-    --panel: #11171D;
-    --line: #1E2831;
-    --line-soft: #161D24;
-    --text: #E6EDF3;
-    --muted: #7D8B99;
-    --accent: #5FD3F3;
-    --active: #F2A93B;
-    --done: #2C4A5A;
+    --page: #f4f6fb; --card: #fff; --line: #e3e8f2; --text: #16203a;
+    --muted: #6b7690; --accent: #2563eb; --good: #16a34a; --warn: #d97706;
+    --rail: #101b3d;
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    padding: 24px 16px 48px;
-    background: var(--surface);
-    color: var(--text);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    -webkit-font-smoothing: antialiased;
+    margin: 0; padding: 28px 18px 64px; background: var(--page); color: var(--text);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
-  .wrap { max-width: 720px; margin: 0 auto; }
+  .wrap { max-width: 940px; margin: 0 auto; }
+  .num { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
 
-  header {
-    display: flex; justify-content: space-between; align-items: baseline;
-    border-bottom: 1px solid var(--line); padding-bottom: 12px;
-  }
-  header .name { font-size: 12px; letter-spacing: 0.14em; color: var(--muted); text-transform: lowercase; }
-  header .stamp { font-size: 12px; color: var(--accent); }
+  header { background: var(--rail); color: #fff; border-radius: 12px; padding: 22px 24px; }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+  header p { margin: 8px 0 0; color: #8f9ab8; font-size: 14px; }
 
-  .hero { display: flex; gap: 32px; flex-wrap: wrap; margin: 28px 0 20px; }
-  .hero div { min-width: 120px; }
-  .hero .label { font-size: 11px; letter-spacing: 0.12em; color: var(--muted); }
-  .hero .value { font-size: 44px; line-height: 1.1; margin-top: 6px; }
-  .hero .value small { font-size: 14px; color: var(--muted); }
-  .hero .lead .value { color: var(--accent); }
+  .stats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 16px 0 24px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 26px; font-weight: 600; }
+  .stat span { font-size: 13px; color: var(--muted); }
 
-  .strip { display: flex; gap: 2px; margin: 4px 0 8px; }
-  .strip span { height: 8px; border-radius: 1px; background: #1A2027; }
-  .strip span.done { background: var(--done); }
-  .strip span.active { background: var(--active); }
-  .caption { font-size: 12px; color: var(--muted); margin-bottom: 28px; }
+  .bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin: 4px 0 22px; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
 
-  ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-  li {
-    display: grid; grid-template-columns: 28px 1fr auto auto; gap: 12px; align-items: center;
-    padding: 14px 8px; border-bottom: 1px solid var(--line-soft);
-    cursor: pointer; min-height: 44px;
-  }
-  li:hover, li:focus-visible { background: var(--panel); outline: none; }
-  li:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
-  .idx { font-size: 12px; color: var(--muted); }
-  .step-name { font-size: 14px; }
-  .step-note { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .hrs { font-size: 12px; color: var(--muted); white-space: nowrap; }
-  .pill {
-    font-size: 11px; letter-spacing: 0.08em; padding: 3px 8px;
-    border: 1px solid var(--line); border-radius: 3px; white-space: nowrap;
-  }
-  .pill.todo { color: var(--muted); }
-  .pill.active { color: var(--active); border-color: var(--active); }
-  .pill.done { color: var(--accent); border-color: var(--done); }
-  li.is-done .step-name { color: var(--muted); }
+  h2 { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 26px 0 10px; }
 
-  footer { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 16px; }
-  button {
-    font: inherit; font-size: 12px; color: var(--text); background: transparent;
-    border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; cursor: pointer;
-    min-height: 44px;
+  .row {
+    display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: start;
+    background: var(--card); border: 1px solid var(--line); border-radius: 11px;
+    padding: 13px 16px; margin-bottom: 8px;
   }
-  button:hover { border-color: var(--muted); }
-  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .hint { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
-  textarea {
-    width: 100%; margin-top: 12px; background: var(--panel); color: var(--text);
-    border: 1px solid var(--line); border-radius: 4px; font: inherit; font-size: 11px;
-    padding: 10px; min-height: 120px; display: none;
-  }
-  @media (prefers-reduced-motion: no-preference) { li { transition: background 120ms ease; } }
+  .row h3 { margin: 0; font-size: 15.5px; font-weight: 600; }
+  .row p { margin: 5px 0 0; font-size: 13.5px; color: var(--muted); }
+  .pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; border: 1px solid; }
+  .done  { color: var(--good); border-color: #b7e3c6; background: #f0fdf4; }
+  .part  { color: var(--warn); border-color: #f2ce8f; background: #fffbeb; }
+  .todo  { color: var(--muted); border-color: var(--line); background: #f8fafc; }
+  .blocked { color: #b91c1c; border-color: #f3b7b7; background: #fef2f2; }
+
+  footer { margin-top: 30px; font-size: 13px; color: var(--muted); }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
-  <span class="name">build tracker · sociology study tracker</span>
-  <span class="stamp" id="stamp"></span>
+  <h1>Build tracker — module by module</h1>
+  <p>Replaces the ten-step tracker. The app is past the step model: it is nine modules, a planner and an AI layer.</p>
 </header>
 
-<div class="hero">
-  <div class="lead">
-    <div class="label">remaining</div>
-    <div class="value" id="hoursLeft">—<small> h</small></div>
-  </div>
-  <div>
-    <div class="label">steps done</div>
-    <div class="value" id="stepsDone">—<small> / 10</small></div>
-  </div>
-  <div>
-    <div class="label">complete</div>
-    <div class="value" id="pct">—<small> %</small></div>
-  </div>
-</div>
+<div class="stats" id="stats"></div>
+<div class="bar"><i id="bar"></i></div>
 
-<div class="strip" id="strip"></div>
-<div class="caption" id="caption"></div>
-
-<ol id="list"></ol>
+<div id="list"></div>
 
 <footer>
-  <button id="copyBtn">Copy updated status</button>
-  <div class="hint">
-    Tap a step to cycle it: remaining → in progress → done. Changes are live but not saved —
-    to keep them, copy the updated status and paste it over the <code>STEPS</code> array at the
-    top of this file, then commit. That way the tracker is versioned with the project.
-  </div>
-  <textarea id="out" readonly aria-label="Updated status to paste back"></textarea>
+  <p><strong>How to update:</strong> edit the <code>MODULES</code> array at the bottom of this file and commit. It is versioned with the project, so the record of what was built and when travels with the code.</p>
+  <p id="stamp"></p>
 </footer>
 
 </div>
 
 <script>
-const STEPS = [
-  { name: "Deploy skeleton",        hours: 3, note: "Live on Vercel, countdown on screen",  status: "done" },
-  { name: "Syllabus data",          hours: 4, note: "85 WBCS topics, hours, units",         status: "done" },
-  { name: "PYQ analysis",           hours: 2, note: "91 questions 2018-2023 tagged",        status: "done" },
-  { name: "Planner and tests",      hours: 3, note: "Depth, pace, calibration, 15 tests",   status: "done" },
-  { name: "Event log and storage",  hours: 3, note: "Append-only, migration, backup",       status: "done" },
-  { name: "Study screens",          hours: 5, note: "Telemetry, week queue, syllabus map",  status: "done" },
-  { name: "Answer attempts",        hours: 2, note: "Marks and minutes per answer",         status: "done" },
-  { name: "Revision decay",         hours: 4, note: "Due revisions booked into the week",   status: "done" },
-  { name: "Weekly review",          hours: 3, note: "Sunday summary, one observation",      status: "todo" },
-  { name: "AI critique",            hours: 5, note: "Serverless proxy, weekly read",        status: "todo" }
+// status: done | part | todo | blocked
+const MODULES = [
+  { group: "Screens", name: "Dashboard", status: "done",
+    note: "Today's focus, weekly review, progress ring with red/amber/green against elapsed time, quote. One column on a phone, two above 1000px." },
+  { group: "Screens", name: "Study Plan", status: "done",
+    note: "Week strip, at-a-glance panel with mind map, thinkers, PYQ focus and AI insight. Later weeks derived, never locked." },
+  { group: "Screens", name: "Chapters", status: "done",
+    note: "Unit accordion, search, status filters, per-unit mind map and takeaways." },
+  { group: "Screens", name: "Today's Study", status: "done",
+    note: "Today's tasks against a daily budget, with full controls. Shares todaysTasks() with the dashboard so the two cannot disagree." },
+  { group: "Screens", name: "Answer Practice", status: "part",
+    note: "Built: timer, optional self-mark, photo or PDF upload, five-criterion scoring, marks reopening weak topics. Not yet tested against real handwriting." },
+  { group: "Screens", name: "Quick Revision", status: "done",
+    note: "Flash-card deck with a real flip. Overdue first, then read-but-never-revised. Intervals 7, 21, 45, 90 days." },
+  { group: "Screens", name: "Progress", status: "done",
+    note: "Telemetry plus recent activity with undo on every check." },
+  { group: "Screens", name: "Settings", status: "done",
+    note: "Name, starting unit, weekly hours, coverage target, backup, restore, erase and start over." },
+
+  { group: "Engine", name: "Planner", status: "done",
+    note: "Depth by PYQ band, calibration from logged time, pace, projection, week packing, revision decay, answer verdicts. 35 tests." },
+  { group: "Engine", name: "Event log and storage", status: "done",
+    note: "Append-only, versioned, export and import. Every figure derived at render time; no computed statistic is ever stored." },
+  { group: "Engine", name: "Syllabus data", status: "done",
+    note: "85 topics across 18 units, with hours and per-topic PYQ counts for 2018-2023." },
+  { group: "Engine", name: "Unit briefs", status: "done",
+    note: "All 18 units: mind map, five takeaways, thinker where one dominates. Sociology still to be checked against the texts." },
+
+  { group: "AI", name: "Serverless proxy", status: "part",
+    note: "Key server-side, origin check, payload ceilings, per-device and monthly limits. The counters are in-memory, so they reset on a cold start — Vercel KV would make the cap real." },
+  { group: "AI", name: "Weekly review", status: "done",
+    note: "Reads the planner's figures and interprets them. Cached with the numbers it reasoned from, marked stale when they move." },
+  { group: "AI", name: "Ask AI", status: "done",
+    note: "Scoped to the syllabus; answers the part of a wandering question that belongs and says so about the rest." },
+  { group: "AI", name: "Week insight", status: "done",
+    note: "What connects this week's topics, from the ask counts already in the repo." },
+  { group: "AI", name: "Answer evaluation", status: "part",
+    note: "Reads a photographed page and returns five scores, the weakest criterion and one rewrite. Shows what it read back first. Unproven on real handwriting." },
+
+  { group: "Not built", name: "PYQ Explorer", status: "blocked",
+    note: "Blocked on content: syllabus.ts stores how many times each topic was asked, not what was asked. The 96 transcribed questions exist but are not in this repo." },
+  { group: "Not built", name: "Blind-spot report", status: "blocked",
+    note: "The highest-value thing left. Needs the question text and its Group A/B tag to say: you have never written from the units supplying 17 Group B questions." },
+  { group: "Not built", name: "My Notes", status: "todo",
+    note: "Per-topic notes. The event log can carry them, so this is small. Needs a decision on plain or rich text first." },
+  { group: "Not built", name: "Offline and installable", status: "todo",
+    note: "PLAN.md Phase 2: PWA manifest and service worker. Nothing is installed yet; the app needs a connection to load." },
+  { group: "Not built", name: "Profile photo", status: "todo",
+    note: "Deferred deliberately: an image in the append-only log would be copied on every settings change. Needs resizing and a separate store." },
+
+  { group: "Owed", name: "Drop the exam date", status: "todo",
+    note: "You decided the tracker should measure a 4-6 month window, not a date. Setup still asks months-to-exam and examDate still runs through the planner, storage and dashboard." },
+  { group: "Owed", name: "Ten years of PYQs", status: "todo",
+    note: "Six years are tagged (2018-2023). 2014-2017 and 2024-2026 are missing, and every extra year sharpens the yield weights." },
+  { group: "Owed", name: "Real hour estimates", status: "todo",
+    note: "The 85 estHours values are mine. Calibration corrects them from logged time once there are five sessions, but the starting numbers are still guesses." },
+  { group: "Owed", name: "Durable rate limits", status: "todo",
+    note: "Billing is on and the repo is public. Move the proxy's counters to Vercel KV before the link goes anywhere wide." },
 ];
 
-const ORDER = ["todo", "active", "done"];
-const LABEL = { todo: "remaining", active: "in progress", done: "done" };
-const list = document.getElementById("list");
+const LABEL = { done: "done", part: "partly done", todo: "to do", blocked: "blocked on content" };
+const WEIGHT = { done: 1, part: 0.5, todo: 0, blocked: 0 };
 
-function render() {
-  const total = STEPS.reduce((s, x) => s + x.hours, 0);
-  const doneHours = STEPS.filter(s => s.status === "done").reduce((s, x) => s + x.hours, 0);
-  const doneSteps = STEPS.filter(s => s.status === "done").length;
-  const activeName = STEPS.find(s => s.status === "active");
+const done = MODULES.filter(m => m.status === "done").length;
+const part = MODULES.filter(m => m.status === "part").length;
+const left = MODULES.length - done - part;
+const pct = Math.round((MODULES.reduce((s, m) => s + WEIGHT[m.status], 0) / MODULES.length) * 100);
 
-  document.getElementById("hoursLeft").innerHTML = (total - doneHours) + "<small> h</small>";
-  document.getElementById("stepsDone").innerHTML = doneSteps + "<small> / " + STEPS.length + "</small>";
-  document.getElementById("pct").innerHTML = Math.round((doneHours / total) * 100) + "<small> %</small>";
+document.getElementById("stats").innerHTML = [
+  ["" + pct + "%", "complete, weighting part-done as a half"],
+  ["" + done, "modules finished"],
+  ["" + part, "partly done"],
+  ["" + left, "not started"],
+].map(([v, l]) => `<div class="stat"><b class="num">${v}</b><span>${l}</span></div>`).join("");
 
-  document.getElementById("caption").textContent = activeName
-    ? "In progress: " + activeName.name.toLowerCase() + ". Everything behind it is settled — ignore it."
-    : (doneSteps === STEPS.length ? "All ten steps done." : "Nothing in progress. Pick the next step.");
+document.getElementById("bar").style.width = pct + "%";
 
-  const strip = document.getElementById("strip");
-  strip.innerHTML = "";
-  STEPS.forEach(s => {
-    const cell = document.createElement("span");
-    cell.style.flex = s.hours;
-    if (s.status !== "todo") cell.className = s.status;
-    strip.appendChild(cell);
-  });
+const groups = [...new Set(MODULES.map(m => m.group))];
+document.getElementById("list").innerHTML = groups.map(g => `
+  <h2>${g}</h2>
+  ${MODULES.filter(m => m.group === g).map(m => `
+    <div class="row">
+      <div>
+        <h3>${m.name}</h3>
+        <p>${m.note}</p>
+      </div>
+      <span class="pill ${m.status}">${LABEL[m.status]}</span>
+    </div>
+  `).join("")}
+`).join("");
 
-  list.innerHTML = "";
-  STEPS.forEach((s, i) => {
-    const li = document.createElement("li");
-    li.tabIndex = 0;
-    li.setAttribute("role", "button");
-    li.setAttribute("aria-label", s.name + ", " + LABEL[s.status] + ". Activate to change status.");
-    if (s.status === "done") li.classList.add("is-done");
-    li.innerHTML =
-      '<span class="idx">' + String(i + 1).padStart(2, "0") + '</span>' +
-      '<span><span class="step-name"></span><span class="step-note"></span></span>' +
-      '<span class="hrs">' + s.hours + ' h</span>' +
-      '<span class="pill ' + s.status + '">' + LABEL[s.status] + '</span>';
-    li.querySelector(".step-name").textContent = s.name;
-    const note = li.querySelector(".step-note");
-    note.textContent = s.note;
-    note.style.display = "block";
-    li.addEventListener("click", () => cycle(i));
-    li.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cycle(i); }
-    });
-    list.appendChild(li);
-  });
-}
-
-function cycle(i) {
-  const next = ORDER[(ORDER.indexOf(STEPS[i].status) + 1) % ORDER.length];
-  STEPS[i].status = next;
-  render();
-}
-
-document.getElementById("stamp").textContent = new Date().toISOString().slice(0, 10);
-
-document.getElementById("copyBtn").addEventListener("click", () => {
-  const text = "const STEPS = [\n" + STEPS.map(s =>
-    '  { name: "' + s.name + '", hours: ' + s.hours + ', note: "' + s.note + '", status: "' + s.status + '" }'
-  ).join(",\n") + "\n];";
-  const out = document.getElementById("out");
-  out.value = text;
-  out.style.display = "block";
-  out.select();
-  try { navigator.clipboard.writeText(text); } catch (e) {}
-});
-
-render();
+document.getElementById("stamp").textContent =
+  "Generated from the MODULES array. Last edited " + new Date().toISOString().slice(0, 10) + ".";
 </script>
 </body>
 </html>
