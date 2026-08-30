@@ -4,11 +4,13 @@ import type { Topic } from "../../data/syllabus";
 import { completionOf, depthFor, hoursFor, packWeeks, type WeekPlan } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
+import { briefFor } from "../../data/briefs";
+import { MindMap, Takeaways } from "./MindMap";
 import { ask } from "../../lib/ai";
 import { effectivePace, progress, requiredPace } from "../../lib/planner";
 
-const TABS = ["Overview", "Key concepts", "Thinkers", "PYQ focus", "Insight", "Practice"] as const;
-type Tab = (typeof TABS)[number];
+const BASE_TABS = ["Key concepts", "Thinkers", "PYQ focus", "Insight", "Practice"] as const;
+type Tab = "Mind map" | "Overview" | (typeof BASE_TABS)[number];
 
 /** The unit that most of a week's hours belong to — what the week is "about". */
 function focusOf(week: WeekPlan, d: Derived): string {
@@ -129,7 +131,7 @@ function TopicList({ topics, d, note }: { topics: Topic[]; d: Derived; note?: (t
 export function PlanScreen({ d }: { d: Derived }) {
   const weeks = packWeeks(d, 8);
   const [selected, setSelected] = useState(0);
-  const [tab, setTab] = useState<Tab>("Overview");
+  const [tab, setTab] = useState<Tab>("Mind map");
   const settings = d.settings as Settings;
 
   if (weeks.length === 0) {
@@ -137,6 +139,15 @@ export function PlanScreen({ d }: { d: Derived }) {
   }
 
   const week = weeks[Math.min(selected, weeks.length - 1)]!;
+  const focusUnit = focusOf(week, d);
+  const focusPaper = week.topics.find((x) => x.unit === focusUnit)?.paper ?? 1;
+  const brief = briefFor(focusPaper, focusUnit);
+  const tabs: Tab[] = brief
+    ? ["Mind map", "Overview", ...BASE_TABS]
+    : ["Overview", ...BASE_TABS];
+  // A unit without a brief has no Mind map tab, so the remembered tab may not
+  // exist here. Fall back rather than rendering an empty panel.
+  const active: Tab = tabs.includes(tab) ? tab : "Overview";
   const thinkers = week.topics.filter((t) => /pathfinder|thinker/i.test(t.unit));
   const byPyq = [...week.topics].sort((a, b) => b.pyq - a.pyq);
 
@@ -159,7 +170,7 @@ export function PlanScreen({ d }: { d: Derived }) {
               active={i === selected}
               onClick={() => {
                 setSelected(i);
-                setTab("Overview");
+                setTab("Mind map");
               }}
             />
           ))}
@@ -176,11 +187,11 @@ export function PlanScreen({ d }: { d: Derived }) {
           title={`${week.weekIndex === 0 ? "This week" : `Week ${week.weekIndex + 1}`} at a glance`}
         >
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
-            {TABS.map((x) => (
+            {tabs.map((x) => (
               <button
                 key={x}
                 onClick={() => setTab(x)}
-                aria-pressed={tab === x}
+                aria-pressed={active === x}
                 style={{
                   minHeight: 36,
                   padding: "0 13px",
@@ -188,9 +199,9 @@ export function PlanScreen({ d }: { d: Derived }) {
                   cursor: "pointer",
                   font: "inherit",
                   fontSize: 13.5,
-                  border: `1px solid ${tab === x ? C.accent : C.line}`,
-                  background: tab === x ? C.accentSoft : "transparent",
-                  color: tab === x ? C.accent : C.muted,
+                  border: `1px solid ${active === x ? C.accent : C.line}`,
+                  background: active === x ? C.accentSoft : "transparent",
+                  color: active === x ? C.accent : C.muted,
                 }}
               >
                 {x}
@@ -198,7 +209,9 @@ export function PlanScreen({ d }: { d: Derived }) {
             ))}
           </div>
 
-          {tab === "Overview" && (
+          {active === "Mind map" && brief && <MindMap brief={brief} />}
+
+          {active === "Overview" && (
             <>
               <p style={{ fontSize: 14.5, margin: "0 0 14px", lineHeight: 1.7 }}>
                 Mostly <strong>{focusOf(week, d)}</strong>. {week.topics.length} topics
@@ -214,9 +227,9 @@ export function PlanScreen({ d }: { d: Derived }) {
             </>
           )}
 
-          {tab === "Key concepts" && <TopicList topics={week.topics} d={d} note={(t) => t.unit} />}
+          {active === "Key concepts" && <TopicList topics={week.topics} d={d} note={(t) => t.unit} />}
 
-          {tab === "Thinkers" && (
+          {active === "Thinkers" && (
             <TopicList
               topics={thinkers}
               d={d}
@@ -224,7 +237,7 @@ export function PlanScreen({ d }: { d: Derived }) {
             />
           )}
 
-          {tab === "PYQ focus" && (
+          {active === "PYQ focus" && (
             <>
               <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 12px", lineHeight: 1.6 }}>
                 How often each of this week's topics was asked in WBCS Main between
@@ -234,9 +247,9 @@ export function PlanScreen({ d }: { d: Derived }) {
             </>
           )}
 
-          {tab === "Insight" && <WeekInsight d={d} week={week} />}
+          {active === "Insight" && <WeekInsight d={d} week={week} />}
 
-          {tab === "Practice" && (
+          {active === "Practice" && (
             <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.75 }}>
               Write one 40-mark answer from this week's topics, timed at 35 minutes,
               then record the marks in Answer Practice. Written answers are the only
@@ -246,6 +259,26 @@ export function PlanScreen({ d }: { d: Derived }) {
         </Card>
 
         <div className="grid" style={{ gap: 14 }}>
+          {brief && (
+            <Card title="Key takeaways">
+              <Takeaways items={brief.takeaways} />
+            </Card>
+          )}
+
+          {brief?.thinker && (
+            <Card title="Main thinker this week">
+              <strong style={{ fontSize: 16 }}>{brief.thinker.name}</strong>
+              <span className="num" style={{ fontSize: 13, color: C.muted, marginLeft: 8 }}>
+                {brief.thinker.life}
+              </span>
+              <ul style={{ margin: "10px 0 0", paddingLeft: 17, fontSize: 14, lineHeight: 1.7 }}>
+                {brief.thinker.points.map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
           <Card title="This week in numbers">
             <TopicList
               topics={byPyq.slice(0, 5)}
@@ -254,7 +287,7 @@ export function PlanScreen({ d }: { d: Derived }) {
             />
           </Card>
 
-          {thinkers.length > 0 && (
+          {!brief?.thinker && thinkers.length > 0 && (
             <Card title="Main thinker this week">
               <strong style={{ fontSize: 16 }}>{thinkers[0]!.name.split("—")[0]!.trim()}</strong>
               <p style={{ fontSize: 14, color: C.muted, margin: "8px 0 0", lineHeight: 1.7 }}>

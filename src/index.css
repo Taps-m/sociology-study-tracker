@@ -27,6 +27,16 @@
   --good-soft: #dcfce7;
   --shadow: 0 1px 2px rgba(16, 27, 61, 0.06), 0 4px 12px rgba(16, 27, 61, 0.04);
 
+  /* Mind-map stage tints. Same four hues in both themes, restated for dark. */
+  --tint-0: #fdf6e7;
+  --tint-0-line: #edd9a8;
+  --tint-1: #eaf1fe;
+  --tint-1-line: #b9cdf5;
+  --tint-2: #fdeef2;
+  --tint-2-line: #f2c2ce;
+  --tint-3: #eafaf1;
+  --tint-3-line: #b3e3c8;
+
   /* The rail and header stay dark in both themes, as in the design. */
   --rail: #101b3d;
   --rail-2: #16234a;
@@ -52,6 +62,15 @@
   --good: #4ade80;
   --good-soft: rgba(74, 222, 128, 0.14);
   --shadow: none;
+
+  --tint-0: rgba(242, 169, 59, 0.10);
+  --tint-0-line: rgba(242, 169, 59, 0.34);
+  --tint-1: rgba(95, 211, 243, 0.10);
+  --tint-1-line: rgba(95, 211, 243, 0.34);
+  --tint-2: rgba(244, 114, 160, 0.10);
+  --tint-2-line: rgba(244, 114, 160, 0.34);
+  --tint-3: rgba(74, 222, 128, 0.10);
+  --tint-3-line: rgba(74, 222, 128, 0.32);
 
   --rail: #0d131a;
   --rail-2: #11171d;
