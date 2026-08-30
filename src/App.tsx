@@ -27,6 +27,7 @@ import { Shell as AppShell, Card } from "./app/Shell";
 import { useRoute } from "./app/routes";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
 import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
+import { PlanScreen } from "./modules/plan/PlanScreen";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -102,48 +103,6 @@ export default function App() {
       )}
 
     </AppShell>
-  );
-}
-
-function PlanScreen({ d }: { d: Derived }) {
-  const weeks = packWeeks(d, 8);
-  if (weeks.length === 0) {
-    return <Card title="Study plan">Nothing to schedule yet.</Card>;
-  }
-  return (
-    <div className="grid" style={{ gap: 12 }}>
-      {weeks.map((w) => (
-        <Card
-          key={w.weekIndex}
-          title={w.weekIndex === 0 ? "This week" : `Week ${w.weekIndex + 1}`}
-          action={
-            <span className="num" style={{ fontSize: 13.5, color: C.muted }}>
-              {w.totalHours} h
-            </span>
-          }
-        >
-          {w.topics.length === 0 && w.revisions.length === 0 ? (
-            <p style={{ fontSize: 14.5, color: C.muted, margin: 0 }}>Clear.</p>
-          ) : (
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 15, lineHeight: 1.9 }}>
-              {w.topics.map((t) => (
-                <li key={t.id}>{t.name}</li>
-              ))}
-              {w.revisions.map((r) => (
-                <li key={`r-${r.topic.id}`} style={{ color: C.warn }}>
-                  Revise: {r.topic.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      ))}
-      <p style={{ fontSize: 13.5, color: C.muted, lineHeight: 1.7 }}>
-        Only this week is fixed. Every week after it is recomputed from what is
-        actually left each time you open the app, so falling behind reshapes the
-        plan instead of breaking it.
-      </p>
-    </div>
   );
 }
 
