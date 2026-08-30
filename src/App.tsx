@@ -22,6 +22,7 @@ import {
 import { exportJson, importJson, load, save } from "./lib/storage";
 import { C } from "./lib/theme";
 import { TopicRow } from "./components/TopicRow";
+import { quoteOfTheDay } from "./data/quotes";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -63,6 +64,8 @@ export default function App() {
   return (
     <Shell align="flex-start">
       <div style={{ maxWidth: 560, width: "100%" }}>
+        <Greeting d={d} onName={(name) => add(on.settings({ name }))} />
+
         <Telemetry d={d} />
 
         <DueForRevision d={d} onRevise={onRevise} />
@@ -82,6 +85,98 @@ export default function App() {
         <Backup events={events} setEvents={setEvents} />
       </div>
     </Shell>
+  );
+}
+
+function Greeting({ d, onName }: { d: Derived; onName: (name: string) => void }) {
+  const [draft, setDraft] = useState("");
+  const name = d.settings?.name?.trim();
+  const quote = quoteOfTheDay();
+  const hour = new Date().getHours();
+  const partOfDay = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  return (
+    <header style={{ fontFamily: C.sans, marginBottom: 22 }}>
+      {name ? (
+        <h1 style={{ fontSize: 22, fontWeight: 600, margin: 0, letterSpacing: "-0.01em" }}>
+          {partOfDay}, {name}.
+        </h1>
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (draft.trim()) onName(draft.trim());
+          }}
+          style={{ display: "flex", gap: 8, marginBottom: 4 }}
+        >
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="What should I call you?"
+            aria-label="Your name"
+            maxLength={40}
+            style={{
+              flex: 1,
+              minHeight: 40,
+              padding: "0 12px",
+              borderRadius: 8,
+              background: C.panel,
+              border: `1px solid ${C.line}`,
+              color: C.text,
+              fontFamily: C.sans,
+              fontSize: 14,
+            }}
+          />
+          <button
+            type="submit"
+            style={{
+              minHeight: 40,
+              padding: "0 16px",
+              borderRadius: 8,
+              border: "none",
+              background: C.accent,
+              color: C.surface,
+              fontFamily: C.sans,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Save
+          </button>
+        </form>
+      )}
+
+      <p style={{ fontSize: 12, color: C.muted, margin: "6px 0 16px" }}>
+        Welcome back to your sociology tracker.
+      </p>
+
+      <figure
+        style={{
+          margin: 0,
+          padding: "14px 16px",
+          background: C.panel,
+          border: `1px solid ${C.line}`,
+          borderLeft: `3px solid ${C.accent}`,
+          borderRadius: 10,
+        }}
+      >
+        <blockquote style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: C.text }}>
+          {quote.text}
+        </blockquote>
+        <figcaption
+          style={{
+            fontFamily: C.mono,
+            fontSize: 11,
+            color: C.muted,
+            marginTop: 10,
+            letterSpacing: "0.04em",
+          }}
+        >
+          {quote.who} · {quote.where}
+        </figcaption>
+      </figure>
+    </header>
   );
 }
 
@@ -415,6 +510,7 @@ function Backup({
 }
 
 function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
+  const [name, setName] = useState("");
   const [months, setMonths] = useState(5);
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
@@ -463,6 +559,33 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
         </header>
 
         <div style={{ display: "grid", gap: 12 }}>
+          <section style={panelStyle}>
+            <label
+              htmlFor="setup-name"
+              style={{ display: "block", fontSize: 13, color: C.text, marginBottom: 10 }}
+            >
+              What should I call you?
+            </label>
+            <input
+              id="setup-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              maxLength={40}
+              style={{
+                width: "100%",
+                minHeight: 42,
+                padding: "0 12px",
+                borderRadius: 8,
+                background: C.surface,
+                border: `1px solid ${C.line}`,
+                color: C.text,
+                fontFamily: C.sans,
+                fontSize: 14,
+              }}
+            />
+          </section>
+
           <Field label="How long until your exam?" value={months} unit={months === 1 ? "month" : "months"} sub={readable}>
             <input
               type="range"
@@ -581,7 +704,10 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
         </div>
 
         <button
-          onClick={() => onDone({ examDate, weeklyHours: hours, targetCoverage: target / 100 }, known)}
+          onClick={() => onDone(
+              { name: name.trim() || undefined, examDate, weeklyHours: hours, targetCoverage: target / 100 },
+              known,
+            )}
           style={{
             width: "100%",
             minHeight: 50,

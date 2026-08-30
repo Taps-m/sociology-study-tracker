@@ -10,6 +10,8 @@ export const DEFAULT_SUBJECT: SubjectId = "sociology";
 export type CheckId = "read" | "notes" | "pyq" | "revised";
 
 export interface Settings {
+  /** What to call you on the first screen. Optional: older saves predate it. */
+  name?: string;
   examDate: string;
   weeklyHours: number;
   targetCoverage: number;
