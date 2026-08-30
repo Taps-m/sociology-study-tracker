@@ -30,12 +30,14 @@ function checkPercent(d: Derived, check: string) {
 }
 
 const STANDING_COLOUR: Record<Standing, string> = {
+  none: "var(--muted)",
   ahead: "var(--good)",
   close: "var(--warn)",
   behind: "#dc2626",
 };
 
 const STANDING_WORD: Record<Standing, string> = {
+  none: "not started",
   ahead: "keeping up",
   close: "slipping",
   behind: "behind",

@@ -448,7 +448,7 @@ export function elapsedFraction(d: Derived, today = new Date()): number {
   return Math.min(1, Math.max(0, (now - from) / (exam - from)));
 }
 
-export type Standing = "ahead" | "close" | "behind";
+export type Standing = "none" | "ahead" | "close" | "behind";
 
 /**
  * Where a percentage sits against where it should be by now.
@@ -460,10 +460,12 @@ export type Standing = "ahead" | "close" | "behind";
  * colour.
  */
 export function standingOf(d: Derived, percent: number, today = new Date()): Standing {
-  if (!d.settings) return "close";
+  // Nothing recorded yet is not slipping. Day one has no standing to report, and
+  // colouring it amber tells a beginner they are already failing.
+  if (!d.settings || startedOn(d) === null) return "none";
   const target = d.settings.targetCoverage * 100;
   const expected = elapsedFraction(d, today) * target;
-  if (expected <= 0.5) return percent > 0 ? "ahead" : "close";
+  if (expected <= 0.5) return percent > 0 ? "ahead" : "none";
   const ratio = percent / expected;
   if (ratio >= 0.9) return "ahead";
   if (ratio >= 0.6) return "close";

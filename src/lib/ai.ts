@@ -65,6 +65,15 @@ function saveAdvice(key: string, advice: Advice) {
   }
 }
 
+/** Forget every cached answer. Used when the event log is erased. */
+export function clearAdvice() {
+  try {
+    localStorage.removeItem(ADVICE_KEY);
+  } catch {
+    /* nothing stored, nothing to clear */
+  }
+}
+
 /**
  * Materially different from the figures this advice was based on?
  * Five points of coverage or two hours a week is enough to make it misleading.

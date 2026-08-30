@@ -19,6 +19,7 @@ import {
   requiredPace,
 } from "./lib/planner";
 import { exportJson, importJson, load, save } from "./lib/storage";
+import { clearAdvice } from "./lib/ai";
 import { C } from "./lib/theme";
 import { TopicRow } from "./components/TopicRow";
 import { quoteOfTheDay } from "./data/quotes";
@@ -564,6 +565,8 @@ function Backup({
             <button
               onClick={() => {
                 setEvents([]);
+                // The AI answers were reasoned from figures that no longer exist.
+                clearAdvice();
                 setConfirming(false);
                 setMessage("");
               }}
