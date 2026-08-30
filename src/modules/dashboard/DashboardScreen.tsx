@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import { quoteOfTheDay } from "../../data/quotes";
 import { TOPICS } from "../../data/syllabus";
 import type { CheckId, Derived, Settings } from "../../lib/events";
-import { CHECKS, daysUntil, hoursFor, progress, streak } from "../../lib/planner";
+import {
+  CHECKS,
+  daysUntil,
+  hoursFor,
+  progress,
+  standingOf,
+  streak,
+  type Standing,
+} from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 import type { RouteId } from "../../app/routes";
@@ -21,7 +29,19 @@ function checkPercent(d: Derived, check: string) {
   return total === 0 ? 0 : Math.round((done / total) * 100);
 }
 
-function Ring({ percent }: { percent: number }) {
+const STANDING_COLOUR: Record<Standing, string> = {
+  ahead: "var(--good)",
+  close: "var(--warn)",
+  behind: "#dc2626",
+};
+
+const STANDING_WORD: Record<Standing, string> = {
+  ahead: "keeping up",
+  close: "slipping",
+  behind: "behind",
+};
+
+function Ring({ percent, colour }: { percent: number; colour: string }) {
   const r = 42;
   const circumference = 2 * Math.PI * r;
   // Draw from empty on mount, so the figure arrives rather than being there.
@@ -39,12 +59,15 @@ function Ring({ percent }: { percent: number }) {
         cy="55"
         r={r}
         fill="none"
-        stroke="var(--accent)"
+        stroke={colour}
         strokeWidth="10"
         strokeLinecap="round"
         strokeDasharray={`${(shown / 100) * circumference} ${circumference}`}
         transform="rotate(-90 55 55)"
-        style={{ transition: "stroke-dasharray 900ms cubic-bezier(0.22, 1, 0.36, 1)" }}
+        style={{
+          transition:
+            "stroke-dasharray 900ms cubic-bezier(0.22, 1, 0.36, 1), stroke 400ms ease",
+        }}
       />
       <text x="55" y="52" textAnchor="middle" className="num" fontSize="22" fill="var(--text)">
         {percent}%
@@ -56,16 +79,16 @@ function Ring({ percent }: { percent: number }) {
   );
 }
 
-function Bar({ percent }: { percent: number }) {
+function Bar({ percent, colour }: { percent: number; colour: string }) {
   return (
     <div style={{ height: 6, borderRadius: 3, background: "var(--line)", overflow: "hidden" }}>
       <div
         style={{
           width: `${percent}%`,
           height: "100%",
-          background: C.accent,
+          background: colour,
           borderRadius: 3,
-          transition: "width 700ms cubic-bezier(0.22, 1, 0.36, 1)",
+          transition: "width 700ms cubic-bezier(0.22, 1, 0.36, 1), background 400ms ease",
         }}
       />
     </div>
@@ -92,6 +115,7 @@ export function DashboardScreen({
 }) {
   const settings = d.settings as Settings;
   const p = progress(d);
+  const standing = standingOf(d, p.percent);
   const quote = quoteOfTheDay();
   const run = streak(d);
   const days = daysUntil(settings.examDate);
@@ -119,12 +143,20 @@ export function DashboardScreen({
       <div className="grid" style={{ gap: 13, minWidth: 0 }}>
         <WeeklyReview d={d} />
 
-        <Card title="Overall progress">
+        <Card
+        title="Overall progress"
+        action={
+          <span style={{ fontSize: 13, color: STANDING_COLOUR[standing], fontWeight: 600 }}>
+            {STANDING_WORD[standing]}
+          </span>
+        }
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-          <Ring percent={p.percent} />
+          <Ring percent={p.percent} colour={STANDING_COLOUR[standing]} />
           <div style={{ flex: 1, minWidth: 220 }}>
             {CHECKS.map((c) => {
               const pct = checkPercent(d, c.id);
+              const s = standingOf(d, pct);
               return (
                 <div key={c.id} style={{ padding: "6px 0" }}>
                   <div
@@ -141,7 +173,7 @@ export function DashboardScreen({
                       {pct}%
                     </span>
                   </div>
-                  <Bar percent={pct} />
+                  <Bar percent={pct} colour={STANDING_COLOUR[s]} />
                 </div>
               );
             })}

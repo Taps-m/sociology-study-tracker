@@ -427,6 +427,49 @@ export function hoursThisWeek(d: Derived, today = new Date()): number {
   return Math.round((minutes / 60) * 10) / 10;
 }
 
+/** The first day anything was recorded. Preparation started then, not at install. */
+export function startedOn(d: Derived): string | null {
+  const days = [...activeDays(d)].sort();
+  return days[0] ?? null;
+}
+
+/**
+ * How far through the run you are, 0 to 1, by elapsed days rather than by work
+ * done. Used to judge whether a figure is ahead or behind, never to produce one.
+ */
+export function elapsedFraction(d: Derived, today = new Date()): number {
+  if (!d.settings) return 0;
+  const start = startedOn(d);
+  if (!start) return 0;
+  const from = Date.parse(start);
+  const now = today.getTime();
+  const exam = Date.parse(d.settings.examDate);
+  if (!(exam > from)) return 1;
+  return Math.min(1, Math.max(0, (now - from) / (exam - from)));
+}
+
+export type Standing = "ahead" | "close" | "behind";
+
+/**
+ * Where a percentage sits against where it should be by now.
+ *
+ * A fixed threshold would call 1.5% a failure on day one, when day one is
+ * exactly where 1.5% belongs — and by the time it turned green the colour would
+ * have stopped meaning anything. This compares against elapsed time instead, so
+ * the colour answers "am I keeping up", which is the only question worth a
+ * colour.
+ */
+export function standingOf(d: Derived, percent: number, today = new Date()): Standing {
+  if (!d.settings) return "close";
+  const target = d.settings.targetCoverage * 100;
+  const expected = elapsedFraction(d, today) * target;
+  if (expected <= 0.5) return percent > 0 ? "ahead" : "close";
+  const ratio = percent / expected;
+  if (ratio >= 0.9) return "ahead";
+  if (ratio >= 0.6) return "close";
+  return "behind";
+}
+
 export interface Streak {
   current: number;
   best: number;
