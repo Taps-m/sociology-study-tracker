@@ -490,6 +490,7 @@ function Backup({
   setEvents: (e: StudyEvent[]) => void;
 }) {
   const [message, setMessage] = useState("");
+  const [confirming, setConfirming] = useState(false);
 
   function download() {
     const blob = new Blob([exportJson(events)], { type: "application/json" });
@@ -549,6 +550,41 @@ function Backup({
         {message ||
           `${events.length} events stored in this browser only. Clearing site data erases them.`}
       </Note>
+
+      <div style={{ marginTop: 22, paddingTop: 16, borderTop: `1px solid ${C.line}` }}>
+        <div style={{ fontSize: 14.5, fontWeight: 600, marginBottom: 6 }}>Start over</div>
+        <Note>
+          Erases every check, every logged session and every answer, and returns
+          you to the setup questions. There is no undo — download a copy first if
+          there is anything here worth keeping.
+        </Note>
+
+        {confirming ? (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+            <button
+              onClick={() => {
+                setEvents([]);
+                setConfirming(false);
+                setMessage("");
+              }}
+              style={{ ...btn, color: "#dc2626", borderColor: "#dc2626" }}
+            >
+              Yes, erase everything
+            </button>
+            <button onClick={() => setConfirming(false)} style={btn}>
+              Keep my data
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirming(true)}
+            style={{ ...btn, marginTop: 12, color: "#dc2626", borderColor: C.line }}
+          >
+            Erase everything and start over
+          </button>
+        )}
+      </div>
+
     </Section>
   );
 }
