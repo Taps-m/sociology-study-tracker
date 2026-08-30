@@ -29,6 +29,7 @@ import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
 import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
 import { PlanScreen } from "./modules/plan/PlanScreen";
 import { RevisionDeck } from "./modules/revision/RevisionDeck";
+import { RecentActivity } from "./modules/activity/RecentActivity";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -90,6 +91,7 @@ export default function App() {
       {route === "progress" && (
         <div className="grid" style={{ gap: 14 }}>
           <Telemetry d={d} />
+          <RecentActivity events={events} add={add} />
         </div>
       )}
 
