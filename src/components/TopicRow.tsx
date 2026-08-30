@@ -12,6 +12,7 @@ import {
   isAtDepth,
 } from "../lib/planner";
 import { C } from "../lib/theme";
+import { chapterUrl, readingLine, readingsFor } from "../data/sources";
 
 const chip = {
   font: "inherit",
@@ -72,6 +73,8 @@ export function TopicRow({
           {atDepth ? "at depth" : `${hoursLeftOn(d, topic)} h`}
         </span>
       </div>
+
+      <WhereToRead topicId={topic.id} />
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 9 }}>
         {CHECKS.map((c) => {
@@ -198,6 +201,53 @@ export function TopicRow({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * The one line that answers "yes, but where do I read this?".
+ *
+ * Starting an optional from nothing, the hard part is not reading, it is not
+ * knowing which twenty pages to read. So this names a chapter and links the
+ * PDF rather than naming a book and wishing you luck.
+ *
+ * A chapter that only touches the topic says so, because sending someone to
+ * read a background chapter under the impression it will finish the topic is
+ * how a plan quietly falls behind.
+ */
+function WhereToRead({ topicId }: { topicId: string }) {
+  const readings = readingsFor(topicId);
+
+  if (readings.length === 0) {
+    return (
+      <div style={{ fontSize: 12.5, color: C.muted, marginTop: 7, lineHeight: 1.5 }}>
+        Not in NCERT — this one needs Essential Sociology.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 7, display: "grid", gap: 3 }}>
+      {readings.map((r) => (
+        <a
+          key={`${r.book}-${r.chapter}`}
+          href={chapterUrl(r.book, r.chapter)}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            fontSize: 12.5,
+            lineHeight: 1.5,
+            color: r.kind === "covers" ? C.accent : C.muted,
+            textDecoration: "none",
+          }}
+        >
+          {r.kind === "background" ? "background · " : "read · "}
+          <span style={{ textDecoration: "underline", textUnderlineOffset: 2 }}>
+            {readingLine(r)}
+          </span>
+        </a>
+      ))}
     </div>
   );
 }
