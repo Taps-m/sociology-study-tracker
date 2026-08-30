@@ -14,16 +14,23 @@
  *                    move to.
  *   ALLOWED_ORIGIN   optional, e.g. https://tracker.example.com
  *   MONTHLY_CAP      optional, default 800 requests
+ *   KV_REST_API_URL,   injected by the Upstash Redis marketplace integration.
+ *   KV_REST_API_TOKEN  Also accepted under their UPSTASH_REDIS_REST_* names.
  *
  * Billing is enabled on this project (paid Tier 1), so every call costs money and
  * the repo is public. The limits below are what stands between a discovered
  * endpoint and a surprise invoice.
  *
- * Honest limitation: serverless instances do not share memory, so the counters
- * here hold only within a warm instance and reset on a cold start. They stop
- * casual abuse and runaway client loops, not a determined attacker. For a real
- * cap, move `hits` to Vercel KV or Upstash — the interface below is deliberately
- * small so that swap is a few lines.
+ * The counters live in Redis when it is configured, because serverless instances
+ * do not share memory: an in-memory cap resets on every cold start, which means
+ * a caller who waits for one gets a fresh allowance. Vercel KV itself no longer
+ * exists — Vercel moved those stores to Upstash in December 2024 — and Upstash
+ * speaks HTTP, so this talks to it with fetch rather than a dependency.
+ *
+ * With no Redis configured it falls back to the in-memory counters, which still
+ * stop a runaway client loop but not a determined one. The fallback is loud in
+ * the health check rather than silent, so a missing integration cannot be
+ * mistaken for a working cap.
  */
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
@@ -35,10 +42,92 @@ const MAX_EVAL_BODY_BYTES = 6 * 1024 * 1024;
 const PER_DEVICE_PER_HOUR = 20;
 const EVAL_PER_DEVICE_PER_DAY = 8;
 
+const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
+const REDIS_TOKEN =
+  process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+export const REDIS_CONFIGURED = Boolean(REDIS_URL && REDIS_TOKEN);
+
 const hits = { month: currentMonth(), total: 0, devices: new Map() };
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
+}
+
+/** UTC hour and day stamps. Windows are fixed buckets, not sliding. */
+function currentHour() {
+  return new Date().toISOString().slice(0, 13);
+}
+function currentDay() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * One round trip, several commands. Upstash returns an array of results in the
+ * order given; a failure anywhere returns null and the caller falls back.
+ */
+async function redis(commands) {
+  if (!REDIS_CONFIGURED) return null;
+  try {
+    const r = await fetch(`${REDIS_URL}/pipeline`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${REDIS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(commands),
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!r.ok) return null;
+    const out = await r.json();
+    return Array.isArray(out) ? out.map((x) => x?.result) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Count first, then judge.
+ *
+ * Reading a counter and incrementing it separately lets two simultaneous calls
+ * both read the old value and both pass, which is exactly what a runaway client
+ * loop does. INCR returns the value after the increment, so the number a caller
+ * is judged on is the one their own call created. A refused call still spends
+ * its slot — deliberately: failing closed is the safe direction when the thing
+ * being protected is a card.
+ *
+ * EXPIRE rides along in the same pipeline. It is set on every call rather than
+ * only on creation, which costs nothing and means a key can never outlive its
+ * window because one write lost a race.
+ */
+async function allowInRedis(deviceId, task) {
+  const monthKey = `ai:m:${currentMonth()}`;
+  const hourKey = `ai:h:${deviceId}:${currentHour()}`;
+  const dayKey = `ai:e:${deviceId}:${currentDay()}`;
+
+  const isEval = task === "evaluate";
+  const commands = [
+    ["INCR", monthKey],
+    ["EXPIRE", monthKey, 40 * 86400],
+    ["INCR", hourKey],
+    ["EXPIRE", hourKey, 7200],
+  ];
+  if (isEval) {
+    commands.push(["INCR", dayKey], ["EXPIRE", dayKey, 26 * 3600]);
+  }
+
+  const out = await redis(commands);
+  if (!out) return undefined; // store unreachable; caller decides
+
+  const month = Number(out[0]);
+  const hour = Number(out[2]);
+  const evals = isEval ? Number(out[4]) : 0;
+
+  if (month > MONTHLY_CAP) return "monthly cap reached";
+  if (hour > PER_DEVICE_PER_HOUR) return "too many requests this hour";
+  if (isEval && evals > EVAL_PER_DEVICE_PER_DAY) {
+    return "daily limit for answer evaluation reached";
+  }
+  return null;
 }
 
 function rollover() {
@@ -49,7 +138,8 @@ function rollover() {
   }
 }
 
-function allow(deviceId, task) {
+/** The fallback. Holds within one warm instance and no further. */
+function allowInMemory(deviceId, task) {
   rollover();
   if (hits.total >= MONTHLY_CAP) return "monthly cap reached";
 
@@ -68,6 +158,12 @@ function allow(deviceId, task) {
   hits.devices.set(deviceId, d);
   hits.total += 1;
   return null;
+}
+
+export async function allow(deviceId, task) {
+  const verdict = await allowInRedis(deviceId, task);
+  if (verdict !== undefined) return verdict;
+  return allowInMemory(deviceId, task);
 }
 
 /**
@@ -177,6 +273,22 @@ built on a misreading is worse than no score. No praise anywhere.`;
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
+
+  // A health check, so a missing Redis integration is visible rather than
+  // discovered on an invoice. It reports configuration, never a key or a count.
+  if (req.method === "GET") {
+    return res.status(200).json({
+      ok: true,
+      model: MODEL,
+      monthlyCap: MONTHLY_CAP,
+      durableLimits: REDIS_CONFIGURED,
+      originLocked: Boolean(process.env.ALLOWED_ORIGIN),
+      note: REDIS_CONFIGURED
+        ? "Limits are counted in Redis and survive cold starts."
+        : "No Redis configured — limits are per-instance and reset on a cold start.",
+    });
+  }
+
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
   // A browser always sends Origin on a cross-origin POST; curl sends none. The
@@ -206,7 +318,7 @@ export default async function handler(req, res) {
   const prompt = buildPrompt(task, context);
   if (!prompt) return res.status(400).json({ error: "unknown task" });
 
-  const denied = allow(deviceId, task);
+  const denied = await allow(deviceId, task);
   if (denied) return res.status(429).json({ error: denied });
 
   try {

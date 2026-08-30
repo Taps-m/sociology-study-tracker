@@ -19,6 +19,7 @@ export function Shell({
   route,
   go,
   name,
+  avatar,
   onLogout,
   children,
 }: {
@@ -26,6 +27,8 @@ export function Shell({
   go: (id: RouteId) => void;
   /** Shown beside the avatar. Undefined until the user gives one. */
   name?: string;
+  /** A square data URL, or nothing — then the initials stand in. */
+  avatar?: string | null;
   /** Closes the session. Deletes nothing — see LockScreen. */
   onLogout: () => void;
   children: ReactNode;
@@ -128,6 +131,7 @@ export function Shell({
                 width: 28,
                 height: 28,
                 borderRadius: "50%",
+                overflow: "hidden",
                 background: "var(--accent)",
                 color: "var(--accent-ink)",
                 fontSize: 12,
@@ -135,7 +139,17 @@ export function Shell({
                 letterSpacing: "0.02em",
               }}
             >
-              {name ? initials(name) : "+"}
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt=""
+                  style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                />
+              ) : name ? (
+                initials(name)
+              ) : (
+                "+"
+              )}
             </span>
             <span style={{ whiteSpace: "nowrap" }}>{name ?? "Add your name"}</span>
           </button>

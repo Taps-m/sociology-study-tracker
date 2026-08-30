@@ -67,6 +67,9 @@ export function RevisionDeck({
   const { topic } = item;
   const brief = briefFor(topic.paper, topic.unit);
   const state = revisionState(d, topic.id);
+  // Your own words beat a generic takeaway at revision time, so they go on the
+  // back of the card, where the checking happens.
+  const note = d.notes[topic.id];
 
   const advance = () => {
     setFlipped(false);
@@ -143,6 +146,34 @@ export function RevisionDeck({
                 against here. Judge yourself honestly: could you have filled
                 thirty-five minutes on it?
               </p>
+            )}
+
+            {note && (
+              <div
+                style={{
+                  marginTop: 14,
+                  padding: "10px 12px",
+                  borderLeft: `2px solid ${C.accent}`,
+                  background: C.panel,
+                  borderRadius: "0 6px 6px 0",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: C.mono,
+                    fontSize: 11,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: C.muted,
+                    marginBottom: 5,
+                  }}
+                >
+                  Your note
+                </div>
+                <div style={{ fontSize: 13.5, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
+                  {note.text}
+                </div>
+              </div>
             )}
 
             <p style={{ fontSize: 13.5, color: C.muted, margin: "auto 0 0", lineHeight: 1.7 }}>

@@ -15,6 +15,7 @@ export const ROUTES = [
   { id: "answers", label: "Answer Practice", icon: "✎" },
   { id: "pyq", label: "PYQ Explorer", icon: "◈" },
   { id: "revision", label: "Quick Revision", icon: "↻" },
+  { id: "notes", label: "My Notes", icon: "✐" },
   { id: "progress", label: "Progress", icon: "▲" },
   { id: "settings", label: "Settings", icon: "⚙" },
 ] as const;

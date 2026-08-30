@@ -13,6 +13,7 @@ import {
 } from "../lib/planner";
 import { C } from "../lib/theme";
 import { chapterUrl, readingLine, readingsFor } from "../data/sources";
+import { NoteEditor } from "./NoteEditor";
 
 const chip = {
   font: "inherit",
@@ -33,6 +34,7 @@ export function TopicRow({
   onLogTime,
   onMarkPrior,
   onAttempt,
+  onNote,
   optional = false,
 }: {
   topic: Topic;
@@ -41,6 +43,7 @@ export function TopicRow({
   onLogTime?: (topicId: string, check: CheckId, minutes: number) => void;
   onMarkPrior?: (topicId: string, check: CheckId) => void;
   onAttempt?: (topicId: string, marks: number, outOf: number, minutes: number) => void;
+  onNote?: (topicId: string, text: string) => void;
   optional?: boolean;
 }) {
   const [asking, setAsking] = useState<CheckId | null>(null);
@@ -75,6 +78,8 @@ export function TopicRow({
       </div>
 
       <WhereToRead topicId={topic.id} />
+
+      {onNote && <NoteEditor topicId={topic.id} d={d} onSave={onNote} />}
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 9 }}>
         {CHECKS.map((c) => {

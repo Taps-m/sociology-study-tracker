@@ -516,3 +516,33 @@ describe("the preparation window", () => {
     expect(windowLabel(null)).toBe("plan");
   });
 });
+
+describe("notes", () => {
+  it("keeps the latest note on a topic", () => {
+    const d = build([
+      on.note(highYield.id, "first thoughts"),
+      on.note(highYield.id, "better thoughts"),
+    ]);
+    expect(d.notes[highYield.id]?.text).toBe("better thoughts");
+  });
+
+  it("trims, and treats an emptied note as a deletion", () => {
+    const written = build([on.note(highYield.id, "  spaced out  ")]);
+    expect(written.notes[highYield.id]?.text).toBe("spaced out");
+
+    const cleared = build([on.note(highYield.id, "something"), on.note(highYield.id, "   ")]);
+    expect(cleared.notes[highYield.id]).toBeUndefined();
+  });
+
+  it("keeps notes on different topics apart", () => {
+    const d = build([on.note(highYield.id, "A"), on.note(coldTopic.id, "B")]);
+    expect(d.notes[highYield.id]?.text).toBe("A");
+    expect(d.notes[coldTopic.id]?.text).toBe("B");
+  });
+
+  it("does not disturb anything the planner counts", () => {
+    const withNote = build([on.check(highYield.id, "read"), on.note(highYield.id, "x")]);
+    const without = build([on.check(highYield.id, "read")]);
+    expect(progress(withNote).percent).toBe(progress(without).percent);
+  });
+});

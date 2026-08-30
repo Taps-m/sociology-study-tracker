@@ -73,7 +73,16 @@ export type StudyEvent =
         outOf: number;
         minutes: number;
       })
-  | (EventBase & { type: "settings"; patch: Partial<Settings> });
+  | (EventBase & { type: "settings"; patch: Partial<Settings> })
+  /**
+   * A note on a topic, in the candidate's own words.
+   *
+   * Plain text, deliberately. A rich editor would mean a dependency, a
+   * serialisation format and a migration the first time it changes; none of
+   * that helps anyone remember what Merton meant by a latent function. Empty
+   * text deletes the note, so there is no second event type for that.
+   */
+  | (EventBase & { type: "note"; topicId: string; text: string });
 
 export function newId(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -101,6 +110,9 @@ export const on = {
   },
   settings(patch: Partial<Settings>): StudyEvent {
     return { ...base(), type: "settings", patch };
+  },
+  note(topicId: string, text: string): StudyEvent {
+    return { ...base(), type: "note", topicId, text };
   },
 };
 
@@ -152,6 +164,13 @@ export interface Derived {
   revisions: Record<string, string[]>;
   time: TimeRecord[];
   attempts: AttemptRecord[];
+  /** The latest note on each topic. Earlier versions stay in the log. */
+  notes: Record<string, NoteRecord>;
+}
+
+export interface NoteRecord {
+  text: string;
+  at: string;
 }
 
 export const EMPTY_DERIVED: Derived = {
@@ -160,11 +179,19 @@ export const EMPTY_DERIVED: Derived = {
   revisions: {},
   time: [],
   attempts: [],
+  notes: {},
 };
 
 /** Fold the log into everything the screens need. The only projection. */
 export function project(events: StudyEvent[]): Derived {
-  const d: Derived = { settings: null, checks: {}, revisions: {}, time: [], attempts: [] };
+  const d: Derived = {
+    settings: null,
+    checks: {},
+    revisions: {},
+    time: [],
+    attempts: [],
+    notes: {},
+  };
 
   for (const e of events) {
     switch (e.type) {
@@ -207,6 +234,13 @@ export function project(events: StudyEvent[]): Derived {
           readBack: e.readBack,
         });
         break;
+
+      case "note": {
+        const text = e.text.trim();
+        if (text) d.notes[e.topicId] = { text, at: e.at };
+        else delete d.notes[e.topicId];
+        break;
+      }
     }
   }
 

@@ -27,6 +27,35 @@ export function sessionOpen(): boolean {
   }
 }
 
+const AVATAR_KEY = "sociology-tracker-avatar";
+
+/**
+ * The profile photo, kept out of the event log on purpose.
+ *
+ * The log is append-only and every settings change appends a whole patch. Put
+ * an image in there and each rename copies it again, so a log that should be a
+ * few kilobytes after a year becomes megabytes, and every export carries them.
+ * A photo is also not a study event: it has no history worth keeping and no
+ * effect on any number the planner computes. So it lives in its own key, as a
+ * small square data URL, and is simply overwritten.
+ */
+export function loadAvatar(): string | null {
+  try {
+    return localStorage.getItem(AVATAR_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveAvatar(dataUrl: string | null): void {
+  try {
+    if (dataUrl) localStorage.setItem(AVATAR_KEY, dataUrl);
+    else localStorage.removeItem(AVATAR_KEY);
+  } catch {
+    // Quota or private mode. The initials still work.
+  }
+}
+
 export function setSessionOpen(open: boolean): void {
   try {
     if (open) localStorage.removeItem(SESSION_KEY);

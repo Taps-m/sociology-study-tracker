@@ -28,7 +28,17 @@ import {
   requiredPace,
   windowEnd,
 } from "./lib/planner";
-import { exportJson, importJson, load, save, sessionOpen, setSessionOpen } from "./lib/storage";
+import {
+  exportJson,
+  importJson,
+  load,
+  loadAvatar,
+  save,
+  saveAvatar,
+  sessionOpen,
+  setSessionOpen,
+} from "./lib/storage";
+import { fileToAvatar } from "./lib/avatar";
 import { clearAdvice } from "./lib/ai";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
@@ -43,10 +53,12 @@ import { RecentActivity } from "./modules/activity/RecentActivity";
 import { TodayScreen } from "./modules/today/TodayScreen";
 import { AnswerPractice } from "./modules/answers/AnswerPractice";
 import { PyqExplorer } from "./modules/pyq/PyqExplorer";
+import { NotesScreen } from "./modules/notes/NotesScreen";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
   const [signedIn, setSignedIn] = useState(sessionOpen);
+  const [avatar, setAvatar] = useState<string | null>(loadAvatar);
   const [route, go] = useRoute();
   useEffect(() => save(events), [events]);
 
@@ -96,6 +108,7 @@ export default function App() {
       add(on.check(topicId, check, { prior: true })),
     onAttempt: (topicId: string, marks: number, outOf: number, minutes: number) =>
       add(on.attempt(topicId, marks, outOf, minutes)),
+    onNote: (topicId: string, text: string) => add(on.note(topicId, text)),
   };
 
   const onRevise = (topicId: string) => add(on.check(topicId, "revised"));
@@ -105,6 +118,7 @@ export default function App() {
       route={route}
       go={go}
       name={d.settings.name?.trim() || undefined}
+      avatar={avatar}
       onLogout={logOut}
     >
       {route === "dashboard" && (
@@ -120,6 +134,8 @@ export default function App() {
       {route === "pyq" && <PyqExplorer d={d} />}
 
       {route === "revision" && <RevisionDeck d={d} onRevise={onRevise} />}
+
+      {route === "notes" && <NotesScreen d={d} onSave={handlers.onNote} />}
 
       {route === "answers" && (
         <AnswerPractice
@@ -140,9 +156,23 @@ export default function App() {
       {route === "settings" && (
         <div className="grid" style={{ gap: 14 }}>
           <Greeting d={d} onName={(name) => add(on.settings({ name }))} />
+          <AvatarControl
+            avatar={avatar}
+            onChange={(next) => {
+              saveAvatar(next);
+              setAvatar(next);
+            }}
+          />
           <StartUnitControl d={d} onChange={(patch) => add(on.settings(patch))} />
           <PaceControl d={d} onChange={(patch) => add(on.settings(patch))} />
-          <Backup events={events} setEvents={setEvents} />
+          <Backup
+            events={events}
+            setEvents={setEvents}
+            onErase={() => {
+              saveAvatar(null);
+              setAvatar(null);
+            }}
+          />
         </div>
       )}
 
@@ -572,9 +602,12 @@ function describeStore(events: StudyEvent[]): string {
 function Backup({
   events,
   setEvents,
+  onErase,
 }: {
   events: StudyEvent[];
   setEvents: (e: StudyEvent[]) => void;
+  /** Everything kept outside the log that an erase should also take. */
+  onErase: () => void;
 }) {
   const [message, setMessage] = useState("");
   const [confirming, setConfirming] = useState(false);
@@ -600,18 +633,6 @@ function Backup({
     };
     reader.readAsText(file);
   }
-
-  const btn = {
-    font: "inherit",
-    fontSize: 13.5,
-    padding: "10px 14px",
-    minHeight: 44,
-    borderRadius: 4,
-    cursor: "pointer",
-    background: "transparent",
-    color: C.text,
-    border: `1px solid ${C.line}`,
-  } as const;
 
   return (
     <Section title="Backup">
@@ -650,6 +671,9 @@ function Backup({
                 setEvents([]);
                 // The AI answers were reasoned from figures that no longer exist.
                 clearAdvice();
+                // The photo lives outside the log, so clearing the log alone
+                // would leave a face on a tracker with nobody in it.
+                onErase();
                 setConfirming(false);
                 setMessage("");
               }}
@@ -1022,6 +1046,97 @@ function Setup({
 }
 
 /**
+ * The profile photo.
+ *
+ * Kept out of the event log — see saveAvatar — so it is the one setting that
+ * does not append an event. It is resized to a small square in the browser
+ * before it is stored, because a phone photograph would eat the whole storage
+ * quota the log needs.
+ */
+function AvatarControl({
+  avatar,
+  onChange,
+}: {
+  avatar: string | null;
+  onChange: (next: string | null) => void;
+}) {
+  const [error, setError] = useState("");
+
+  return (
+    <Section title="Photo">
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 4 }}>
+        <div
+          aria-hidden
+          style={{
+            display: "grid",
+            placeItems: "center",
+            width: 56,
+            height: 56,
+            flex: "0 0 auto",
+            borderRadius: "50%",
+            overflow: "hidden",
+            background: avatar ? "transparent" : C.panel,
+            border: `1px solid ${C.line}`,
+            color: C.muted,
+            fontSize: 20,
+          }}
+        >
+          {avatar ? (
+            <img
+              src={avatar}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            "☺"
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <label
+            style={{
+              ...btn,
+              display: "inline-flex",
+              alignItems: "center",
+              cursor: "pointer",
+            }}
+          >
+            {avatar ? "Change" : "Choose a photo"}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                setError("");
+                try {
+                  onChange(await fileToAvatar(file));
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Could not read that image.");
+                }
+              }}
+            />
+          </label>
+          {avatar && (
+            <button onClick={() => onChange(null)} style={btn}>
+              Remove
+            </button>
+          )}
+        </div>
+      </div>
+
+      <Note>
+        {error
+          ? error
+          : "Optional, and it shows only in the top bar. It is squared off and shrunk here in the browser, then kept apart from your study log — so it never travels in an export and never counts against the room your record needs."}
+      </Note>
+    </Section>
+  );
+}
+
+/**
  * What you see after logging out.
  *
  * There is no password, because there is no account: everything lives in this
@@ -1084,6 +1199,19 @@ function LockScreen({
     </Shell>
   );
 }
+
+/** The plain secondary button. Shared by Backup and the photo control. */
+const btn = {
+  font: "inherit",
+  fontSize: 13.5,
+  padding: "10px 14px",
+  minHeight: 44,
+  borderRadius: 4,
+  cursor: "pointer",
+  background: "transparent",
+  color: C.text,
+  border: `1px solid ${C.line}`,
+} as const;
 
 const panelStyle = {
   background: C.panel,
