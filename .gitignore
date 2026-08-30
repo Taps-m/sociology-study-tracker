@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Never commit the key. Vercel holds it as an environment variable.
+.env
+.env.local
+.env*.local
+.vercel

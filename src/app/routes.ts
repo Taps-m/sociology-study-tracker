@@ -8,18 +8,14 @@
 import { useEffect, useState } from "react";
 
 export const ROUTES = [
-  { id: "dashboard", label: "Dashboard", icon: "◎", built: true },
-  { id: "plan", label: "Study Plan", icon: "◫", built: true },
-  { id: "chapters", label: "Chapters", icon: "▤", built: true },
-  { id: "today", label: "Today's Study", icon: "◐", built: true },
-  { id: "pyq", label: "PYQ Explorer", icon: "◈", built: false },
-  { id: "answers", label: "Answer Practice", icon: "✎", built: true },
-  { id: "revision", label: "Quick Revision", icon: "↻", built: true },
-  { id: "flashcards", label: "Flashcards", icon: "▦", built: false },
-  { id: "notes", label: "My Notes", icon: "▭", built: false },
-  { id: "mindmaps", label: "Mind Maps", icon: "⌘", built: false },
-  { id: "progress", label: "Progress", icon: "▲", built: true },
-  { id: "settings", label: "Settings", icon: "⚙", built: true },
+  { id: "dashboard", label: "Dashboard", icon: "◎" },
+  { id: "plan", label: "Study Plan", icon: "◫" },
+  { id: "chapters", label: "Chapters", icon: "▤" },
+  { id: "today", label: "Today's Study", icon: "◐" },
+  { id: "answers", label: "Answer Practice", icon: "✎" },
+  { id: "revision", label: "Quick Revision", icon: "↻" },
+  { id: "progress", label: "Progress", icon: "▲" },
+  { id: "settings", label: "Settings", icon: "⚙" },
 ] as const;
 
 export type RouteId = (typeof ROUTES)[number]["id"];

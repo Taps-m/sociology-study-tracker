@@ -15,6 +15,7 @@ import {
 } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
+import { WeeklyReview } from "./WeeklyReview";
 import type { RouteId } from "../../app/routes";
 
 /** Share of the syllabus, by hours, that has a given check ticked. */
@@ -160,6 +161,8 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
             </p>
           )}
         </Card>
+
+        <WeeklyReview d={d} />
 
         <Card title="Where the time is going">
           <p style={{ fontSize: 15, lineHeight: 1.8, margin: 0, color: C.text }}>

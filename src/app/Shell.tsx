@@ -42,9 +42,6 @@ export function Shell({
               {r.icon}
             </span>
             <span style={{ flex: 1 }}>{r.label}</span>
-            {!r.built && (
-              <span style={{ fontSize: 12, color: "var(--rail-muted)" }}>soon</span>
-            )}
           </button>
         ))}
       </nav>
@@ -54,7 +51,7 @@ export function Shell({
           <strong style={{ fontSize: 15.5, whiteSpace: "nowrap" }}>Study Hub</strong>
 
           <div className="tabstrip" style={{ flex: 1 }}>
-            {ROUTES.filter((r) => r.built).map((r) => (
+            {ROUTES.map((r) => (
               <button
                 key={r.id}
                 aria-current={route === r.id ? "page" : undefined}
@@ -121,22 +118,5 @@ export function Card({
       )}
       {children}
     </section>
-  );
-}
-
-/** A module that has a slot in the rail but nothing behind it yet. */
-export function NotBuiltYet({ label, needs }: { label: string; needs: string[] }) {
-  return (
-    <Card title={label}>
-      <p style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.7, marginTop: 0 }}>
-        This module has its slot but nothing behind it. It is blocked on content,
-        not on code:
-      </p>
-      <ul style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.9, margin: 0, paddingLeft: 18 }}>
-        {needs.map((n) => (
-          <li key={n}>{n}</li>
-        ))}
-      </ul>
-    </Card>
   );
 }

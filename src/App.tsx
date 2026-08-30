@@ -23,7 +23,7 @@ import { exportJson, importJson, load, save } from "./lib/storage";
 import { C } from "./lib/theme";
 import { TopicRow } from "./components/TopicRow";
 import { quoteOfTheDay } from "./data/quotes";
-import { Shell as AppShell, Card, NotBuiltYet } from "./app/Shell";
+import { Shell as AppShell, Card } from "./app/Shell";
 import { useRoute } from "./app/routes";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
 import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
@@ -101,45 +101,6 @@ export default function App() {
         </div>
       )}
 
-      {route === "pyq" && (
-        <NotBuiltYet
-          label="PYQ Explorer"
-          needs={[
-            "The text of the 91 tagged questions. syllabus.ts stores only how many times each topic was asked, not what was asked.",
-            "Ten years rather than six — 2014-2017 and 2024-2026 are still missing.",
-          ]}
-        />
-      )}
-
-      {route === "flashcards" && (
-        <NotBuiltYet
-          label="Flashcards"
-          needs={[
-            "Cards for 85 topics. The screen is an afternoon; the cards are the work.",
-            "A decision on whether they are written by hand or generated once and committed.",
-          ]}
-        />
-      )}
-
-      {route === "notes" && (
-        <NotBuiltYet
-          label="My Notes"
-          needs={[
-            "A per-topic note store. The event log can carry it, so this is small.",
-            "A decision on plain text or rich text before anything is stored.",
-          ]}
-        />
-      )}
-
-      {route === "mindmaps" && (
-        <NotBuiltYet
-          label="Mind Maps"
-          needs={[
-            "A diagram per unit. Nineteen units, drawn by hand or authored as data.",
-            "This is the most expensive module in the design and the least urgent.",
-          ]}
-        />
-      )}
     </AppShell>
   );
 }
