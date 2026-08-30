@@ -97,8 +97,16 @@ export async function ask(
     });
 
     if (!res.ok) {
-      const detail = await res.json().catch(() => ({}));
-      return { advice: loadAdvice(key), error: detail.error || `request failed (${res.status})` };
+      const payload = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        detail?: string;
+      };
+      // The proxy passes the model's own refusal through in `detail`. Showing it
+      // is the difference between "it failed" and knowing which setting is wrong.
+      const reason = [payload.error ?? `request failed (${res.status})`, payload.detail]
+        .filter(Boolean)
+        .join(" — ");
+      return { advice: loadAdvice(key), error: reason };
     }
 
     const data = (await res.json()) as { body: string; generatedAt: string };

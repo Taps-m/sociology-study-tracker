@@ -107,7 +107,7 @@ export function WeeklyReview({ d }: { d: Derived }) {
       )}
 
       {error && (
-        <p style={{ fontSize: 13, color: C.warn, margin: "12px 0 0", lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: C.warn, margin: "12px 0 0", lineHeight: 1.6, wordBreak: "break-word" }}>
           Could not reach the model ({error}).
           {advice ? " Showing the last saved review above." : " Your figures on this page are unaffected."}
         </p>
