@@ -103,7 +103,7 @@ export function TodaysFocus({
                   display: "flex",
                   alignItems: "flex-start",
                   gap: 11,
-                  padding: "10px 8px",
+                  padding: "8px 8px",
                   margin: "0 -8px",
                   borderRadius: 9,
                   cursor: "pointer",
@@ -134,8 +134,8 @@ export function TodaysFocus({
         onClick={() => go("today")}
         style={{
           width: "100%",
-          minHeight: 46,
-          marginTop: 14,
+          minHeight: 44,
+          marginTop: 12,
           borderRadius: 9,
           border: "none",
           background: C.accent,

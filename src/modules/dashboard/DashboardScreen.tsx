@@ -100,8 +100,8 @@ export function DashboardScreen({
   const name = settings.name?.trim();
 
   return (
-    <div className="grid" style={{ gap: 14, maxWidth: 760 }}>
-      <header style={{ padding: "4px 2px 2px" }}>
+    <div className="dash">
+      <header className="dash-full" style={{ padding: "2px 2px 0" }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>
           {name ? `${greeting}, ${name}.` : greeting}
         </h1>
@@ -117,10 +117,11 @@ export function DashboardScreen({
 
       <TodaysFocus d={d} go={go} onToggle={onToggle} />
 
-      <WeeklyReview d={d} />
+      <div className="grid" style={{ gap: 13, minWidth: 0 }}>
+        <WeeklyReview d={d} />
 
-      <Card title="Overall progress">
-        <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+        <Card title="Overall progress">
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <Ring percent={p.percent} />
           <div style={{ flex: 1, minWidth: 220 }}>
             {CHECKS.map((c) => {
@@ -147,16 +148,17 @@ export function DashboardScreen({
             })}
           </div>
         </div>
-      </Card>
+        </Card>
 
-      <section className="card" style={{ padding: 16, borderLeft: `3px solid ${C.accent}` }}>
-        <blockquote style={{ margin: 0, fontSize: 15, lineHeight: 1.7, fontStyle: "italic" }}>
-          “{quote.text}”
-        </blockquote>
-        <div style={{ fontFamily: C.mono, fontSize: 12.5, color: C.muted, marginTop: 10 }}>
-          {quote.who} · {quote.where}
-        </div>
-      </section>
+        <section className="card" style={{ padding: 14, borderLeft: `3px solid ${C.accent}` }}>
+          <blockquote style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, fontStyle: "italic" }}>
+            “{quote.text}”
+          </blockquote>
+          <div style={{ fontFamily: C.mono, fontSize: 12, color: C.muted, marginTop: 8 }}>
+            {quote.who} · {quote.where}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
