@@ -8,7 +8,6 @@ import {
   calibration,
   coreProgress,
   daysUntil,
-  dueForRevision,
   effectivePace,
   freshness,
   isOptional,
@@ -29,6 +28,7 @@ import { AskAI } from "./app/AskAI";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
 import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
 import { PlanScreen } from "./modules/plan/PlanScreen";
+import { RevisionDeck } from "./modules/revision/RevisionDeck";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -83,11 +83,7 @@ export default function App() {
         </div>
       )}
 
-      {route === "revision" && (
-        <div className="grid" style={{ gap: 14 }}>
-          <DueForRevision d={d} onRevise={onRevise} />
-        </div>
-      )}
+      {route === "revision" && <RevisionDeck d={d} onRevise={onRevise} />}
 
       {route === "answers" && <AnswersScreen d={d} />}
 
@@ -330,49 +326,6 @@ function Telemetry({ d }: { d: Derived }) {
   );
 }
 
-function DueForRevision({ d, onRevise }: { d: Derived; onRevise: (id: string) => void }) {
-  const due = dueForRevision(d).slice(0, 8);
-  if (due.length === 0) return null;
-
-  return (
-    <Section title={`${due.length} due for revision`}>
-      {due.map(({ topic, overdueDays, count }) => (
-        <Row key={topic.id} pad>
-          <span style={{ fontSize: 13.5, lineHeight: 1.45 }}>
-            {topic.name}
-            <span style={{ fontSize: 12.5, color: C.warn, marginLeft: 8, whiteSpace: "nowrap" }}>
-              {overdueDays}d overdue
-            </span>
-            <span style={{ fontSize: 12.5, color: C.muted, marginLeft: 8 }}>
-              revised {count}×
-            </span>
-          </span>
-          <button
-            onClick={() => onRevise(topic.id)}
-            style={{
-              font: "inherit",
-              fontSize: 12.5,
-              padding: "8px 12px",
-              minHeight: 36,
-              borderRadius: 4,
-              cursor: "pointer",
-              background: "transparent",
-              color: C.accent,
-              border: `1px solid ${C.accent}`,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Revised
-          </button>
-        </Row>
-      ))}
-      <Note>
-        Next interval widens each time: 7 days, then 21, 45, 90. Coverage never falls for missing
-        these — only freshness does.
-      </Note>
-    </Section>
-  );
-}
 
 function CalibrationNote({ d }: { d: Derived }) {
   const cal = calibration(d);
