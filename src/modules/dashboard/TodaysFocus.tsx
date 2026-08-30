@@ -31,17 +31,32 @@ interface Task {
  * percentages, the pace and the week plan all move with it. Nothing here is a
  * separate to-do list that can drift out of step with the rest of the app.
  */
-function tasksFor(d: Derived, limit = 5): Task[] {
+/** Today's share of the weekly commitment, in minutes. */
+export function dailyBudget(d: Derived): number {
+  return Math.max(20, Math.round(((d.settings?.weeklyHours ?? 7) / 7) * 60));
+}
+
+/**
+ * Fills a day, not a week. Items are added until the next one would overrun
+ * today's share of the weekly hours — one always gets through, however long, so
+ * the card is never empty while work remains.
+ */
+function tasksFor(d: Derived, budget: number, limit = 5): Task[] {
   const out: Task[] = [];
+  let used = 0;
+  const fits = (m: number) => out.length === 0 || used + m <= budget;
 
   for (const r of revisionQueue(d).slice(0, 2)) {
+    const minutes = Math.max(10, Math.round(r.hours * 60));
+    if (!fits(minutes)) break;
     out.push({
       id: `${r.topic.id}:revised`,
       topic: r.topic,
       check: "revised",
       label: `Revise: ${r.topic.name}`,
-      minutes: Math.max(10, Math.round(r.hours * 60)),
+      minutes,
     });
+    used += minutes;
   }
 
   const week = packWeeks(d, 1)[0];
@@ -53,13 +68,16 @@ function tasksFor(d: Derived, limit = 5): Task[] {
       cumulative += c.weight;
       if (cumulative > target + 0.001) break;
       if (isChecked(d, topic.id, c.id)) continue;
+      const minutes = Math.max(10, Math.round(hoursFor(d, topic) * c.weight * 60));
+      if (!fits(minutes)) return out;
       out.push({
         id: `${topic.id}:${c.id}`,
         topic,
         check: c.id,
         label: `${c.label}: ${topic.name}`,
-        minutes: Math.max(10, Math.round(hoursFor(d, topic) * c.weight * 60)),
+        minutes,
       });
+      used += minutes;
       break;
     }
   }
@@ -76,7 +94,8 @@ export function TodaysFocus({
   go: (r: RouteId) => void;
   onToggle: (topicId: string, check: CheckId) => void;
 }) {
-  const tasks = tasksFor(d);
+  const budget = dailyBudget(d);
+  const tasks = tasksFor(d, budget);
   const total = tasks.reduce((s, t) => s + t.minutes, 0);
 
   return (
@@ -84,7 +103,7 @@ export function TodaysFocus({
       title="Today's focus"
       action={
         <span className="num" style={{ fontSize: 13, color: C.muted }}>
-          {total} min
+          {total} of {budget} min
         </span>
       }
     >
@@ -129,6 +148,11 @@ export function TodaysFocus({
           ))}
         </ul>
       )}
+
+      <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
+        Today's share of your {d.settings?.weeklyHours ?? 0} hours a week. The rest
+        of the week's work is under Study Plan.
+      </p>
 
       <button
         onClick={() => go("today")}
