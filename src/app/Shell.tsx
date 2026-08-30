@@ -68,8 +68,6 @@ export function Shell({
               ←
             </button>
           )}
-          <strong style={{ fontSize: 15.5, whiteSpace: "nowrap" }}>Study Hub</strong>
-
           <div className="tabstrip" style={{ flex: 1 }}>
             {ROUTES.map((r) => (
               <button
