@@ -408,6 +408,18 @@ export function activeDays(d: Derived): Set<string> {
   return days;
 }
 
+/** Hours of real work logged since Monday. Prior knowledge never counts. */
+export function hoursThisWeek(d: Derived, today = new Date()): number {
+  const monday = new Date(today);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  const from = monday.getTime();
+
+  let minutes = 0;
+  for (const t of d.time) if (Date.parse(t.at) >= from) minutes += t.minutes;
+  return Math.round((minutes / 60) * 10) / 10;
+}
+
 export interface Streak {
   current: number;
   best: number;

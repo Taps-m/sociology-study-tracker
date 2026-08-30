@@ -11,6 +11,7 @@ import {
   progress,
   projection,
   requiredPace,
+  hoursThisWeek,
   revisionLoad,
   streak,
 } from "../../lib/planner";
@@ -144,6 +145,7 @@ export function DashboardScreen({
   const backlog = revisionLoad(d);
   const days = daysUntil(settings.examDate);
   const run = streak(d);
+  const logged = hoursThisWeek(d);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const name = settings.name?.trim();
@@ -177,12 +179,21 @@ export function DashboardScreen({
             tint={run.current > 0 ? 3 : 2}
             strong
           />
-          <Tile value={core.topicCount} label="Topics in your plan" tint={1} />
           <Tile
-            value={Math.round(settings.targetCoverage * 100)}
-            unit="%"
-            label="Coverage target"
+            value={logged}
+            unit={`of ${settings.weeklyHours} h`}
+            label="Logged this week"
             tint={1}
+          />
+          <Tile
+            value={proj.percent}
+            unit="%"
+            label={
+              proj.feasible
+                ? `On course, past your ${Math.round(settings.targetCoverage * 100)}% target`
+                : `On course, short of ${Math.round(settings.targetCoverage * 100)}%`
+            }
+            tint={proj.feasible ? 3 : 2}
           />
         </div>
 
