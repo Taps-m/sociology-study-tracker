@@ -83,6 +83,18 @@ export function Shell({
         <main className="main" style={{ fontFamily: C.sans }}>
           {children}
         </main>
+
+        <footer
+          style={{
+            borderTop: `1px solid ${C.line}`,
+            padding: "18px 16px 28px",
+            textAlign: "center",
+            fontSize: 12.5,
+            color: C.muted,
+          }}
+        >
+          Copyright © {new Date().getFullYear()} Tapomoy. All rights reserved.
+        </footer>
       </div>
     </div>
   );
