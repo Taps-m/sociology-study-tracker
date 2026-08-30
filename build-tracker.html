@@ -120,8 +120,8 @@ const MODULES = [
   { group: "Not built", name: "Profile photo", status: "todo",
     note: "Deferred deliberately: an image in the append-only log would be copied on every settings change. Needs resizing and a separate store." },
 
-  { group: "Owed", name: "Drop the exam date", status: "todo",
-    note: "You decided the tracker should measure a 4-6 month window, not a date. Setup still asks months-to-exam and examDate still runs through the planner, storage and dashboard." },
+  { group: "Owed", name: "Drop the exam date", status: "done",
+    note: "Setup asks how many months you are planning for (4, 5 or 6) and saves startDate + windowMonths. Pace, projection, dashboard and telemetry all count down to the end of that window. Old saves carrying an examDate still work. Settings can lengthen the run." },
   { group: "Owed", name: "Ten years of PYQs", status: "todo",
     note: "Six years are tagged (2018-2023). 2014-2017 and 2024-2026 are missing, and every extra year sharpens the yield weights." },
   { group: "Owed", name: "Real hour estimates", status: "todo",
