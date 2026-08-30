@@ -643,4 +643,75 @@ export function options(d: Derived, today = new Date()): Option[] {
   ];
 }
 
+// ── what to do today ──────────────────────────────────────────────────────
+
+export interface Task {
+  id: string;
+  topic: Topic;
+  check: CheckId;
+  label: string;
+  minutes: number;
+}
+
+/** Today's share of the weekly commitment, in minutes. */
+export function dailyBudget(d: Derived): number {
+  return Math.max(20, Math.round(((d.settings?.weeklyHours ?? 7) / 7) * 60));
+}
+
+/**
+ * Today's work, derived. For each topic in this week's plan, the next check it
+ * still needs, stopping at the depth the planner set. Overdue revision comes
+ * first because it decays whether or not anything lists it.
+ *
+ * Items are added until the next would overrun today's budget; one always gets
+ * through, so the list is never empty while work remains.
+ *
+ * This is the single source for "today" — the dashboard card and the Today's
+ * Study screen both read it, so they cannot disagree.
+ */
+export function todaysTasks(d: Derived, limit = 5): Task[] {
+  const budget = dailyBudget(d);
+  const out: Task[] = [];
+  let used = 0;
+  const fits = (m: number) => out.length === 0 || used + m <= budget;
+
+  for (const r of revisionQueue(d).slice(0, 2)) {
+    const minutes = Math.max(10, Math.round(r.hours * 60));
+    if (!fits(minutes)) break;
+    out.push({
+      id: `${r.topic.id}:revised`,
+      topic: r.topic,
+      check: "revised",
+      label: `Revise: ${r.topic.name}`,
+      minutes,
+    });
+    used += minutes;
+  }
+
+  const week = packWeeks(d, 1)[0];
+  for (const topic of week?.topics ?? []) {
+    if (out.length >= limit) break;
+    const target = depthFor(d, topic);
+    let cumulative = 0;
+    for (const c of CHECKS) {
+      cumulative += c.weight;
+      if (cumulative > target + 0.001) break;
+      if (isChecked(d, topic.id, c.id)) continue;
+      const minutes = Math.max(10, Math.round(hoursFor(d, topic) * c.weight * 60));
+      if (!fits(minutes)) return out;
+      out.push({
+        id: `${topic.id}:${c.id}`,
+        topic,
+        check: c.id,
+        label: `${c.label}: ${topic.name}`,
+        minutes,
+      });
+      used += minutes;
+      break;
+    }
+  }
+
+  return out.slice(0, limit);
+}
+
 export type { Settings };

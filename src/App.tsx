@@ -10,10 +10,8 @@ import {
   daysUntil,
   effectivePace,
   freshness,
-  isOptional,
   observedPace,
   options,
-  packWeeks,
   progress,
   projection,
   requiredPace,
@@ -21,7 +19,6 @@ import {
 import { exportJson, importJson, load, save } from "./lib/storage";
 import { clearAdvice } from "./lib/ai";
 import { C } from "./lib/theme";
-import { TopicRow } from "./components/TopicRow";
 import { quoteOfTheDay } from "./data/quotes";
 import { Shell as AppShell, Card } from "./app/Shell";
 import { useRoute } from "./app/routes";
@@ -31,6 +28,7 @@ import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
 import { PlanScreen } from "./modules/plan/PlanScreen";
 import { RevisionDeck } from "./modules/revision/RevisionDeck";
 import { RecentActivity } from "./modules/activity/RecentActivity";
+import { TodayScreen } from "./modules/today/TodayScreen";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -79,11 +77,7 @@ export default function App() {
 
       {route === "plan" && <PlanScreen d={d} />}
 
-      {route === "today" && (
-        <div className="grid" style={{ gap: 14 }}>
-          <ThisWeek d={d} {...handlers} />
-        </div>
-      )}
+      {route === "today" && <TodayScreen d={d} go={go} {...handlers} />}
 
       {route === "revision" && <RevisionDeck d={d} onRevise={onRevise} />}
 
@@ -356,37 +350,7 @@ function CalibrationNote({ d }: { d: Derived }) {
   );
 }
 
-type Handlers = {
-  onToggle: (id: string, c: CheckId) => void;
-  onLogTime: (id: string, c: CheckId, m: number) => void;
-  onMarkPrior: (id: string, c: CheckId) => void;
-  onAttempt: (id: string, marks: number, outOf: number, minutes: number) => void;
-};
 
-function ThisWeek({ d, ...h }: { d: Derived } & Handlers) {
-  const week = packWeeks(d, 1)[0];
-  if (!week || (week.topics.length === 0 && week.revisions.length === 0)) {
-    return <Note>Nothing left in the queue. Every topic is at its planned depth.</Note>;
-  }
-  const title =
-    week.revisionHours > 0
-      ? `${week.topics.length} topics · ${week.hours} h new · ${week.revisionHours} h revision`
-      : `${week.topics.length} topics · ${week.hours} hours`;
-  return (
-    <Section title={title}>
-      {week.topics.map((t) => (
-        <TopicRow key={t.id} topic={t} d={d} {...h} optional={isOptional(d, t.id)} />
-      ))}
-      {week.revisionHours > 0 && (
-        <Note>
-          {week.revisions.length} revisions fall due this week, booked at {week.revisionHours} of
-          your {week.totalHours} planned hours. Revision is taken out of the week before new
-          topics, so a backlog slows new coverage instead of being quietly ignored.
-        </Note>
-      )}
-    </Section>
-  );
-}
 
 
 function StartUnitControl({
