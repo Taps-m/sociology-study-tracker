@@ -48,6 +48,26 @@ export function Shell({
 
       <div style={{ minWidth: 0 }}>
         <header className="topbar">
+          {route !== "dashboard" && (
+            <button
+              onClick={() => (window.history.length > 1 ? window.history.back() : go("dashboard"))}
+              aria-label="Go back"
+              style={{
+                minHeight: 36,
+                minWidth: 36,
+                borderRadius: 8,
+                border: "1px solid var(--rail-line)",
+                background: "var(--rail-2)",
+                color: "var(--rail-text)",
+                font: "inherit",
+                fontSize: 16,
+                cursor: "pointer",
+                flex: "0 0 auto",
+              }}
+            >
+              ←
+            </button>
+          )}
           <strong style={{ fontSize: 15.5, whiteSpace: "nowrap" }}>Study Hub</strong>
 
           <div className="tabstrip" style={{ flex: 1 }}>

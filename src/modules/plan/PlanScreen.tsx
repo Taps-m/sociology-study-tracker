@@ -4,8 +4,10 @@ import type { Topic } from "../../data/syllabus";
 import { completionOf, depthFor, hoursFor, packWeeks, type WeekPlan } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
+import { ask } from "../../lib/ai";
+import { effectivePace, progress, requiredPace } from "../../lib/planner";
 
-const TABS = ["Overview", "Key concepts", "Thinkers", "PYQ focus", "Practice"] as const;
+const TABS = ["Overview", "Key concepts", "Thinkers", "PYQ focus", "Insight", "Practice"] as const;
 type Tab = (typeof TABS)[number];
 
 /** The unit that most of a week's hours belong to — what the week is "about". */
@@ -232,6 +234,8 @@ export function PlanScreen({ d }: { d: Derived }) {
             </>
           )}
 
+          {tab === "Insight" && <WeekInsight d={d} week={week} />}
+
           {tab === "Practice" && (
             <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.75 }}>
               Write one 40-mark answer from this week's topics, timed at 35 minutes,
@@ -265,6 +269,71 @@ export function PlanScreen({ d }: { d: Derived }) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * One read on the week's topics: what connects them, what to open first.
+ * The ask-counts come from the repo; the model only interprets them.
+ */
+function WeekInsight({ d, week }: { d: Derived; week: WeekPlan }) {
+  const [body, setBody] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function run() {
+    setBusy(true);
+    setError(null);
+    const res = await ask(
+      `insight:${week.weekIndex}`,
+      "insight",
+      {
+        topics: week.topics.map((t) => ({ name: t.name, unit: t.unit, askedSince2018: t.pyq })),
+        revisionsDue: week.revisions.map((r) => r.topic.name),
+      },
+      {
+        percent: progress(d).percent,
+        pace: effectivePace(d),
+        requiredPace: requiredPace(d),
+      },
+    );
+    setBody(res.advice?.body ?? null);
+    setError(res.error);
+    setBusy(false);
+  }
+
+  return (
+    <div>
+      <button
+        onClick={run}
+        disabled={busy}
+        style={{
+          minHeight: 40,
+          padding: "0 16px",
+          borderRadius: 9,
+          border: "none",
+          background: busy ? C.line : C.accent,
+          color: busy ? C.muted : C.accentInk,
+          font: "inherit",
+          fontSize: 14,
+          fontWeight: 600,
+          cursor: busy ? "default" : "pointer",
+        }}
+      >
+        {busy ? "Reading…" : body ? "Read again" : "What connects this week?"}
+      </button>
+
+      {body && (
+        <p style={{ fontSize: 14.5, lineHeight: 1.75, margin: "14px 0 0", whiteSpace: "pre-wrap" }}>
+          {body}
+        </p>
+      )}
+      {error && (
+        <p style={{ fontSize: 13, color: C.warn, margin: "12px 0 0" }}>
+          Could not reach the model ({error}).
+        </p>
+      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@
  *    their own.
  */
 
-export type AiTask = "critique" | "guidance" | "evaluate";
+export type AiTask = "critique" | "guidance" | "evaluate" | "insight" | "doubt";
 
 /** The figures an answer was reasoned from, so drift can be detected later. */
 export interface AdviceBasis {

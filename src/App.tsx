@@ -25,6 +25,7 @@ import { TopicRow } from "./components/TopicRow";
 import { quoteOfTheDay } from "./data/quotes";
 import { Shell as AppShell, Card } from "./app/Shell";
 import { useRoute } from "./app/routes";
+import { AskAI } from "./app/AskAI";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
 import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
 import { PlanScreen } from "./modules/plan/PlanScreen";
@@ -102,6 +103,7 @@ export default function App() {
         </div>
       )}
 
+      <AskAI d={d} route={route} />
     </AppShell>
   );
 }

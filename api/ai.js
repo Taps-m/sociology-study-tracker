@@ -111,6 +111,28 @@ MUST CONTAIN - what a 40-mark answer has to include to score.
 THINKERS - who to cite by name, and for what.
 TRAP - the most common way candidates lose marks here.`;
 
+    case "insight":
+      return `${SYSTEM}
+
+The topics scheduled for one week, with how often each was asked in WBCS Main
+between 2018 and 2023:
+${json}
+
+At most 130 words. Say what connects these topics, which one to open first and
+why, and the one link between them an examiner is most likely to reward. Use the
+ask-counts given; do not invent any.`;
+
+    case "doubt":
+      return `${SYSTEM}
+
+The candidate is studying this, and has asked a question about it:
+${json}
+
+Answer the question in at most 180 words, at the standard a 40-mark WBCS answer
+would need. Stay on this topic: if the question wanders away from it, answer the
+part that belongs to the syllabus and say plainly that the rest is outside it.
+Name the thinkers involved. Do not invent statistics, dates or case law.`;
+
     case "evaluate":
       return `${SYSTEM}
 
