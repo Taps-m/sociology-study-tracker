@@ -9,7 +9,7 @@ import { MindMap, Takeaways } from "./MindMap";
 import { ask } from "../../lib/ai";
 import { effectivePace, progress, requiredPace } from "../../lib/planner";
 
-const BASE_TABS = ["Key concepts", "Thinkers", "PYQ focus", "Insight", "Practice"] as const;
+const BASE_TABS = ["Thinkers", "PYQ focus", "Insight"] as const;
 type Tab = "Mind map" | "Overview" | (typeof BASE_TABS)[number];
 
 /** The unit that most of a week's hours belong to — what the week is "about". */
@@ -41,10 +41,10 @@ function WeekCard({
       onClick={onClick}
       aria-current={active ? "true" : undefined}
       style={{
-        flex: "0 0 210px",
+        flex: "0 0 172px",
         textAlign: "left",
-        padding: 14,
-        borderRadius: 12,
+        padding: 12,
+        borderRadius: 11,
         cursor: "pointer",
         font: "inherit",
         background: active ? "var(--accent-soft)" : C.panel,
@@ -71,7 +71,7 @@ function WeekCard({
         )}
       </div>
 
-      <div style={{ fontSize: 13.5, color: C.muted, marginTop: 8, lineHeight: 1.5, minHeight: 40 }}>
+      <div style={{ fontSize: 13, color: C.muted, marginTop: 6, lineHeight: 1.45, minHeight: 34 }}>
         {focusOf(week, d)}
       </div>
 
@@ -224,10 +224,13 @@ export function PlanScreen({ d }: { d: Derived }) {
                   ({week.revisionHours} h), booked before new work.
                 </p>
               )}
+              <p style={{ fontSize: 13.5, color: C.muted, margin: "14px 0 0", lineHeight: 1.7 }}>
+                Write one 40-mark answer from these, timed at 35 minutes, and record
+                the marks in Answer Practice. Written answers are the only thing the
+                exam scores.
+              </p>
             </>
           )}
-
-          {active === "Key concepts" && <TopicList topics={week.topics} d={d} note={(t) => t.unit} />}
 
           {active === "Thinkers" && (
             <TopicList
@@ -249,13 +252,6 @@ export function PlanScreen({ d }: { d: Derived }) {
 
           {active === "Insight" && <WeekInsight d={d} week={week} />}
 
-          {active === "Practice" && (
-            <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.75 }}>
-              Write one 40-mark answer from this week's topics, timed at 35 minutes,
-              then record the marks in Answer Practice. Written answers are the only
-              thing the exam actually scores.
-            </p>
-          )}
         </Card>
 
         <div className="grid" style={{ gap: 14 }}>
@@ -278,14 +274,6 @@ export function PlanScreen({ d }: { d: Derived }) {
               </ul>
             </Card>
           )}
-
-          <Card title="This week in numbers">
-            <TopicList
-              topics={byPyq.slice(0, 5)}
-              d={d}
-              note={(t) => `${t.pyq}× · ${hoursFor(d, t)} h`}
-            />
-          </Card>
 
           {!brief?.thinker && thinkers.length > 0 && (
             <Card title="Main thinker this week">

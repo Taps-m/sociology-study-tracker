@@ -14,8 +14,8 @@ export function MindMap({ brief }: { brief: UnitBrief }) {
           background: "var(--rail)",
           color: "var(--rail-text)",
           borderRadius: 10,
-          padding: "12px 18px",
-          fontSize: 16,
+          padding: "10px 16px",
+          fontSize: 15,
           fontWeight: 600,
           textAlign: "center",
         }}
@@ -36,19 +36,19 @@ export function MindMap({ brief }: { brief: UnitBrief }) {
           <div key={stage.title} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <section
               style={{
-                flex: "0 0 190px",
-                minWidth: 190,
+                flex: "0 0 168px",
+                minWidth: 168,
                 alignSelf: "stretch",
                 background: `var(--tint-${stage.tint})`,
                 border: `1px solid var(--tint-${stage.tint}-line)`,
                 borderRadius: 10,
-                padding: "12px 13px",
+                padding: "11px 12px",
               }}
             >
-              <h3 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 9px", lineHeight: 1.35 }}>
+              <h3 style={{ fontSize: 13.5, fontWeight: 700, margin: "0 0 8px", lineHeight: 1.35 }}>
                 {stage.title}
               </h3>
-              <ul style={{ margin: 0, paddingLeft: 15, fontSize: 13, lineHeight: 1.65 }}>
+              <ul style={{ margin: 0, paddingLeft: 14, fontSize: 12.5, lineHeight: 1.55 }}>
                 {stage.items.map((it) => (
                   <li key={it}>{it}</li>
                 ))}

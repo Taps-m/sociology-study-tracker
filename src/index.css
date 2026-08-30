@@ -156,7 +156,7 @@ input[type="range"]::-moz-range-thumb {
 }
 @media (min-width: 900px) {
   .shell {
-    grid-template-columns: 232px 1fr;
+    grid-template-columns: 232px minmax(0, 1fr);
   }
 }
 
@@ -241,6 +241,8 @@ input[type="range"]::-moz-range-thumb {
   padding: 20px 16px 64px;
   font-size: 15px;
   line-height: 1.6;
+  min-width: 0;
+  overflow-x: hidden;
 }
 @media (min-width: 900px) {
   .main {
@@ -249,11 +251,12 @@ input[type="range"]::-moz-range-thumb {
 }
 /* Long measures are hard to read. Cap the content, centre it on wide screens. */
 .main > * {
-  max-width: 1180px;
+  max-width: min(1180px, 100%);
   margin-inline: auto;
 }
 
 .card {
+  min-width: 0;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
