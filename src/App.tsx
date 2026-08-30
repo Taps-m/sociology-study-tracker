@@ -1,32 +1,602 @@
-const EXAM_DATE = new Date("2027-03-01");
-
-function daysRemaining(): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = EXAM_DATE.getTime() - today.getTime();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-}
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import { TOPICS } from "./data/syllabus";
+import { on, project } from "./lib/events";
+import type { CheckId, Derived, Settings, StudyEvent } from "./lib/events";
+import {
+  attemptStats,
+  calibration,
+  coreProgress,
+  daysUntil,
+  dueForRevision,
+  effectivePace,
+  freshness,
+  isOptional,
+  observedPace,
+  options,
+  packWeeks,
+  progress,
+  projection,
+  requiredPace,
+} from "./lib/planner";
+import { exportJson, importJson, load, save } from "./lib/storage";
+import { C } from "./lib/theme";
+import { TopicRow } from "./components/TopicRow";
 
 export default function App() {
-  const days = daysRemaining();
+  const [events, setEvents] = useState<StudyEvent[]>(() => load());
+  const [tab, setTab] = useState<"week" | "syllabus">("week");
+  useEffect(() => save(events), [events]);
+
+  const d = useMemo(() => project(events), [events]);
+  const add = (e: StudyEvent) => setEvents((prev) => [...prev, e]);
+
+  if (!d.settings) {
+    return (
+      <Setup
+        onDone={(settings, known) => {
+          const batch: StudyEvent[] = [on.settings(settings)];
+          for (const unit of known) {
+            for (const t of TOPICS.filter((x) => x.unit === unit)) {
+              batch.push(on.check(t.id, "read", { prior: true }));
+            }
+          }
+          setEvents(batch);
+        }}
+      />
+    );
+  }
+
+  const handlers = {
+    onToggle: (topicId: string, check: CheckId) =>
+      add(d.checks[topicId]?.[check] ? on.uncheck(topicId, check) : on.check(topicId, check)),
+    onLogTime: (topicId: string, check: CheckId, minutes: number) =>
+      add(on.check(topicId, check, { minutes })),
+    onMarkPrior: (topicId: string, check: CheckId) =>
+      add(on.check(topicId, check, { prior: true })),
+    onAttempt: (topicId: string, marks: number, outOf: number, minutes: number) =>
+      add(on.attempt(topicId, marks, outOf, minutes)),
+  };
+
+  const onRevise = (topicId: string) => add(on.check(topicId, "revised"));
+
   return (
-    <main style={{
-      margin: 0, padding: 0, minHeight: "100vh",
-      background: "#0A0E12", display: "flex",
-      flexDirection: "column", alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
-      color: "#E6EDF3"
-    }}>
-      <div style={{ fontSize: "11px", letterSpacing: "0.14em", color: "#7D8B99", marginBottom: "12px" }}>
-        SOCIOLOGY · DAYS TO EXAM
+    <Shell align="flex-start">
+      <div style={{ maxWidth: 560, width: "100%" }}>
+        <Telemetry d={d} />
+
+        <DueForRevision d={d} onRevise={onRevise} />
+
+        <div style={{ display: "flex", gap: 6, marginTop: 24 }}>
+          <Tab on={tab === "week"} onClick={() => setTab("week")}>
+            This week
+          </Tab>
+          <Tab on={tab === "syllabus"} onClick={() => setTab("syllabus")}>
+            Full syllabus
+          </Tab>
+        </div>
+
+        {tab === "week" ? <ThisWeek d={d} {...handlers} /> : <FullSyllabus d={d} {...handlers} />}
+
+        <PaceControl d={d} onChange={(patch) => add(on.settings(patch))} />
+        <Backup events={events} setEvents={setEvents} />
       </div>
-      <div style={{ fontSize: "96px", lineHeight: 1, color: "#5FD3F3" }}>
-        {days}
+    </Shell>
+  );
+}
+
+function Telemetry({ d }: { d: Derived }) {
+  const settings = d.settings as Settings;
+  const p = progress(d);
+  const core = coreProgress(d);
+  const proj = projection(d);
+  const need = requiredPace(d);
+  const measured = observedPace(d);
+  const answers = attemptStats(d);
+  const fresh = freshness(d);
+  const days = daysUntil(settings.examDate);
+  const targetPct = Math.round(settings.targetCoverage * 100);
+
+  return (
+    <>
+      <Row>
+        <span style={{ fontSize: 11, letterSpacing: "0.12em", color: C.muted }}>
+          sociology · wbcs
+        </span>
+        <span style={{ fontSize: 13, color: C.accent }}>T-{days}d</span>
+      </Row>
+
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, margin: "20px 0 4px" }}>
+        <span style={{ fontSize: 44, lineHeight: 1 }}>{p.percent}</span>
+        <span style={{ fontSize: 15, color: C.muted, paddingBottom: 4 }}>%</span>
+        <span style={{ fontSize: 11, color: C.muted, marginLeft: "auto", paddingBottom: 6 }}>
+          {p.doneHours} h done · target {targetPct}%
+        </span>
       </div>
-      <div style={{ fontSize: "13px", color: "#7D8B99", marginTop: "12px" }}>
-        {days === 0 ? "exam day" : days === 1 ? "one day remaining" : "days remaining"}
+
+      <div style={{ position: "relative", margin: "14px 0 8px" }}>
+        <div style={{ display: "flex", gap: 2 }}>
+          <div style={{ flex: Math.max(0.001, p.percent), height: 6, background: C.accent, borderRadius: 1 }} />
+          <div style={{ flex: Math.max(0.001, 100 - p.percent), height: 6, background: C.dim, borderRadius: 1 }} />
+        </div>
+        <div
+          title={`target ${targetPct}%`}
+          style={{ position: "absolute", left: `${targetPct}%`, top: -3, width: 1, height: 12, background: C.warn }}
+        />
       </div>
+
+      <div style={{ fontSize: 11, color: C.muted, marginBottom: 18 }}>
+        {core.topicsComplete} of {core.topicCount} topics at planned depth ·{" "}
+        {TOPICS.length - core.topicCount} skipped
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: 1,
+          background: C.line,
+          border: `1px solid ${C.line}`,
+          borderRadius: 6,
+          overflow: "hidden",
+        }}
+      >
+        <Cell label="Planned" value={settings.weeklyHours} unit="h/wk" />
+        <Cell
+          label="Actual"
+          value={measured ?? "—"}
+          unit={measured === null ? "" : "h/wk"}
+          warn={measured !== null && measured < settings.weeklyHours}
+        />
+        <Cell label="Needed" value={need} unit="h/wk" warn={need > effectivePace(d)} />
+        <Cell label="Projected" value={proj.ofSyllabus} unit="% of syllabus" warn={proj.margin < 0} />
+        <Cell label="Answers" value={answers.perWeek} unit="a week" warn={answers.perWeek < 1} />
+        <Cell
+          label="Fresh"
+          value={fresh.percent ?? "—"}
+          unit={fresh.percent === null ? "" : "%"}
+          warn={fresh.percent !== null && fresh.percent < 70}
+        />
+        <Cell
+          label="Scoring"
+          value={answers.averagePercent ?? "—"}
+          unit={answers.averagePercent === null ? "" : "%"}
+        />
+      </div>
+
+      <CalibrationNote d={d} />
+
+      {options(d).length > 0 && (
+        <Section title="Three ways to close the gap">
+          {options(d).map((o) => (
+            <Row key={o.label} pad>
+              <span style={{ fontSize: 12 }}>{o.label}</span>
+              <span style={{ fontSize: 12, color: C.accent, whiteSpace: "nowrap" }}>{o.outcome}</span>
+            </Row>
+          ))}
+        </Section>
+      )}
+    </>
+  );
+}
+
+function DueForRevision({ d, onRevise }: { d: Derived; onRevise: (id: string) => void }) {
+  const due = dueForRevision(d).slice(0, 8);
+  if (due.length === 0) return null;
+
+  return (
+    <Section title={`${due.length} due for revision`}>
+      {due.map(({ topic, overdueDays, count }) => (
+        <Row key={topic.id} pad>
+          <span style={{ fontSize: 12, lineHeight: 1.45 }}>
+            {topic.name}
+            <span style={{ fontSize: 11, color: C.warn, marginLeft: 8, whiteSpace: "nowrap" }}>
+              {overdueDays}d overdue
+            </span>
+            <span style={{ fontSize: 11, color: C.muted, marginLeft: 8 }}>
+              revised {count}×
+            </span>
+          </span>
+          <button
+            onClick={() => onRevise(topic.id)}
+            style={{
+              font: "inherit",
+              fontSize: 11,
+              padding: "8px 12px",
+              minHeight: 36,
+              borderRadius: 4,
+              cursor: "pointer",
+              background: "transparent",
+              color: C.accent,
+              border: `1px solid ${C.accent}`,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Revised
+          </button>
+        </Row>
+      ))}
+      <Note>
+        Next interval widens each time: 7 days, then 21, 45, 90. Coverage never falls for missing
+        these — only freshness does.
+      </Note>
+    </Section>
+  );
+}
+
+function CalibrationNote({ d }: { d: Derived }) {
+  const cal = calibration(d);
+  const answers = attemptStats(d);
+  const fresh = freshness(d);
+
+  if (!cal.ready) {
+    return (
+      <Note>
+        Hour estimates are still mine. Log time on {5 - cal.samples} more checks and the app starts
+        using your own pace.
+        {answers.total === 0 && " No answers written yet — that is what the exam scores."}
+      </Note>
+    );
+  }
+  const pct = Math.round(Math.abs(cal.factor - 1) * 100);
+  return (
+    <Note>
+      {cal.factor > 1.05
+        ? `Topics take you about ${pct}% longer than my estimates, so every hour here is scaled up.`
+        : cal.factor < 0.95
+          ? `You get through topics about ${pct}% faster than my estimates, so the hours are scaled down.`
+          : "Your pace matches my estimates closely."}{" "}
+      Based on {cal.samples} logged sessions.
+    </Note>
+  );
+}
+
+type Handlers = {
+  onToggle: (id: string, c: CheckId) => void;
+  onLogTime: (id: string, c: CheckId, m: number) => void;
+  onMarkPrior: (id: string, c: CheckId) => void;
+  onAttempt: (id: string, marks: number, outOf: number, minutes: number) => void;
+};
+
+function ThisWeek({ d, ...h }: { d: Derived } & Handlers) {
+  const week = packWeeks(d, 1)[0];
+  if (!week || week.topics.length === 0) {
+    return <Note>Nothing left in the queue. Every topic is at its planned depth.</Note>;
+  }
+  return (
+    <Section title={`${week.topics.length} topics · ${week.hours} hours`}>
+      {week.topics.map((t) => (
+        <TopicRow key={t.id} topic={t} d={d} {...h} optional={isOptional(d, t.id)} />
+      ))}
+    </Section>
+  );
+}
+
+function FullSyllabus({ d, ...h }: { d: Derived } & Handlers) {
+  const units = [...new Set(TOPICS.map((t) => `${t.paper}|${t.unit}`))];
+  return (
+    <div style={{ marginTop: 8 }}>
+      {units.map((key) => {
+        const [paper, unit] = key.split("|");
+        return (
+          <Section key={key} title={`paper ${paper === "1" ? "i" : "ii"} · ${unit}`}>
+            {TOPICS.filter((t) => `${t.paper}|${t.unit}` === key).map((t) => (
+              <TopicRow key={t.id} topic={t} d={d} {...h} optional={isOptional(d, t.id)} />
+            ))}
+          </Section>
+        );
+      })}
+    </div>
+  );
+}
+
+function PaceControl({
+  d,
+  onChange,
+}: {
+  d: Derived;
+  onChange: (patch: Partial<Settings>) => void;
+}) {
+  const s = d.settings as Settings;
+  return (
+    <Section title="Hours a week you can give">
+      <input
+        type="range"
+        min={1}
+        max={40}
+        value={s.weeklyHours}
+        onChange={(e) => onChange({ weeklyHours: +e.target.value })}
+        style={{ width: "100%", accentColor: C.accent, marginTop: 10 }}
+      />
+      <Note>
+        {s.weeklyHours} hours a week · exam on {s.examDate}
+      </Note>
+
+      <div style={{ fontSize: 11, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
+        How much of the syllabus you are aiming for
+      </div>
+      <input
+        type="range"
+        min={50}
+        max={100}
+        step={5}
+        value={Math.round(s.targetCoverage * 100)}
+        onChange={(e) => onChange({ targetCoverage: +e.target.value / 100 })}
+        style={{ width: "100%", accentColor: C.accent, marginTop: 10 }}
+      />
+      <Note>
+        {Math.round(s.targetCoverage * 100)}% target. Depth per topic comes from how often it was
+        asked between 2018 and 2023, blended with its unit's record. This plan works out at{" "}
+        {coreProgress(d).shareOfSyllabus}% of the full syllabus.
+      </Note>
+    </Section>
+  );
+}
+
+function Backup({
+  events,
+  setEvents,
+}: {
+  events: StudyEvent[];
+  setEvents: (e: StudyEvent[]) => void;
+}) {
+  const [message, setMessage] = useState("");
+
+  function download() {
+    const blob = new Blob([exportJson(events)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sociology-tracker-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setMessage("Saved to your downloads.");
+  }
+
+  function upload(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const parsed = importJson(String(reader.result));
+      if (!parsed) return setMessage("That file could not be read.");
+      setEvents(parsed);
+      setMessage("Restored.");
+    };
+    reader.readAsText(file);
+  }
+
+  const btn = {
+    font: "inherit",
+    fontSize: 12,
+    padding: "10px 14px",
+    minHeight: 44,
+    borderRadius: 4,
+    cursor: "pointer",
+    background: "transparent",
+    color: C.text,
+    border: `1px solid ${C.line}`,
+  } as const;
+
+  return (
+    <Section title="Backup">
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+        <button onClick={download} style={btn}>
+          Download a copy
+        </button>
+        <label style={{ ...btn, display: "inline-flex", alignItems: "center" }}>
+          Restore from file
+          <input
+            type="file"
+            accept="application/json"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) upload(f);
+              e.target.value = "";
+            }}
+            style={{ display: "none" }}
+          />
+        </label>
+      </div>
+      <Note>
+        {message ||
+          `${events.length} events stored in this browser only. Clearing site data erases them.`}
+      </Note>
+    </Section>
+  );
+}
+
+function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
+  const [months, setMonths] = useState(5);
+  const [hours, setHours] = useState(12);
+  const [target, setTarget] = useState(80);
+  const [known, setKnown] = useState<string[]>([]);
+  const units = [...new Set(TOPICS.map((t) => t.unit))];
+
+  const targetDate = new Date();
+  targetDate.setMonth(targetDate.getMonth() + months);
+  const examDate = targetDate.toISOString().slice(0, 10);
+
+  const totalHours = TOPICS.reduce((s, t) => s + t.estHours, 0);
+  const reachable = Math.min(100, Math.round(((hours * months * 4.345) / totalHours) * 100));
+  const meetsTarget = reachable >= target;
+
+  return (
+    <Shell>
+      <div style={{ maxWidth: 440, width: "100%" }}>
+        <h1 style={{ fontSize: 16, fontWeight: 400, marginBottom: 4 }}>Before we start</h1>
+        <p style={{ fontSize: 12, color: C.muted, marginTop: 0, marginBottom: 28 }}>
+          All of this can be changed later.
+        </p>
+
+        <Field label="How many months until your exam?">
+          <input type="range" min={1} max={24} value={months} onChange={(e) => setMonths(+e.target.value)} style={{ width: "100%", accentColor: C.accent }} />
+          <Readout value={months} unit={months === 1 ? "month" : "months"} sub={examDate} />
+        </Field>
+
+        <Field label="How many hours a week can you give sociology?">
+          <input type="range" min={1} max={40} value={hours} onChange={(e) => setHours(+e.target.value)} style={{ width: "100%", accentColor: C.accent }} />
+          <Readout value={hours} unit="hours a week" />
+        </Field>
+
+        <Field label="How much of the syllabus are you aiming to cover?">
+          <input type="range" min={50} max={100} step={5} value={target} onChange={(e) => setTarget(+e.target.value)} style={{ width: "100%", accentColor: C.accent }} />
+          <Readout value={target} unit="% target" sub="the rest stays visible as optional" />
+        </Field>
+
+        <Field label="Any of this you already know? Tick those units.">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
+            {units.map((u) => {
+              const isOn = known.includes(u);
+              return (
+                <button
+                  key={u}
+                  onClick={() => setKnown(isOn ? known.filter((k) => k !== u) : [...known, u])}
+                  style={{
+                    font: "inherit",
+                    fontSize: 11,
+                    padding: "7px 10px",
+                    minHeight: 34,
+                    borderRadius: 4,
+                    cursor: "pointer",
+                    background: "transparent",
+                    color: isOn ? C.accent : C.muted,
+                    border: `1px solid ${isOn ? C.accent : C.line}`,
+                  }}
+                >
+                  {isOn ? "✓ " : ""}
+                  {u}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+
+        <div style={{ border: `1px solid ${C.line}`, borderRadius: 6, padding: 14, fontSize: 12, color: C.muted, lineHeight: 1.7, marginBottom: 24 }}>
+          At that pace you reach{" "}
+          <strong style={{ color: meetsTarget ? C.accent : C.warn, fontSize: 15 }}>{reachable}%</strong>{" "}
+          of the syllabus.{" "}
+          {meetsTarget
+            ? `That clears your ${target}% target.`
+            : `That falls short of ${target}%. Change it now, or close the gap later.`}
+        </div>
+
+        <button
+          onClick={() => onDone({ examDate, weeklyHours: hours, targetCoverage: target / 100 }, known)}
+          style={{
+            width: "100%",
+            minHeight: 48,
+            background: "transparent",
+            border: `1px solid ${C.accent}`,
+            borderRadius: 6,
+            color: C.accent,
+            font: "inherit",
+            fontSize: 13,
+            cursor: "pointer",
+          }}
+        >
+          Start
+        </button>
+      </div>
+    </Shell>
+  );
+}
+
+function Shell({ children, align = "center" }: { children: ReactNode; align?: string }) {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background: C.surface,
+        color: C.text,
+        fontFamily: C.mono,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: align,
+        padding: "28px 16px 64px",
+      }}
+    >
+      {children}
     </main>
   );
+}
+
+function Tab({ on: isOn, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        font: "inherit",
+        fontSize: 12,
+        padding: "9px 14px",
+        minHeight: 40,
+        borderRadius: 4,
+        cursor: "pointer",
+        background: "transparent",
+        color: isOn ? C.accent : C.muted,
+        border: `1px solid ${isOn ? C.accent : C.line}`,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ fontSize: 12, color: C.muted, marginBottom: 12 }}>{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function Readout({ value, unit, sub }: { value: number; unit: string; sub?: string }) {
+  return (
+    <div style={{ marginTop: 8 }}>
+      <span style={{ fontSize: 24, color: C.accent }}>{value}</span>
+      <span style={{ fontSize: 12, color: C.muted }}> {unit}</span>
+      {sub && <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{sub}</div>}
+    </div>
+  );
+}
+
+function Cell({ label, value, unit, warn }: { label: string; value: number | string; unit: string; warn?: boolean }) {
+  return (
+    <div style={{ background: C.panel, padding: 10 }}>
+      <div style={{ fontSize: 11, color: C.muted, letterSpacing: "0.08em" }}>{label}</div>
+      <div style={{ fontSize: 19, marginTop: 3, color: warn ? C.warn : C.text }}>
+        {value}
+        <span style={{ fontSize: 11, color: C.muted }}> {unit}</span>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div style={{ marginTop: 22, borderTop: `1px solid ${C.line}`, paddingTop: 14 }}>
+      <div style={{ fontSize: 11, color: C.muted, letterSpacing: "0.08em", marginBottom: 4 }}>{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function Row({ children, pad }: { children: ReactNode; pad?: boolean }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 12,
+        padding: pad ? "9px 0" : 0,
+        borderBottom: pad ? `1px solid ${C.hair}` : undefined,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Note({ children }: { children: ReactNode }) {
+  return <div style={{ fontSize: 11, color: C.muted, marginTop: 10, lineHeight: 1.6 }}>{children}</div>;
 }
