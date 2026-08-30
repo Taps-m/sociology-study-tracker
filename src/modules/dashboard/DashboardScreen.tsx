@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { TOPICS } from "../../data/syllabus";
 import { quoteOfTheDay } from "../../data/quotes";
 import type { CheckId, Derived, Settings } from "../../lib/events";
@@ -11,6 +12,7 @@ import {
   projection,
   requiredPace,
   revisionLoad,
+  streak,
 } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -33,6 +35,12 @@ function checkPercent(d: Derived, check: string) {
 function Ring({ percent }: { percent: number }) {
   const r = 42;
   const circumference = 2 * Math.PI * r;
+  // Draw from empty on mount. Real value, arriving — not invented liveness.
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShown(percent));
+    return () => cancelAnimationFrame(id);
+  }, [percent]);
   return (
     <svg viewBox="0 0 110 110" width={110} height={110} role="img" aria-label={`${percent}% complete`}>
       <circle cx="55" cy="55" r={r} fill="none" stroke="var(--line)" strokeWidth="10" />
@@ -44,8 +52,9 @@ function Ring({ percent }: { percent: number }) {
         stroke="var(--accent)"
         strokeWidth="10"
         strokeLinecap="round"
-        strokeDasharray={`${(percent / 100) * circumference} ${circumference}`}
+        strokeDasharray={`${(shown / 100) * circumference} ${circumference}`}
         transform="rotate(-90 55 55)"
+        style={{ transition: "stroke-dasharray 900ms cubic-bezier(0.22, 1, 0.36, 1)" }}
       />
       <text
         x="55"
@@ -64,16 +73,54 @@ function Ring({ percent }: { percent: number }) {
   );
 }
 
-function Tile({ value, unit, label }: { value: string | number; unit?: string; label: string }) {
+function Tile({
+  value,
+  unit,
+  label,
+  tint = 1,
+  strong = false,
+}: {
+  value: string | number;
+  unit?: string;
+  label: string;
+  tint?: 0 | 1 | 2 | 3;
+  strong?: boolean;
+}) {
   return (
-    <div className="card" style={{ padding: "14px 16px" }}>
+    <div
+      className="card stage"
+      style={{
+        padding: "15px 16px",
+        background: `var(--tint-${tint})`,
+        borderColor: `var(--tint-${tint}-line)`,
+      }}
+    >
       <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
-        <span className="num" style={{ fontSize: 24, color: C.text }}>
+        <span
+          className="num"
+          style={{ fontSize: strong ? 30 : 25, color: C.text, fontWeight: 600 }}
+        >
           {value}
         </span>
         {unit && <span style={{ fontSize: 13.5, color: C.muted }}>{unit}</span>}
       </div>
       <div style={{ fontSize: 13.5, color: C.muted, marginTop: 4 }}>{label}</div>
+    </div>
+  );
+}
+
+function Bar({ percent, tint }: { percent: number; tint: string }) {
+  return (
+    <div style={{ height: 6, borderRadius: 3, background: "var(--line)", overflow: "hidden" }}>
+      <div
+        style={{
+          width: `${percent}%`,
+          height: "100%",
+          background: tint,
+          borderRadius: 3,
+          transition: "width 700ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      />
     </div>
   );
 }
@@ -96,6 +143,7 @@ export function DashboardScreen({
   const fresh = freshness(d);
   const backlog = revisionLoad(d);
   const days = daysUntil(settings.examDate);
+  const run = streak(d);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const name = settings.name?.trim();
@@ -121,10 +169,21 @@ export function DashboardScreen({
         </section>
 
         <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
-          <Tile value={days} unit="days" label="Until your exam" />
-          <Tile value={TOPICS.length} label="Topics in the syllabus" />
-          <Tile value={core.topicCount} label="Topics in your plan" />
-          <Tile value={Math.round(settings.targetCoverage * 100)} unit="%" label="Coverage target" />
+          <Tile value={days} unit="days" label="Until your exam" tint={0} strong />
+          <Tile
+            value={run.current}
+            unit={run.current === 1 ? "day" : "days"}
+            label={run.today ? "Streak — today counted" : "Streak — nothing yet today"}
+            tint={run.current > 0 ? 3 : 2}
+            strong
+          />
+          <Tile value={core.topicCount} label="Topics in your plan" tint={1} />
+          <Tile
+            value={Math.round(settings.targetCoverage * 100)}
+            unit="%"
+            label="Coverage target"
+            tint={1}
+          />
         </div>
 
         <WeeklyReview d={d} />
@@ -157,23 +216,28 @@ export function DashboardScreen({
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <Ring percent={p.percent} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              {CHECKS.map((c) => (
-                <div
-                  key={c.id}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 14,
-                    padding: "5px 0",
-                    color: C.muted,
-                  }}
-                >
-                  <span>{c.label}</span>
-                  <span className="num" style={{ color: C.text }}>
-                    {checkPercent(d, c.id)}%
-                  </span>
-                </div>
-              ))}
+              {CHECKS.map((c) => {
+                const pct = checkPercent(d, c.id);
+                return (
+                  <div key={c.id} style={{ padding: "6px 0" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: 14,
+                        color: C.muted,
+                        marginBottom: 5,
+                      }}
+                    >
+                      <span>{c.label}</span>
+                      <span className="num" style={{ color: C.text }}>
+                        {pct}%
+                      </span>
+                    </div>
+                    <Bar percent={pct} tint={C.accent} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </Card>

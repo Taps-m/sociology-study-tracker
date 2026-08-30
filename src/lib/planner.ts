@@ -390,6 +390,62 @@ function dueBy(d: Derived, by: Date, today: Date): RevisionItem[] {
   );
 }
 
+/**
+ * Days on which real work was recorded. Prior knowledge is excluded, exactly as
+ * it is from pace: ticking what you already knew is not a day of study.
+ */
+export function activeDays(d: Derived): Set<string> {
+  const days = new Set<string>();
+  const add = (at: string) => days.add(at.slice(0, 10));
+
+  for (const topicId of Object.keys(d.checks)) {
+    for (const rec of Object.values(d.checks[topicId] ?? {})) {
+      if (rec && !rec.prior) add(rec.at);
+    }
+  }
+  for (const t of d.time) add(t.at);
+  for (const a of d.attempts) add(a.at);
+  return days;
+}
+
+export interface Streak {
+  current: number;
+  best: number;
+  today: boolean;
+}
+
+/**
+ * Consecutive days worked. A streak survives a day that is still in progress —
+ * if today is blank but yesterday was not, the run is alive until midnight.
+ */
+export function streak(d: Derived, today = new Date()): Streak {
+  const days = activeDays(d);
+  const key = (dt: Date) => dt.toISOString().slice(0, 10);
+  const shift = (n: number) => new Date(today.getTime() - n * 86400000);
+
+  const doneToday = days.has(key(today));
+  let current = 0;
+  if (doneToday || days.has(key(shift(1)))) {
+    for (let i = doneToday ? 0 : 1; ; i++) {
+      if (!days.has(key(shift(i)))) break;
+      current++;
+    }
+  }
+
+  const sorted = [...days].sort();
+  let best = 0;
+  let run = 0;
+  let prev: number | null = null;
+  for (const day of sorted) {
+    const ms = Date.parse(day);
+    run = prev !== null && ms - prev === 86400000 ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = ms;
+  }
+
+  return { current, best, today: doneToday };
+}
+
 // ── queue and plan ────────────────────────────────────────────────────────
 
 export function hoursLeftOn(d: Derived, topic: Topic): number {
