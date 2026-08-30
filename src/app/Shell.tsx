@@ -7,13 +7,24 @@ import { applyTheme, C, loadTheme, type ThemeName } from "../lib/theme";
  * top always. Below 900px the rail disappears and the bar's tab strip scrolls,
  * so the whole thing still works one-handed on a phone.
  */
+/** Two letters from a name: "Tapomoy Das" gives TD, "Tapomoy" gives TA. */
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+}
+
 export function Shell({
   route,
   go,
+  name,
   children,
 }: {
   route: RouteId;
   go: (id: RouteId) => void;
+  /** Shown beside the avatar. Undefined until the user gives one. */
+  name?: string;
   children: ReactNode;
 }) {
   const [theme, setTheme] = useState<ThemeName>(loadTheme);
@@ -86,6 +97,45 @@ export function Shell({
               </button>
             ))}
           </div>
+
+          <button
+            onClick={() => go("settings")}
+            title={name ? `${name} — open settings` : "Add your name"}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              minHeight: 40,
+              padding: "0 12px 0 6px",
+              borderRadius: 999,
+              border: "1px solid var(--rail-line)",
+              background: "var(--rail-2)",
+              color: "var(--rail-text)",
+              font: "inherit",
+              fontSize: 14,
+              cursor: "pointer",
+              flex: "0 0 auto",
+            }}
+          >
+            <span
+              aria-hidden
+              style={{
+                display: "grid",
+                placeItems: "center",
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "var(--accent)",
+                color: "var(--accent-ink)",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+              }}
+            >
+              {name ? initials(name) : "+"}
+            </span>
+            <span style={{ whiteSpace: "nowrap" }}>{name ?? "Add your name"}</span>
+          </button>
 
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

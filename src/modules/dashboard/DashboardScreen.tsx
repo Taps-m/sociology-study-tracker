@@ -97,13 +97,12 @@ export function DashboardScreen({
   const days = daysUntil(settings.examDate);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const name = settings.name?.trim();
 
   return (
     <div className="dash">
       <header className="dash-full" style={{ padding: "2px 2px 0" }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>
-          {name ? `${greeting}, ${name}.` : greeting}
+          {greeting}.
         </h1>
         <p style={{ fontSize: 14, color: C.muted, margin: "6px 0 0" }}>
           <span className="num">{days}</span> days until your exam ·{" "}

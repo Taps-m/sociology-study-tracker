@@ -69,7 +69,7 @@ export default function App() {
   const onRevise = (topicId: string) => add(on.check(topicId, "revised"));
 
   return (
-    <AppShell route={route} go={go}>
+    <AppShell route={route} go={go} name={d.settings.name?.trim() || undefined}>
       {route === "dashboard" && (
         <DashboardScreen d={d} go={go} onToggle={handlers.onToggle} />
       )}
