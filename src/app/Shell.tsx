@@ -51,23 +51,30 @@ export function Shell({
           {route !== "dashboard" && (
             <button
               onClick={() => (window.history.length > 1 ? window.history.back() : go("dashboard"))}
-              aria-label="Go back"
               style={{
-                minHeight: 36,
-                minWidth: 36,
-                borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
+                minHeight: 42,
+                padding: "0 16px 0 12px",
+                borderRadius: 9,
                 border: "1px solid var(--rail-line)",
                 background: "var(--rail-2)",
                 color: "var(--rail-text)",
                 font: "inherit",
-                fontSize: 16,
+                fontSize: 15,
+                fontWeight: 600,
                 cursor: "pointer",
                 flex: "0 0 auto",
               }}
             >
-              ←
+              <span aria-hidden style={{ fontSize: 19, lineHeight: 1 }}>
+                ←
+              </span>
+              Back
             </button>
           )}
+
           <div className="tabstrip" style={{ flex: 1 }}>
             {ROUTES.map((r) => (
               <button
