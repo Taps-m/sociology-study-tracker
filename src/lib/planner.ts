@@ -226,6 +226,13 @@ export function projection(d: Derived, today = new Date()) {
     margin: Math.round((percent - 100) * 10) / 10,
     feasible: percent >= 99.9,
     ofSyllabus: Math.round((reachable / totalHours(d)) * 1000) / 10,
+    /**
+     * False when nothing has been measured yet and the projection is running on
+     * the hours the user *said* they would do. The arithmetic is sound either
+     * way, but the claim is not the same one, and rule 4 says this app never
+     * flatters. Anything showing this figure must say which it is.
+     */
+    measured: observedPace(d, 21, today) !== null,
   };
 }
 

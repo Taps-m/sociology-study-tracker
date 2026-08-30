@@ -50,6 +50,7 @@ export function WeeklyReview({ d }: { d: Derived }) {
       hoursPerWeekMeasured: observedPace(d),
       hoursPerWeekRequired: basis.requiredPace,
       projectedPercentAtCurrentPace: proj.percent,
+      projectionIsBasedOnMeasuredWork: proj.measured,
       overdueRevisionHours: revisionLoad(d),
       thisWeekNewHours: week?.hours ?? 0,
       thisWeekRevisionHours: week?.revisionHours ?? 0,
