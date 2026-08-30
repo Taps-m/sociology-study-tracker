@@ -424,6 +424,32 @@ function PaceControl({
   );
 }
 
+/**
+ * What is actually stored, in plain English.
+ *
+ * "1 events" was worse than useless: it is also exactly what a fresh setup
+ * leaves behind, so it could not distinguish "erased and set up again" from
+ * "erase did nothing" — which is precisely the question anyone reads this line
+ * to answer.
+ */
+function describeStore(events: StudyEvent[]): string {
+  const checks = events.filter((e) => e.type === "check").length;
+  const undone = events.filter((e) => e.type === "uncheck").length;
+  const answers = events.filter((e) => e.type === "attempt").length;
+
+  if (checks === 0 && answers === 0) {
+    return "Nothing recorded yet — only your settings. Stored in this browser alone.";
+  }
+
+  const parts = [
+    `${checks} ${checks === 1 ? "check" : "checks"}`,
+    answers > 0 ? `${answers} ${answers === 1 ? "answer" : "answers"}` : null,
+    undone > 0 ? `${undone} undone` : null,
+  ].filter(Boolean);
+
+  return `${parts.join(", ")}. Stored in this browser alone — clearing site data erases it.`;
+}
+
 function Backup({
   events,
   setEvents,
@@ -488,10 +514,7 @@ function Backup({
           />
         </label>
       </div>
-      <Note>
-        {message ||
-          `${events.length} events stored in this browser only. Clearing site data erases them.`}
-      </Note>
+      <Note>{message || describeStore(events)}</Note>
 
       <div style={{ marginTop: 22, paddingTop: 16, borderTop: `1px solid ${C.line}` }}>
         <div style={{ fontSize: 14.5, fontWeight: 600, marginBottom: 6 }}>Start over</div>
