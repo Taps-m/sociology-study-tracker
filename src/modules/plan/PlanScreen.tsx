@@ -4,7 +4,7 @@ import type { Topic } from "../../data/syllabus";
 import { completionOf, depthFor, hoursFor, packWeeks, type WeekPlan } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
-import { briefFor } from "../../data/briefs";
+import { briefFor, unitsWithBriefs } from "../../data/briefs";
 import { MindMap, Takeaways } from "./MindMap";
 import { ask } from "../../lib/ai";
 import { effectivePace, progress, requiredPace } from "../../lib/planner";
@@ -140,8 +140,20 @@ export function PlanScreen({ d }: { d: Derived }) {
 
   const week = weeks[Math.min(selected, weeks.length - 1)]!;
   const focusUnit = focusOf(week, d);
-  const focusPaper = week.topics.find((x) => x.unit === focusUnit)?.paper ?? 1;
-  const brief = briefFor(focusPaper, focusUnit);
+  const available = unitsWithBriefs();
+
+  // Prefer a unit this week actually covers; otherwise fall back to whatever
+  // has been written, so the map never disappears because the week's mix moved.
+  const inWeek = available.filter((a) => week.topics.some((x) => x.unit === a.unit));
+  const choices = inWeek.length > 0 ? inWeek : available;
+  const preferred =
+    choices.find((c) => c.unit === focusUnit)?.key ?? choices[0]?.key ?? "";
+  const [mapKey, setMapKey] = useState(preferred);
+  const activeKey = choices.some((c) => c.key === mapKey) ? mapKey : preferred;
+  const brief = available.find((c) => c.key === activeKey)
+    ? briefFor(Number(activeKey.split("|")[0]), activeKey.split("|")[1]!)
+    : undefined;
+
   const tabs: Tab[] = brief
     ? ["Mind map", "Overview", ...BASE_TABS]
     : ["Overview", ...BASE_TABS];
@@ -210,7 +222,41 @@ export function PlanScreen({ d }: { d: Derived }) {
           </div>
 
           <div key={active} className="fade-in">
-            {active === "Mind map" && brief && <MindMap brief={brief} />}
+            {active === "Mind map" && brief && (
+              <>
+                {choices.length > 1 && (
+                  <select
+                    value={activeKey}
+                    onChange={(e) => setMapKey(e.target.value)}
+                    aria-label="Which unit's map to show"
+                    style={{
+                      minHeight: 38,
+                      marginBottom: 12,
+                      padding: "0 10px",
+                      borderRadius: 8,
+                      background: C.raised,
+                      border: `1px solid ${C.line}`,
+                      color: C.text,
+                      font: "inherit",
+                      fontSize: 14,
+                    }}
+                  >
+                    {choices.map((c) => (
+                      <option key={c.key} value={c.key}>
+                        Paper {c.paper === 1 ? "I" : "II"} · {c.unit}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {inWeek.length === 0 && (
+                  <p style={{ fontSize: 13, color: C.muted, margin: "0 0 12px", lineHeight: 1.6 }}>
+                    No unit in this week has a written map yet, so this is the one
+                    that does.
+                  </p>
+                )}
+                <MindMap brief={brief} />
+              </>
+            )}
 
           {active === "Overview" && (
             <>

@@ -5,6 +5,8 @@ import { bandOf, completionOf, depthFor, hoursFor, isOptional } from "../../lib/
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 import { TopicRow } from "../../components/TopicRow";
+import { briefFor } from "../../data/briefs";
+import { MindMap, Takeaways } from "../plan/MindMap";
 
 type Handlers = {
   onToggle: (id: string, c: CheckId) => void;
@@ -155,6 +157,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
 
                   {isOpen && (
                     <div style={{ borderTop: `1px solid ${C.line}`, padding: "4px 12px 8px" }}>
+                      <UnitBriefPanel paper={paper} unit={unit} />
                       {topics.map((t) => (
                         <TopicRow
                           key={t.id}
@@ -171,6 +174,48 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
             })}
           </div>
         ),
+      )}
+    </div>
+  );
+}
+
+/**
+ * A unit's map and takeaways, where they have been written. Folded away by
+ * default: the topic list is what most visits are for, and the map is what a
+ * first visit or a revision pass wants.
+ */
+function UnitBriefPanel({ paper, unit }: { paper: number; unit: string }) {
+  const [open, setOpen] = useState(false);
+  const brief = briefFor(paper, unit);
+  if (!brief) return null;
+
+  return (
+    <div style={{ padding: "10px 0 4px" }}>
+      <button
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        style={{
+          minHeight: 40,
+          padding: "0 14px",
+          borderRadius: 999,
+          cursor: "pointer",
+          font: "inherit",
+          fontSize: 14,
+          fontWeight: 600,
+          border: `1px solid ${C.accent}`,
+          background: open ? C.accentSoft : "transparent",
+          color: C.accent,
+        }}
+      >
+        {open ? "Hide the map" : "Show the map for this unit"}
+      </button>
+
+      {open && (
+        <div className="fade-in" style={{ marginTop: 14 }}>
+          <MindMap brief={brief} />
+          <h3 style={{ fontSize: 15, fontWeight: 600, margin: "18px 0 8px" }}>Key takeaways</h3>
+          <Takeaways items={brief.takeaways} />
+        </div>
       )}
     </div>
   );

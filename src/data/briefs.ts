@@ -97,3 +97,11 @@ export const BRIEFS: UnitBrief[] = [
 export function briefFor(paper: number, unit: string): UnitBrief | undefined {
   return BRIEFS.find((b) => b.key === `${paper}|${unit}`);
 }
+
+/** Every unit that has a written brief, as `${paper}|${unit}`. */
+export function unitsWithBriefs(): { key: string; paper: number; unit: string }[] {
+  return BRIEFS.map((b) => {
+    const [paper, unit] = b.key.split("|");
+    return { key: b.key, paper: Number(paper), unit: unit! };
+  });
+}
