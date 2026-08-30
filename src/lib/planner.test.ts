@@ -13,14 +13,20 @@ import {
   freshness,
   intervalFor,
   observedPace,
+  packWeeks,
   progress,
   queue,
+  REVISION_WEEK_SHARE,
+  revisionHoursFor,
+  revisionLoad,
+  revisionQueue,
   revisionState,
 } from "./planner";
 
+const WEEKLY_HOURS = 10;
 const settings = on.settings({
   examDate: "2027-01-01",
-  weeklyHours: 10,
+  weeklyHours: WEEKLY_HOURS,
   targetCoverage: 0.8,
 });
 
@@ -158,6 +164,83 @@ describe("revision decay", () => {
     const stale = withRevisions([ago(60)]);
     const fresh = withRevisions([ago(1)]);
     expect(progress(stale).percent).toBe(progress(fresh).percent);
+  });
+});
+
+describe("revision reaches the week plan", () => {
+  const day = 86400000;
+  const ago = (days: number) => new Date(Date.now() - days * day).toISOString();
+
+  /** Put `n` topics into the cycle, each revised once and now well overdue. */
+  function overdue(n: number, daysAgo = 30) {
+    const events: StudyEvent[] = TOPICS.slice(0, n).map((t) => ({
+      ...on.check(t.id, "revised"),
+      at: ago(daysAgo),
+    }));
+    return build(events);
+  }
+
+  it("charges a revision pass a fraction of the first pass, never zero", () => {
+    const d = overdue(1);
+    const t = TOPICS[0];
+    expect(revisionHoursFor(d, t)).toBeLessThan(t.estHours);
+    expect(revisionHoursFor(d, t)).toBeGreaterThanOrEqual(0.25);
+  });
+
+  it("books overdue revision into the coming week", () => {
+    const d = overdue(3);
+    const week = packWeeks(d, 1)[0]!;
+    expect(week.revisions.length).toBe(3);
+    expect(week.revisionHours).toBeGreaterThan(0);
+    expect(week.totalHours).toBe(
+      Math.round((week.hours + week.revisionHours) * 10) / 10,
+    );
+  });
+
+  it("takes those hours out of new work, not out of thin air", () => {
+    const clean = packWeeks(build([]), 1)[0]!;
+    const loaded = packWeeks(overdue(6), 1)[0]!;
+    expect(loaded.revisionHours).toBeGreaterThan(0);
+    expect(loaded.hours).toBeLessThan(clean.hours);
+    expect(loaded.totalHours).toBeLessThanOrEqual(WEEKLY_HOURS + 6);
+  });
+
+  it("caps revision at half a week and carries the rest forward", () => {
+    const d = overdue(40);
+    const weeks = packWeeks(d, 3);
+    const cap = WEEKLY_HOURS * REVISION_WEEK_SHARE;
+    for (const w of weeks) {
+      // A single item may exceed the cap on its own; two must not.
+      if (w.revisions.length > 1) expect(w.revisionHours).toBeLessThanOrEqual(cap);
+    }
+    expect(weeks[1]!.revisions.length).toBeGreaterThan(0);
+    const ids = weeks.flatMap((w) => w.revisions.map((r) => r.topic.id));
+    expect(new Set(ids).size).toBe(ids.length); // never scheduled twice
+  });
+
+  it("schedules a topic that falls due later in the horizon, not just today's backlog", () => {
+    // Revised twice, last one yesterday: interval widens to 21 days, so it is
+    // not due now and not due next week — it comes due in week index 2.
+    const d = build(
+      TOPICS.slice(0, 2).flatMap((t) => [
+        { ...on.check(t.id, "revised"), at: ago(30) },
+        { ...on.check(t.id, "revised"), at: ago(1) },
+      ]),
+    );
+    expect(revisionQueue(d)).toHaveLength(0); // nothing overdue today
+    const weeks = packWeeks(d, 4);
+    expect(weeks[0]!.revisions).toHaveLength(0);
+    expect(weeks[1]!.revisions).toHaveLength(0);
+    expect(weeks[2]!.revisions.length).toBe(2);
+  });
+
+  it("reports the overdue backlog as hours", () => {
+    expect(revisionLoad(build([]))).toBe(0);
+    expect(revisionLoad(overdue(4))).toBeGreaterThan(0);
+  });
+
+  it("still leaves coverage untouched", () => {
+    expect(progress(overdue(5)).percent).toBe(progress(overdue(5, 1)).percent);
   });
 });
 

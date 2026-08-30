@@ -227,7 +227,6 @@ function DueForRevision({ d, onRevise }: { d: Derived; onRevise: (id: string) =>
 function CalibrationNote({ d }: { d: Derived }) {
   const cal = calibration(d);
   const answers = attemptStats(d);
-  const fresh = freshness(d);
 
   if (!cal.ready) {
     return (
@@ -260,14 +259,25 @@ type Handlers = {
 
 function ThisWeek({ d, ...h }: { d: Derived } & Handlers) {
   const week = packWeeks(d, 1)[0];
-  if (!week || week.topics.length === 0) {
+  if (!week || (week.topics.length === 0 && week.revisions.length === 0)) {
     return <Note>Nothing left in the queue. Every topic is at its planned depth.</Note>;
   }
+  const title =
+    week.revisionHours > 0
+      ? `${week.topics.length} topics · ${week.hours} h new · ${week.revisionHours} h revision`
+      : `${week.topics.length} topics · ${week.hours} hours`;
   return (
-    <Section title={`${week.topics.length} topics · ${week.hours} hours`}>
+    <Section title={title}>
       {week.topics.map((t) => (
         <TopicRow key={t.id} topic={t} d={d} {...h} optional={isOptional(d, t.id)} />
       ))}
+      {week.revisionHours > 0 && (
+        <Note>
+          {week.revisions.length} revisions fall due this week, booked at {week.revisionHours} of
+          your {week.totalHours} planned hours. Revision is taken out of the week before new
+          topics, so a backlog slows new coverage instead of being quietly ignored.
+        </Note>
+      )}
     </Section>
   );
 }

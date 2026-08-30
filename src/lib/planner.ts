@@ -258,6 +258,7 @@ export function attemptsFor(d: Derived, topicId: string) {
 export const REVISION_INTERVALS = [7, 21, 45, 90] as const;
 
 export function intervalFor(count: number): number {
+  if (count < 1) return REVISION_INTERVALS[0];
   return REVISION_INTERVALS[Math.min(count, REVISION_INTERVALS.length) - 1];
 }
 
@@ -327,6 +328,68 @@ export function freshness(d: Derived, today = new Date()) {
   };
 }
 
+/**
+ * What one revision pass costs, as a share of the topic's first-pass hours.
+ * Going over something you already know is far cheaper than learning it, but it
+ * is not free, and pretending it is free is how a plan quietly overpromises.
+ */
+export const REVISION_COST = 0.2;
+const MIN_REVISION_HOURS = 0.25;
+
+/**
+ * Ceiling on how much of a week revision may take. Without it, a backlog after a
+ * bad fortnight would eat every hour and no new topic would ever be opened again.
+ * The overflow rolls into the following week rather than disappearing.
+ */
+export const REVISION_WEEK_SHARE = 0.5;
+
+export function revisionHoursFor(d: Derived, topic: Topic): number {
+  return Math.max(
+    MIN_REVISION_HOURS,
+    Math.round(hoursFor(d, topic) * REVISION_COST * 10) / 10,
+  );
+}
+
+export interface RevisionItem extends DueTopic {
+  hours: number;
+}
+
+/** Revisions already overdue today, most overdue first, with what they cost. */
+export function revisionQueue(d: Derived, today = new Date()): RevisionItem[] {
+  return dueForRevision(d, today).map((x) => ({
+    ...x,
+    hours: revisionHoursFor(d, x.topic),
+  }));
+}
+
+/** Hours of revision currently overdue. */
+export function revisionLoad(d: Derived, today = new Date()): number {
+  return Math.round(revisionQueue(d, today).reduce((s, r) => s + r.hours, 0) * 10) / 10;
+}
+
+/**
+ * Every topic in the cycle that falls due on or before `by`, soonest first.
+ * Due dates are known exactly, so a week's revision load is a fact rather than
+ * an estimate — no prediction is involved.
+ */
+function dueBy(d: Derived, by: Date, today: Date): RevisionItem[] {
+  const out: RevisionItem[] = [];
+  for (const topic of TOPICS) {
+    const r = revisionState(d, topic.id, today);
+    if (!r.inCycle || !r.dueAt) continue;
+    if (new Date(r.dueAt).getTime() > by.getTime()) continue;
+    out.push({
+      topic,
+      overdueDays: r.overdueDays,
+      count: r.count,
+      hours: revisionHoursFor(d, topic),
+    });
+  }
+  return out.sort(
+    (a, b) => b.overdueDays - a.overdueDays || bandOf(b.topic) - bandOf(a.topic),
+  );
+}
+
 // ── queue and plan ────────────────────────────────────────────────────────
 
 export function hoursLeftOn(d: Derived, topic: Topic): number {
@@ -343,26 +406,70 @@ export function queue(d: Derived): Topic[] {
 export interface WeekPlan {
   weekIndex: number;
   topics: Topic[];
+  /** Hours of new work. Unchanged meaning — the UI's existing figure. */
   hours: number;
+  /** Revisions falling due in this week, most overdue first. */
+  revisions: RevisionItem[];
+  revisionHours: number;
+  /** New work plus revision. What the week actually asks of you. */
+  totalHours: number;
 }
 
-export function packWeeks(d: Derived, weekCount: number): WeekPlan[] {
+/**
+ * Revision is booked before new work, because a topic left past its interval
+ * decays whether or not the plan admits it. What is left of the weekly budget
+ * then goes to new topics — so a growing revision load visibly slows new
+ * coverage instead of silently making the projection a lie.
+ */
+export function packWeeks(d: Derived, weekCount: number, today = new Date()): WeekPlan[] {
   if (!d.settings) return [];
   const budget = d.settings.weeklyHours;
   const pending = queue(d);
   const weeks: WeekPlan[] = [];
+  const scheduled = new Set<string>();
   let i = 0;
+  let carried: RevisionItem[] = [];
 
-  for (let w = 0; w < weekCount && i < pending.length; w++) {
-    const week: WeekPlan = { weekIndex: w, topics: [], hours: 0 };
+  for (let w = 0; w < weekCount; w++) {
+    const weekEnd = new Date(today.getTime() + (w + 1) * 7 * 86400000);
+    const newlyDue = dueBy(d, weekEnd, today).filter((r) => !scheduled.has(r.topic.id));
+    const candidates = [...carried, ...newlyDue];
+
+    const week: WeekPlan = {
+      weekIndex: w,
+      topics: [],
+      hours: 0,
+      revisions: [],
+      revisionHours: 0,
+      totalHours: 0,
+    };
+
+    const revisionCap = budget * REVISION_WEEK_SHARE;
+    carried = [];
+    for (const r of candidates) {
+      if (week.revisionHours + r.hours > revisionCap && week.revisions.length > 0) {
+        carried.push(r);
+        continue;
+      }
+      week.revisions.push(r);
+      week.revisionHours = Math.round((week.revisionHours + r.hours) * 10) / 10;
+      scheduled.add(r.topic.id);
+    }
+
+    const left = Math.max(0, budget - week.revisionHours);
     while (i < pending.length) {
       const cost = hoursLeftOn(d, pending[i]);
-      if (week.hours + cost > budget && week.topics.length > 0) break;
+      if (week.hours + cost > left && week.topics.length > 0) break;
+      if (week.hours + cost > left && left <= 0) break;
       week.topics.push(pending[i]);
       week.hours = Math.round((week.hours + cost) * 10) / 10;
       i++;
     }
+
+    week.totalHours = Math.round((week.hours + week.revisionHours) * 10) / 10;
     weeks.push(week);
+
+    if (i >= pending.length && carried.length === 0 && week.revisions.length === 0) break;
   }
   return weeks;
 }
