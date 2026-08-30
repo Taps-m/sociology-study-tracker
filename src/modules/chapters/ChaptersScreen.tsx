@@ -67,7 +67,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
               background: C.raised,
               color: C.text,
               font: "inherit",
-              fontSize: 13.5,
+              fontSize: 15,
             }}
           />
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -82,7 +82,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
                   borderRadius: 999,
                   cursor: "pointer",
                   font: "inherit",
-                  fontSize: 12.5,
+                  fontSize: 14,
                   border: `1px solid ${filter === f.id ? C.accent : C.line}`,
                   background: filter === f.id ? C.accentSoft : "transparent",
                   color: filter === f.id ? C.accent : C.muted,
@@ -93,7 +93,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
             ))}
           </div>
         </div>
-        <p style={{ fontSize: 12, color: C.muted, margin: "12px 0 0" }}>
+        <p style={{ fontSize: 13.5, color: C.muted, margin: "12px 0 0" }}>
           <span className="num">{visible}</span> of{" "}
           <span className="num">{TOPICS.length}</span> topics shown
         </p>
@@ -105,7 +105,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
             <h2
               style={{
                 fontFamily: C.mono,
-                fontSize: 11,
+                fontSize: 12.5,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: C.muted,
@@ -138,14 +138,14 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
                       background: "transparent",
                       color: C.text,
                       font: "inherit",
-                      fontSize: 14,
+                      fontSize: 15.5,
                       fontWeight: 600,
                       textAlign: "left",
                       cursor: "pointer",
                     }}
                   >
                     <span style={{ flex: 1, minWidth: 0 }}>{unit}</span>
-                    <span className="num" style={{ fontSize: 12, color: C.muted, whiteSpace: "nowrap" }}>
+                    <span className="num" style={{ fontSize: 13.5, color: C.muted, whiteSpace: "nowrap" }}>
                       {done}/{all.length} · {hours}h
                     </span>
                     <span aria-hidden style={{ color: C.muted }}>

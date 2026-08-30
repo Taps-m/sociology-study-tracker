@@ -23,10 +23,10 @@ export function Shell({
     <div className="shell">
       <nav className="rail" aria-label="Sections">
         <div style={{ padding: "6px 12px 18px" }}>
-          <div style={{ color: "var(--rail-text)", fontSize: 15, fontWeight: 700 }}>
+          <div style={{ color: "var(--rail-text)", fontSize: 16, fontWeight: 700 }}>
             WBCS Sociology
           </div>
-          <div style={{ color: "var(--rail-muted)", fontSize: 11.5, marginTop: 3 }}>
+          <div style={{ color: "var(--rail-muted)", fontSize: 13, marginTop: 3 }}>
             Understand society. Write better.
           </div>
         </div>
@@ -43,7 +43,7 @@ export function Shell({
             </span>
             <span style={{ flex: 1 }}>{r.label}</span>
             {!r.built && (
-              <span style={{ fontSize: 10, color: "var(--rail-muted)" }}>soon</span>
+              <span style={{ fontSize: 12, color: "var(--rail-muted)" }}>soon</span>
             )}
           </button>
         ))}
@@ -51,7 +51,7 @@ export function Shell({
 
       <div style={{ minWidth: 0 }}>
         <header className="topbar">
-          <strong style={{ fontSize: 14, whiteSpace: "nowrap" }}>Study Hub</strong>
+          <strong style={{ fontSize: 15.5, whiteSpace: "nowrap" }}>Study Hub</strong>
 
           <div className="tabstrip" style={{ flex: 1 }}>
             {ROUTES.filter((r) => r.built).map((r) => (
@@ -76,7 +76,7 @@ export function Shell({
               background: "var(--rail-2)",
               color: "var(--rail-text)",
               cursor: "pointer",
-              fontSize: 14,
+              fontSize: 15.5,
             }}
           >
             {theme === "dark" ? "☀" : "☾"}
@@ -115,7 +115,7 @@ export function Card({
             marginBottom: 12,
           }}
         >
-          <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>{title}</h2>
+          <h2 style={{ fontSize: 15.5, fontWeight: 600, margin: 0 }}>{title}</h2>
           {action}
         </div>
       )}
@@ -128,11 +128,11 @@ export function Card({
 export function NotBuiltYet({ label, needs }: { label: string; needs: string[] }) {
   return (
     <Card title={label}>
-      <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, marginTop: 0 }}>
+      <p style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.7, marginTop: 0 }}>
         This module has its slot but nothing behind it. It is blocked on content,
         not on code:
       </p>
-      <ul style={{ fontSize: 13, color: C.muted, lineHeight: 1.9, margin: 0, paddingLeft: 18 }}>
+      <ul style={{ fontSize: 14.5, color: C.muted, lineHeight: 1.9, margin: 0, paddingLeft: 18 }}>
         {needs.map((n) => (
           <li key={n}>{n}</li>
         ))}

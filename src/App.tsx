@@ -156,15 +156,15 @@ function PlanScreen({ d }: { d: Derived }) {
           key={w.weekIndex}
           title={w.weekIndex === 0 ? "This week" : `Week ${w.weekIndex + 1}`}
           action={
-            <span className="num" style={{ fontSize: 12, color: C.muted }}>
+            <span className="num" style={{ fontSize: 13.5, color: C.muted }}>
               {w.totalHours} h
             </span>
           }
         >
           {w.topics.length === 0 && w.revisions.length === 0 ? (
-            <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>Clear.</p>
+            <p style={{ fontSize: 14.5, color: C.muted, margin: 0 }}>Clear.</p>
           ) : (
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, lineHeight: 1.9 }}>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 15, lineHeight: 1.9 }}>
               {w.topics.map((t) => (
                 <li key={t.id}>{t.name}</li>
               ))}
@@ -177,7 +177,7 @@ function PlanScreen({ d }: { d: Derived }) {
           )}
         </Card>
       ))}
-      <p style={{ fontSize: 12, color: C.muted, lineHeight: 1.7 }}>
+      <p style={{ fontSize: 13.5, color: C.muted, lineHeight: 1.7 }}>
         Only this week is fixed. Every week after it is recomputed from what is
         actually left each time you open the app, so falling behind reshapes the
         plan instead of breaking it.
@@ -192,7 +192,7 @@ function AnswersScreen({ d }: { d: Derived }) {
     <div className="grid" style={{ gap: 14 }}>
       <Card title="Answer practice">
         {s.total === 0 ? (
-          <p style={{ fontSize: 13.5, color: C.muted, margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 15, color: C.muted, margin: 0, lineHeight: 1.7 }}>
             No answers written yet — and that is the thing the exam actually scores.
             Attempts are logged per topic: open a topic in Chapters and record the
             marks and the minutes it took.
@@ -203,13 +203,13 @@ function AnswersScreen({ d }: { d: Derived }) {
               <div className="num" style={{ fontSize: 28 }}>
                 {s.total}
               </div>
-              <div style={{ fontSize: 12, color: C.muted }}>answers written</div>
+              <div style={{ fontSize: 13.5, color: C.muted }}>answers written</div>
             </div>
             <div>
               <div className="num" style={{ fontSize: 28, color: C.accent }}>
                 {s.averagePercent}%
               </div>
-              <div style={{ fontSize: 12, color: C.muted }}>average score</div>
+              <div style={{ fontSize: 13.5, color: C.muted }}>average score</div>
             </div>
           </div>
         )}
@@ -254,7 +254,7 @@ function Greeting({ d, onName }: { d: Derived; onName: (name: string) => void })
               border: `1px solid ${C.line}`,
               color: C.text,
               fontFamily: C.sans,
-              fontSize: 14,
+              fontSize: 15.5,
             }}
           />
           <button
@@ -267,7 +267,7 @@ function Greeting({ d, onName }: { d: Derived; onName: (name: string) => void })
               background: C.accent,
               color: C.surface,
               fontFamily: C.sans,
-              fontSize: 13,
+              fontSize: 14.5,
               fontWeight: 600,
               cursor: "pointer",
             }}
@@ -277,7 +277,7 @@ function Greeting({ d, onName }: { d: Derived; onName: (name: string) => void })
         </form>
       )}
 
-      <p style={{ fontSize: 12, color: C.muted, margin: "6px 0 16px" }}>
+      <p style={{ fontSize: 13.5, color: C.muted, margin: "6px 0 16px" }}>
         Welcome back to your sociology tracker.
       </p>
 
@@ -291,13 +291,13 @@ function Greeting({ d, onName }: { d: Derived; onName: (name: string) => void })
           borderRadius: 10,
         }}
       >
-        <blockquote style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: C.text }}>
+        <blockquote style={{ margin: 0, fontSize: 15.5, lineHeight: 1.65, color: C.text }}>
           {quote.text}
         </blockquote>
         <figcaption
           style={{
             fontFamily: C.mono,
-            fontSize: 11,
+            fontSize: 12.5,
             color: C.muted,
             marginTop: 10,
             letterSpacing: "0.04em",
@@ -325,16 +325,16 @@ function Telemetry({ d }: { d: Derived }) {
   return (
     <>
       <Row>
-        <span style={{ fontSize: 11, letterSpacing: "0.12em", color: C.muted }}>
+        <span style={{ fontSize: 12.5, letterSpacing: "0.12em", color: C.muted }}>
           sociology · wbcs
         </span>
-        <span style={{ fontSize: 13, color: C.accent }}>T-{days}d</span>
+        <span style={{ fontSize: 14.5, color: C.accent }}>T-{days}d</span>
       </Row>
 
       <div style={{ display: "flex", alignItems: "flex-end", gap: 8, margin: "20px 0 4px" }}>
         <span style={{ fontSize: 44, lineHeight: 1 }}>{p.percent}</span>
-        <span style={{ fontSize: 15, color: C.muted, paddingBottom: 4 }}>%</span>
-        <span style={{ fontSize: 11, color: C.muted, marginLeft: "auto", paddingBottom: 6 }}>
+        <span style={{ fontSize: 16, color: C.muted, paddingBottom: 4 }}>%</span>
+        <span style={{ fontSize: 12.5, color: C.muted, marginLeft: "auto", paddingBottom: 6 }}>
           {p.doneHours} h done · target {targetPct}%
         </span>
       </div>
@@ -350,7 +350,7 @@ function Telemetry({ d }: { d: Derived }) {
         />
       </div>
 
-      <div style={{ fontSize: 11, color: C.muted, marginBottom: 18 }}>
+      <div style={{ fontSize: 12.5, color: C.muted, marginBottom: 18 }}>
         {core.topicsComplete} of {core.topicCount} topics at planned depth ·{" "}
         {TOPICS.length - core.topicCount} skipped
       </div>
@@ -395,8 +395,8 @@ function Telemetry({ d }: { d: Derived }) {
         <Section title="Three ways to close the gap">
           {options(d).map((o) => (
             <Row key={o.label} pad>
-              <span style={{ fontSize: 12 }}>{o.label}</span>
-              <span style={{ fontSize: 12, color: C.accent, whiteSpace: "nowrap" }}>{o.outcome}</span>
+              <span style={{ fontSize: 13.5 }}>{o.label}</span>
+              <span style={{ fontSize: 13.5, color: C.accent, whiteSpace: "nowrap" }}>{o.outcome}</span>
             </Row>
           ))}
         </Section>
@@ -413,12 +413,12 @@ function DueForRevision({ d, onRevise }: { d: Derived; onRevise: (id: string) =>
     <Section title={`${due.length} due for revision`}>
       {due.map(({ topic, overdueDays, count }) => (
         <Row key={topic.id} pad>
-          <span style={{ fontSize: 12, lineHeight: 1.45 }}>
+          <span style={{ fontSize: 13.5, lineHeight: 1.45 }}>
             {topic.name}
-            <span style={{ fontSize: 11, color: C.warn, marginLeft: 8, whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 12.5, color: C.warn, marginLeft: 8, whiteSpace: "nowrap" }}>
               {overdueDays}d overdue
             </span>
-            <span style={{ fontSize: 11, color: C.muted, marginLeft: 8 }}>
+            <span style={{ fontSize: 12.5, color: C.muted, marginLeft: 8 }}>
               revised {count}×
             </span>
           </span>
@@ -426,7 +426,7 @@ function DueForRevision({ d, onRevise }: { d: Derived; onRevise: (id: string) =>
             onClick={() => onRevise(topic.id)}
             style={{
               font: "inherit",
-              fontSize: 11,
+              fontSize: 12.5,
               padding: "8px 12px",
               minHeight: 36,
               borderRadius: 4,
@@ -530,7 +530,7 @@ function PaceControl({
         {s.weeklyHours} hours a week · exam on {s.examDate}
       </Note>
 
-      <div style={{ fontSize: 11, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
+      <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
         How much of the syllabus you are aiming for
       </div>
       <input
@@ -584,7 +584,7 @@ function Backup({
 
   const btn = {
     font: "inherit",
-    fontSize: 12,
+    fontSize: 13.5,
     padding: "10px 14px",
     minHeight: 44,
     borderRadius: 4,
@@ -655,7 +655,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
           <div
             style={{
               fontFamily: C.mono,
-              fontSize: 11,
+              fontSize: 12.5,
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: C.muted,
@@ -666,7 +666,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
           <h1 style={{ fontSize: 24, fontWeight: 600, margin: "10px 0 6px", letterSpacing: "-0.01em" }}>
             Before we start
           </h1>
-          <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.6 }}>
             Four questions. All of it can be changed later.
           </p>
         </header>
@@ -675,7 +675,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
           <section style={panelStyle}>
             <label
               htmlFor="setup-name"
-              style={{ display: "block", fontSize: 13, color: C.text, marginBottom: 10 }}
+              style={{ display: "block", fontSize: 14.5, color: C.text, marginBottom: 10 }}
             >
               What should I call you?
             </label>
@@ -694,7 +694,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
                 border: `1px solid ${C.line}`,
                 color: C.text,
                 fontFamily: C.sans,
-                fontSize: 14,
+                fontSize: 15.5,
               }}
             />
           </section>
@@ -734,10 +734,10 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
           </Field>
 
           <section style={panelStyle}>
-            <div style={{ fontSize: 13, color: C.text, marginBottom: 4 }}>
+            <div style={{ fontSize: 14.5, color: C.text, marginBottom: 4 }}>
               Already know any of this?
             </div>
-            <div style={{ fontSize: 12, color: C.muted, marginBottom: 14, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 13.5, color: C.muted, marginBottom: 14, lineHeight: 1.6 }}>
               Tick the units you have studied before. They start part-complete instead of at zero.
             </div>
 
@@ -746,7 +746,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
                 <div
                   style={{
                     fontFamily: C.mono,
-                    fontSize: 10,
+                    fontSize: 12,
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
                     color: C.muted,
@@ -765,7 +765,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
                         aria-pressed={isOn}
                         style={{
                           fontFamily: C.sans,
-                          fontSize: 12,
+                          fontSize: 13.5,
                           padding: "8px 12px",
                           minHeight: 36,
                           borderRadius: 999,
@@ -783,7 +783,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
                 </div>
               </div>
             ))}
-            <div style={{ fontSize: 11, color: C.muted }}>
+            <div style={{ fontSize: 12.5, color: C.muted }}>
               {known.length === 0 ? "Nothing ticked — starting from zero." : `${known.length} ticked.`}
             </div>
           </section>
@@ -806,9 +806,9 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
               >
                 {reachable}%
               </span>
-              <span style={{ fontSize: 13, color: C.muted }}>of the syllabus at this pace</span>
+              <span style={{ fontSize: 14.5, color: C.muted }}>of the syllabus at this pace</span>
             </div>
-            <p style={{ fontSize: 12, color: C.muted, lineHeight: 1.7, margin: "10px 0 0" }}>
+            <p style={{ fontSize: 13.5, color: C.muted, lineHeight: 1.7, margin: "10px 0 0" }}>
               {meetsTarget
                 ? `That clears your ${target}% target with room to spare.`
                 : `That falls short of your ${target}% target. Reaching it needs about ${weeklyNeeded} hours a week — or a longer run-up. You can also leave it and close the gap later.`}
@@ -830,7 +830,7 @@ function Setup({ onDone }: { onDone: (s: Settings, known: string[]) => void }) {
             borderRadius: 8,
             color: C.surface,
             fontFamily: C.sans,
-            fontSize: 14,
+            fontSize: 15.5,
             fontWeight: 600,
             cursor: "pointer",
           }}
@@ -865,7 +865,7 @@ function Field({
   return (
     <section style={panelStyle}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-        <span style={{ fontSize: 13, color: C.text, lineHeight: 1.4 }}>{label}</span>
+        <span style={{ fontSize: 14.5, color: C.text, lineHeight: 1.4 }}>{label}</span>
         <span style={{ whiteSpace: "nowrap" }}>
           <span
             style={{
@@ -877,12 +877,12 @@ function Field({
           >
             {value}
           </span>
-          <span style={{ fontSize: 12, color: C.muted, marginLeft: 5 }}>{unit}</span>
+          <span style={{ fontSize: 13.5, color: C.muted, marginLeft: 5 }}>{unit}</span>
         </span>
       </div>
       <div style={{ marginTop: 10 }}>{children}</div>
       {sub && (
-        <div style={{ fontFamily: C.mono, fontSize: 11, color: C.muted, marginTop: 8 }}>{sub}</div>
+        <div style={{ fontFamily: C.mono, fontSize: 12.5, color: C.muted, marginTop: 8 }}>{sub}</div>
       )}
     </section>
   );
@@ -913,21 +913,26 @@ function Shell({ children, align = "center" }: { children: ReactNode; align?: st
 function Cell({ label, value, unit, warn }: { label: string; value: number | string; unit: string; warn?: boolean }) {
   return (
     <div style={{ background: C.panel, padding: 10 }}>
-      <div style={{ fontSize: 11, color: C.muted, letterSpacing: "0.08em" }}>{label}</div>
+      <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em" }}>{label}</div>
       <div style={{ fontSize: 19, marginTop: 3, color: warn ? C.warn : C.text }}>
         {value}
-        <span style={{ fontSize: 11, color: C.muted }}> {unit}</span>
+        <span style={{ fontSize: 12.5, color: C.muted }}> {unit}</span>
       </div>
     </div>
   );
 }
 
+/**
+ * Every legacy screen builds out of this, so it is the one place that decides
+ * whether Today, Revision, Progress and Settings look like the rest of the app.
+ * It is now the same card the modules use.
+ */
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div style={{ marginTop: 22, borderTop: `1px solid ${C.line}`, paddingTop: 14 }}>
-      <div style={{ fontSize: 11, color: C.muted, letterSpacing: "0.08em", marginBottom: 4 }}>{title}</div>
+    <section className="card" style={{ padding: 18, marginTop: 14 }}>
+      <h2 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 12px" }}>{title}</h2>
       {children}
-    </div>
+    </section>
   );
 }
 
@@ -949,5 +954,5 @@ function Row({ children, pad }: { children: ReactNode; pad?: boolean }) {
 }
 
 function Note({ children }: { children: ReactNode }) {
-  return <div style={{ fontSize: 11, color: C.muted, marginTop: 10, lineHeight: 1.6 }}>{children}</div>;
+  return <div style={{ fontSize: 12.5, color: C.muted, marginTop: 10, lineHeight: 1.6 }}>{children}</div>;
 }

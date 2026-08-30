@@ -70,9 +70,9 @@ function Tile({ value, unit, label }: { value: string | number; unit?: string; l
         <span className="num" style={{ fontSize: 24, color: C.text }}>
           {value}
         </span>
-        {unit && <span style={{ fontSize: 12, color: C.muted }}>{unit}</span>}
+        {unit && <span style={{ fontSize: 13.5, color: C.muted }}>{unit}</span>}
       </div>
-      <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>{label}</div>
+      <div style={{ fontSize: 13.5, color: C.muted, marginTop: 4 }}>{label}</div>
     </div>
   );
 }
@@ -107,7 +107,7 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 700, letterSpacing: "-0.02em" }}>
             {name ? `${greeting}, ${name}.` : "Crack WBCS Sociology"}
           </h1>
-          <p style={{ margin: "8px 0 0", fontSize: 13.5, color: "var(--rail-muted)" }}>
+          <p style={{ margin: "8px 0 0", fontSize: 15, color: "var(--rail-muted)" }}>
             Concept-driven · PYQ-focused · Answer-oriented
           </p>
         </section>
@@ -129,7 +129,7 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
                 background: "transparent",
                 color: C.accent,
                 font: "inherit",
-                fontSize: 12.5,
+                fontSize: 14,
                 cursor: "pointer",
               }}
             >
@@ -139,7 +139,7 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
         >
           {week && (week.topics.length > 0 || week.revisions.length > 0) ? (
             <>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, lineHeight: 2 }}>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 15, lineHeight: 2 }}>
                 {week.topics.slice(0, 4).map((t) => (
                   <li key={t.id}>{t.name}</li>
                 ))}
@@ -149,20 +149,20 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
                   </li>
                 ))}
               </ul>
-              <p style={{ fontSize: 12, color: C.muted, margin: "12px 0 0" }}>
+              <p style={{ fontSize: 13.5, color: C.muted, margin: "12px 0 0" }}>
                 This week: {week.hours} h new work
                 {week.revisionHours > 0 && ` · ${week.revisionHours} h revision`}
               </p>
             </>
           ) : (
-            <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>
+            <p style={{ fontSize: 14.5, color: C.muted, margin: 0 }}>
               Nothing queued. Every topic is at its planned depth.
             </p>
           )}
         </Card>
 
         <Card title="Where the time is going">
-          <p style={{ fontSize: 13.5, lineHeight: 1.8, margin: 0, color: C.text }}>
+          <p style={{ fontSize: 15, lineHeight: 1.8, margin: 0, color: C.text }}>
             You need <strong className="num">{need}</strong> hours a week to reach{" "}
             {Math.round(settings.targetCoverage * 100)}% by exam day.{" "}
             {proj.feasible ? (
@@ -174,7 +174,7 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
             )}
           </p>
           {backlog > 0 && (
-            <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0", lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: C.muted, margin: "10px 0 0", lineHeight: 1.7 }}>
               {backlog} hours of revision are overdue. Those hours come out of the week
               before new topics, so the backlog slows new coverage rather than being ignored.
             </p>
@@ -193,7 +193,7 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    fontSize: 12.5,
+                    fontSize: 14,
                     padding: "5px 0",
                     color: C.muted,
                   }}
@@ -226,7 +226,7 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
               }}
             />
           </div>
-          <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0" }}>
+          <p style={{ fontSize: 14, color: C.muted, margin: "10px 0 0" }}>
             <span className="num">{core.topicsComplete}</span> of{" "}
             <span className="num">{core.topicCount}</span> planned topics at depth
             {fresh.percent !== null && ` · ${fresh.percent}% of revision still fresh`}
@@ -237,10 +237,10 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
           className="card"
           style={{ padding: 16, borderLeft: `3px solid ${C.accent}` }}
         >
-          <blockquote style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7, fontStyle: "italic" }}>
+          <blockquote style={{ margin: 0, fontSize: 15, lineHeight: 1.7, fontStyle: "italic" }}>
             “{quote.text}”
           </blockquote>
-          <div style={{ fontFamily: C.mono, fontSize: 11, color: C.muted, marginTop: 10 }}>
+          <div style={{ fontFamily: C.mono, fontSize: 12.5, color: C.muted, marginTop: 10 }}>
             {quote.who} · {quote.where}
           </div>
         </section>

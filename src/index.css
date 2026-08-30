@@ -220,11 +220,18 @@ input[type="range"]::-moz-range-thumb {
 
 .main {
   padding: 20px 16px 64px;
+  font-size: 15px;
+  line-height: 1.6;
 }
 @media (min-width: 900px) {
   .main {
-    padding: 24px 28px 64px;
+    padding: 28px 32px 72px;
   }
+}
+/* Long measures are hard to read. Cap the content, centre it on wide screens. */
+.main > * {
+  max-width: 1180px;
+  margin-inline: auto;
 }
 
 .card {
@@ -240,7 +247,7 @@ input[type="range"]::-moz-range-thumb {
 }
 @media (min-width: 1100px) {
   .grid-main {
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) 348px;
     align-items: start;
   }
 }

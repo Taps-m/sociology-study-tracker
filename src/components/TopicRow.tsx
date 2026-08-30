@@ -15,7 +15,7 @@ import { C } from "../lib/theme";
 
 const chip = {
   font: "inherit",
-  fontSize: 11,
+  fontSize: 12.5,
   padding: "6px 10px",
   minHeight: 32,
   borderRadius: 4,
@@ -58,7 +58,7 @@ export function TopicRow({
   return (
     <div style={{ padding: "12px 0", borderBottom: `1px solid ${C.hair}` }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <span style={{ fontSize: 12.5, color: atDepth || optional ? C.muted : C.text, lineHeight: 1.45 }}>
+        <span style={{ fontSize: 14, color: atDepth || optional ? C.muted : C.text, lineHeight: 1.45 }}>
           {topic.name}
           {topic.pyq > 0 && (
             <Tag color={C.accent} title="times asked in WBCS Main since 2018">
@@ -68,7 +68,7 @@ export function TopicRow({
           {depth > 0 && depth < 1 && <Tag>{depthLabel(depth)} depth</Tag>}
           {optional && <Tag>optional</Tag>}
         </span>
-        <span style={{ fontSize: 11, color: atDepth ? C.accent : C.muted, whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: 12.5, color: atDepth ? C.accent : C.muted, whiteSpace: "nowrap" }}>
           {atDepth ? "at depth" : `${hoursLeftOn(d, topic)} h`}
         </span>
       </div>
@@ -107,14 +107,14 @@ export function TopicRow({
             </button>
           );
         })}
-        <span style={{ fontSize: 11, color: C.muted, alignSelf: "center", marginLeft: "auto" }}>
+        <span style={{ fontSize: 12.5, color: C.muted, alignSelf: "center", marginLeft: "auto" }}>
           {pct}%
         </span>
       </div>
 
       {asking && onLogTime && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 9, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 11, color: C.muted }}>roughly how long?</span>
+          <span style={{ fontSize: 12.5, color: C.muted }}>roughly how long?</span>
           {([["30m", 30], ["1h", 60], ["2h", 120], ["3h+", 180]] as const).map(([label, mins]) => (
             <button
               key={label}
@@ -151,7 +151,7 @@ export function TopicRow({
       {onAttempt && (
         <div style={{ marginTop: 9 }}>
           {attempts.length > 0 && (
-            <span style={{ fontSize: 11, color: C.muted, marginRight: 10 }}>
+            <span style={{ fontSize: 12.5, color: C.muted, marginRight: 10 }}>
               {attempts.length} answer{attempts.length > 1 ? "s" : ""} written ·{" "}
               {Math.round(
                 (attempts.reduce((s, a) => s + a.marks, 0) /
@@ -171,7 +171,7 @@ export function TopicRow({
           ) : (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
               <Num value={marks} onChange={setMarks} placeholder="marks" />
-              <span style={{ fontSize: 11, color: C.muted }}>/ 40 in</span>
+              <span style={{ fontSize: 12.5, color: C.muted }}>/ 40 in</span>
               <Num value={minutes} onChange={setMinutes} placeholder="mins" />
               <button
                 onClick={() => {
@@ -215,7 +215,7 @@ function Tag({
     <span
       title={title}
       style={{
-        fontSize: 10,
+        fontSize: 12,
         color,
         border: `1px solid ${C.line}`,
         borderRadius: 3,
@@ -246,7 +246,7 @@ function Num({
       onChange={(e) => onChange(e.target.value)}
       style={{
         font: "inherit",
-        fontSize: 11,
+        fontSize: 12.5,
         width: 64,
         minHeight: 32,
         padding: "6px 8px",
