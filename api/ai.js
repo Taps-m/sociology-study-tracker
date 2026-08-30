@@ -159,9 +159,13 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
+  // A browser always sends Origin on a cross-origin POST; curl sends none. The
+  // earlier check skipped the test when Origin was absent, so anything that was
+  // not a browser walked straight past it. With ALLOWED_ORIGIN set, a missing
+  // Origin is now refused too.
   const origin = req.headers.origin;
   const allowed = process.env.ALLOWED_ORIGIN;
-  if (allowed && origin && origin !== allowed) {
+  if (allowed && origin !== allowed) {
     return res.status(403).json({ error: "origin not allowed" });
   }
 
