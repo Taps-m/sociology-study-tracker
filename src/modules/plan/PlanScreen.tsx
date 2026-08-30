@@ -328,6 +328,15 @@ function WeekInsight({ d, week }: { d: Derived; week: WeekPlan }) {
 
   return (
     <div>
+      <p style={{ fontSize: 14.5, lineHeight: 1.75, margin: "0 0 14px", color: C.text }}>
+        {week.topics.length} topics are scheduled this week. This asks the AI what
+        ties them together, which one to open first, and the link between them an
+        examiner is most likely to reward.
+      </p>
+      <p style={{ fontSize: 13, color: C.muted, margin: "0 0 14px", lineHeight: 1.6 }}>
+        It is given your topic list and how often each was asked between 2018 and
+        2023. It cannot invent a number — it only interprets those.
+      </p>
       <button
         onClick={run}
         disabled={busy}
