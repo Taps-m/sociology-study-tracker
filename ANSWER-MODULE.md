@@ -68,10 +68,11 @@ your estimate and the score is itself a finding, and a candidate who
 over-rates themselves by eight marks has learned something worth knowing before
 exam day rather than after it.
 
-**4. Evaluate (optional).** If the answer was typed, the AI returns the five
-criterion scores and one concrete rewrite of the weakest part. About ₹1 per
-answer, under the existing daily cap. If it was written on paper, the attempt is
-recorded with the self-mark alone and still counts everywhere below.
+**4. Evaluate (optional).** Photograph the page. The model reads images, so a
+handwritten answer is scored against the same rubric as a typed one: five
+criterion scores and one concrete rewrite of the weakest part. Roughly ₹1–2 per
+answer, under the existing daily cap. Skipping this still records the attempt
+with the self-mark, and it counts everywhere below.
 
 ## What the record then makes possible
 
@@ -102,11 +103,38 @@ This is the strongest argument for the module. Right now the planner knows only
 what you have *read*. Marks are the only signal in the app that measures what
 the exam measures.
 
+## Settled: paper, photographed
+
+Answers are written by hand. Not as a concession to habit — because a keyboard
+allows copy and paste, and an answer you can paste is not an answer you can
+write in a hall. The constraint is the point.
+
+The phone camera closes the gap the decision would otherwise open. The model
+reads images, so the page is photographed and scored against the same rubric.
+Nothing is lost except the ability to cheat yourself.
+
+Three things this forces, none of them large:
+
+- **Resize before upload.** A phone photo is several megabytes; a page of
+  handwriting is legible at about 1200px wide. Resize on the client, send JPEG.
+- **Raise the payload ceiling for this task only.** The proxy caps a request at
+  24KB, which is right for a context object and hopeless for an image. Raise it
+  for `evaluate`, leave the others alone, and keep the existing daily limit —
+  which was already stricter for evaluation, because it is the one task with
+  unbounded input.
+- **Never store the image.** Scores go in the event log; the photograph does
+  not. The log is loaded on every start and read on every calculation, and
+  putting pages of JPEG in it would ruin the thing the whole app depends on.
+  The paper is the archive. That is what paper is for.
+
+**Known limit, worth saying out loud:** the model will misread some handwriting.
+A score built on a misreading is worse than no score, so an evaluation should
+show what it read back — or at least flag low confidence — and the self-mark
+stays the figure of record when the two disagree wildly.
+
 ## Open questions
 
-1. **Paper or typed?** Paper is how the exam works and how most candidates
-   practise, but only typed answers can be scored by the AI. Support both, or
-   push towards typing for the feedback?
+1. ~~Paper or typed?~~ **Settled: paper, photographed.**
 2. **Is self-marking compulsory before the AI score is revealed?** Compulsory
    makes the calibration data complete; optional makes the module lighter to use.
 3. **What threshold should send a topic back into the queue, and to what depth?**
