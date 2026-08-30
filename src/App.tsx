@@ -685,14 +685,13 @@ function Setup({
   const [name, setName] = useState("");
   const [startUnit, setStartUnit] = useState("");
   const [level, setLevel] = useState<Level>("guided");
-  const [months, setMonths] = useState<WindowMonths>(5);
-  /** Once you move the months yourself, the level stops moving them for you. */
-  const [monthsTouched, setMonthsTouched] = useState(false);
-
-  const chooseLevel = (next: Level) => {
-    setLevel(next);
-    if (!monthsTouched) setMonths(suggestedMonths(next));
-  };
+  /**
+   * Not asked separately. Someone setting up has no way to know whether four
+   * months is enough for them — that is the question they came here to have
+   * answered — so the category answers it, and Settings can lengthen the run
+   * later, once there is a pace on record to judge it against.
+   */
+  const months: WindowMonths = suggestedMonths(level);
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
   const [known, setKnown] = useState<string[]>([]);
@@ -734,7 +733,7 @@ function Setup({
             Before we start
           </h1>
           <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.6 }}>
-            Five questions. All of it can be changed later.
+            Four questions. All of it can be changed later.
           </p>
         </header>
 
@@ -771,8 +770,7 @@ function Setup({
               Where are you starting from?
             </div>
             <p style={{ fontSize: 13, color: C.muted, margin: "0 0 12px", lineHeight: 1.6 }}>
-              This picks a sensible length for the run and how deep to go on the topics WBCS
-              rarely asks. Both stay editable underneath.
+              This sets how long the run is and how deep to go on the topics WBCS rarely asks.
             </p>
             <div style={{ display: "grid", gap: 8 }}>
               {LEVELS.map((l) => {
@@ -780,7 +778,7 @@ function Setup({
                 return (
                   <button
                     key={l.id}
-                    onClick={() => chooseLevel(l.id)}
+                    onClick={() => setLevel(l.id)}
                     aria-pressed={on}
                     style={{
                       display: "block",
@@ -812,45 +810,16 @@ function Setup({
                     <div style={{ fontSize: 13, color: C.muted, marginTop: 4, lineHeight: 1.55 }}>
                       {l.blurb}
                     </div>
+                    {on && (
+                      <div style={{ fontSize: 12.5, color: C.accent, marginTop: 6 }}>
+                        Ends {readable}
+                      </div>
+                    )}
                   </button>
                 );
               })}
             </div>
           </section>
-
-          <Field
-            label="How many months are you planning for?"
-            value={months}
-            unit="months"
-            sub={`a run to ${readable} — these exams come round every year, so a window that ends without a pass still leaves you further ahead for the next one`}
-          >
-            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-              {([4, 5, 6] as WindowMonths[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => {
-                    setMonths(m);
-                    setMonthsTouched(true);
-                  }}
-                  aria-pressed={months === m}
-                  style={{
-                    flex: 1,
-                    minHeight: 46,
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontFamily: C.sans,
-                    fontSize: 15.5,
-                    fontWeight: months === m ? 600 : 400,
-                    background: months === m ? C.accent : C.surface,
-                    color: months === m ? C.surface : C.text,
-                    border: `1px solid ${months === m ? C.accent : C.line}`,
-                  }}
-                >
-                  {m} months
-                </button>
-              ))}
-            </div>
-          </Field>
 
           <Field label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
             <input
