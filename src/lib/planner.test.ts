@@ -26,7 +26,12 @@ import {
   rubricAverages,
   selfMarkGap,
   CHECKS,
+  blindSpots,
+  groupBAtRisk,
+  questionsForTopic,
+  unitExposure,
 } from "./planner";
+import { PYQS } from "../data/pyq";
 
 const WEEKLY_HOURS = 10;
 const settings = on.settings({
@@ -319,6 +324,76 @@ describe("answers feed back into the plan", () => {
     ]);
     expect(selfMarkGap(d).n).toBe(1);
     expect(selfMarkGap(d).averageGap).toBe(8);
+  });
+});
+
+describe("the question corpus", () => {
+  it("holds twelve complete papers", () => {
+    expect(PYQS).toHaveLength(96);
+    expect(PYQS.filter((q) => q.group === "A")).toHaveLength(60);
+    expect(PYQS.filter((q) => q.group === "B")).toHaveLength(36);
+  });
+
+  it("never points at a topic that does not exist", () => {
+    const ids = new Set(TOPICS.map((t) => t.id));
+    for (const q of PYQS) {
+      for (const id of q.topicIds) {
+        expect(ids.has(id), `${q.year} P${q.paper} Q${q.number} -> ${id}`).toBe(true);
+      }
+    }
+  });
+
+  it("explains any question it could not place", () => {
+    for (const q of PYQS.filter((x) => x.topicIds.length === 0)) {
+      expect(q.note, `${q.year} P${q.paper} Q${q.number}`).toBeTruthy();
+    }
+  });
+
+  it("finds the questions asked on a topic", () => {
+    const busiest = TOPICS.reduce((a, b) => (b.pyq > a.pyq ? b : a));
+    expect(questionsForTopic(busiest.id).length).toBeGreaterThan(0);
+  });
+});
+
+describe("blind spots", () => {
+  it("counts what each unit asked in each group", () => {
+    const rows = unitExposure(build([]));
+    const totalA = rows.reduce((s, r) => s + r.askedA, 0);
+    const totalB = rows.reduce((s, r) => s + r.askedB, 0);
+    // A question spanning two units counts for both, so these meet or exceed
+    // the paper counts rather than matching them exactly.
+    expect(totalA).toBeGreaterThanOrEqual(50);
+    expect(totalB).toBeGreaterThanOrEqual(30);
+  });
+
+  it("flags every Group B unit before any answer is written", () => {
+    const spots = blindSpots(build([]));
+    expect(spots.length).toBeGreaterThan(0);
+    expect(spots.every((s) => s.askedB > 0)).toBe(true);
+    // Sorted by exposure, worst first.
+    for (let i = 1; i < spots.length; i++) {
+      expect(spots[i - 1]!.askedB).toBeGreaterThanOrEqual(spots[i]!.askedB);
+    }
+    expect(groupBAtRisk(build([]))).toBeGreaterThan(0);
+  });
+
+  it("clears a unit once an answer has been written from it", () => {
+    const before = blindSpots(build([]));
+    const worst = before[0]!;
+    const topic = TOPICS.find((t) => t.unit === worst.unit)!;
+    const after = blindSpots(build([on.attempt(topic.id, 28, 40, 35)]));
+
+    expect(after.some((s) => s.unit === worst.unit)).toBe(false);
+    expect(groupBAtRisk(build([on.attempt(topic.id, 28, 40, 35)]))).toBeLessThan(
+      groupBAtRisk(build([])),
+    );
+  });
+
+  it("counts a weak answer as written — exposure is about practice, not marks", () => {
+    const worst = blindSpots(build([]))[0]!;
+    const topic = TOPICS.find((t) => t.unit === worst.unit)!;
+    const d = build([on.attempt(topic.id, 8, 40, 35)]);
+    expect(blindSpots(d).some((s) => s.unit === worst.unit)).toBe(false);
   });
 });
 

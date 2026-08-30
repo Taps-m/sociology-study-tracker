@@ -13,6 +13,7 @@ export const ROUTES = [
   { id: "chapters", label: "Chapters", icon: "▤" },
   { id: "today", label: "Today's Study", icon: "◐" },
   { id: "answers", label: "Answer Practice", icon: "✎" },
+  { id: "pyq", label: "PYQ Explorer", icon: "◈" },
   { id: "revision", label: "Quick Revision", icon: "↻" },
   { id: "progress", label: "Progress", icon: "▲" },
   { id: "settings", label: "Settings", icon: "⚙" },

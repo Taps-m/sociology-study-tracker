@@ -1,4 +1,5 @@
 import { TOPICS, TOTAL_HOURS } from "../data/syllabus";
+import { PYQS } from "../data/pyq";
 import type { Topic } from "../data/syllabus";
 import type { CheckId, Derived, Settings } from "./events";
 
@@ -713,6 +714,101 @@ export function selfMarkGap(d: Derived): { n: number; averageGap: number | null 
   if (pairs.length === 0) return { n: 0, averageGap: null };
   const total = pairs.reduce((s, a) => s + (a.selfMark! - a.marks), 0);
   return { n: pairs.length, averageGap: Math.round((total / pairs.length) * 10) / 10 };
+}
+
+// ── blind spots ───────────────────────────────────────────────────────────
+
+export interface UnitExposure {
+  paper: 1 | 2;
+  unit: string;
+  /** Questions this unit supplied, 2018-2023. */
+  askedA: number;
+  askedB: number;
+  /** Answers the candidate has written from it. */
+  written: number;
+  /** Topics in the unit that have been taken to their planned depth. */
+  studied: number;
+  topics: number;
+}
+
+/**
+ * What each unit has asked, against what has been done about it.
+ *
+ * The Group A and Group B split is the point. Five questions are set in Group A
+ * and three answered; three are set in Group B and two answered. So Group B is
+ * far less forgiving — there is almost no choice in it — and the units feeding
+ * it are not the units that dominate Group A. A candidate can be well prepared
+ * on paper and unable to fill a section.
+ */
+export function unitExposure(d: Derived): UnitExposure[] {
+  const byUnit = new Map<string, UnitExposure>();
+
+  for (const t of TOPICS) {
+    const key = `${t.paper}|${t.unit}`;
+    const row = byUnit.get(key) ?? {
+      paper: t.paper as 1 | 2,
+      unit: t.unit,
+      askedA: 0,
+      askedB: 0,
+      written: 0,
+      studied: 0,
+      topics: 0,
+    };
+    row.topics++;
+    if (isAtDepth(d, t)) row.studied++;
+    row.written += d.attempts.filter((a) => a.topicId === t.id).length;
+    byUnit.set(key, row);
+  }
+
+  const unitOf = new Map(TOPICS.map((t) => [t.id, `${t.paper}|${t.unit}`]));
+  for (const q of PYQS) {
+    const keys = new Set(q.topicIds.map((id) => unitOf.get(id)).filter(Boolean) as string[]);
+    for (const key of keys) {
+      const row = byUnit.get(key);
+      if (!row) continue;
+      if (q.group === "A") row.askedA++;
+      else row.askedB++;
+    }
+  }
+
+  return [...byUnit.values()];
+}
+
+export interface BlindSpot {
+  unit: string;
+  paper: 1 | 2;
+  askedB: number;
+  askedA: number;
+  studied: number;
+  topics: number;
+}
+
+/**
+ * Units that supply Group B questions and from which no answer has been
+ * written. Group B first, because that is the section with no room to dodge.
+ */
+export function blindSpots(d: Derived): BlindSpot[] {
+  return unitExposure(d)
+    .filter((u) => u.askedB > 0 && u.written === 0)
+    .sort((a, b) => b.askedB - a.askedB)
+    .map(({ unit, paper, askedB, askedA, studied, topics }) => ({
+      unit,
+      paper,
+      askedB,
+      askedA,
+      studied,
+      topics,
+    }));
+}
+
+/** Group B questions sitting in units you have never written an answer from. */
+export function groupBAtRisk(d: Derived): number {
+  return blindSpots(d).reduce((s, u) => s + u.askedB, 0);
+}
+
+/** The corpus, filtered to one topic. */
+export function questionsForTopic(topicId: string) {
+  return PYQS.filter((q) => q.topicIds.includes(topicId));
 }
 
 // ── what to do today ──────────────────────────────────────────────────────

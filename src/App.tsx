@@ -30,6 +30,7 @@ import { RevisionDeck } from "./modules/revision/RevisionDeck";
 import { RecentActivity } from "./modules/activity/RecentActivity";
 import { TodayScreen } from "./modules/today/TodayScreen";
 import { AnswerPractice } from "./modules/answers/AnswerPractice";
+import { PyqExplorer } from "./modules/pyq/PyqExplorer";
 
 export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
@@ -79,6 +80,8 @@ export default function App() {
       {route === "plan" && <PlanScreen d={d} />}
 
       {route === "today" && <TodayScreen d={d} go={go} {...handlers} />}
+
+      {route === "pyq" && <PyqExplorer d={d} />}
 
       {route === "revision" && <RevisionDeck d={d} onRevise={onRevise} />}
 
