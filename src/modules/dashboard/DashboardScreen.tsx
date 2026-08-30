@@ -1,13 +1,12 @@
 import { TOPICS } from "../../data/syllabus";
 import { quoteOfTheDay } from "../../data/quotes";
-import type { Derived, Settings } from "../../lib/events";
+import type { CheckId, Derived, Settings } from "../../lib/events";
 import {
   CHECKS,
   coreProgress,
   daysUntil,
   freshness,
   hoursFor,
-  packWeeks,
   progress,
   projection,
   requiredPace,
@@ -16,6 +15,7 @@ import {
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 import { WeeklyReview } from "./WeeklyReview";
+import { TodaysFocus } from "./TodaysFocus";
 import type { RouteId } from "../../app/routes";
 
 /** Share of the syllabus, by hours, that has a given check ticked. */
@@ -78,14 +78,21 @@ function Tile({ value, unit, label }: { value: string | number; unit?: string; l
   );
 }
 
-export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => void }) {
+export function DashboardScreen({
+  d,
+  go,
+  onToggle,
+}: {
+  d: Derived;
+  go: (r: RouteId) => void;
+  onToggle: (topicId: string, check: CheckId) => void;
+}) {
   const settings = d.settings as Settings;
   const p = progress(d);
   const core = coreProgress(d);
   const proj = projection(d);
   const need = requiredPace(d);
   const quote = quoteOfTheDay();
-  const week = packWeeks(d, 1)[0];
   const fresh = freshness(d);
   const backlog = revisionLoad(d);
   const days = daysUntil(settings.examDate);
@@ -120,48 +127,6 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
           <Tile value={Math.round(settings.targetCoverage * 100)} unit="%" label="Coverage target" />
         </div>
 
-        <Card
-          title="Today's focus"
-          action={
-            <button
-              onClick={() => go("today")}
-              style={{
-                border: "none",
-                background: "transparent",
-                color: C.accent,
-                font: "inherit",
-                fontSize: 14,
-                cursor: "pointer",
-              }}
-            >
-              Open →
-            </button>
-          }
-        >
-          {week && (week.topics.length > 0 || week.revisions.length > 0) ? (
-            <>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 15, lineHeight: 2 }}>
-                {week.topics.slice(0, 4).map((t) => (
-                  <li key={t.id}>{t.name}</li>
-                ))}
-                {week.revisions.slice(0, 2).map((r) => (
-                  <li key={r.topic.id} style={{ color: C.warn }}>
-                    Revise: {r.topic.name}
-                  </li>
-                ))}
-              </ul>
-              <p style={{ fontSize: 13.5, color: C.muted, margin: "12px 0 0" }}>
-                This week: {week.hours} h new work
-                {week.revisionHours > 0 && ` · ${week.revisionHours} h revision`}
-              </p>
-            </>
-          ) : (
-            <p style={{ fontSize: 14.5, color: C.muted, margin: 0 }}>
-              Nothing queued. Every topic is at its planned depth.
-            </p>
-          )}
-        </Card>
-
         <WeeklyReview d={d} />
 
         <Card title="Where the time is going">
@@ -186,6 +151,8 @@ export function DashboardScreen({ d, go }: { d: Derived; go: (r: RouteId) => voi
       </div>
 
       <div className="grid" style={{ gap: 14, minWidth: 0 }}>
+        <TodaysFocus d={d} go={go} onToggle={onToggle} />
+
         <Card title="Overall progress">
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <Ring percent={p.percent} />

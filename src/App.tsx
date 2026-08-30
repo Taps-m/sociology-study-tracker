@@ -69,7 +69,9 @@ export default function App() {
 
   return (
     <AppShell route={route} go={go}>
-      {route === "dashboard" && <DashboardScreen d={d} go={go} />}
+      {route === "dashboard" && (
+        <DashboardScreen d={d} go={go} onToggle={handlers.onToggle} />
+      )}
 
       {route === "chapters" && <ChaptersScreen d={d} {...handlers} />}
 
