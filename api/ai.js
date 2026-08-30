@@ -7,8 +7,9 @@
  *
  * Environment:
  *   GEMINI_API_KEY   required
- *   GEMINI_MODEL     optional, defaults below. Set it to whatever is current —
- *                    Google retires model ids faster than this file gets edited.
+ *   GEMINI_MODEL     optional. Defaults to gemini-3.5-flash, which is what this
+ *                    key is provisioned for. Google retires model ids faster than
+ *                    this file gets edited, so keep the env var authoritative.
  *   ALLOWED_ORIGIN   optional, e.g. https://tracker.example.com
  *   MONTHLY_CAP      optional, default 800 requests
  *
@@ -23,7 +24,7 @@
  * small so that swap is a few lines.
  */
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const MONTHLY_CAP = Number(process.env.MONTHLY_CAP || 800);
 const MAX_BODY_BYTES = 24 * 1024;
 const PER_DEVICE_PER_HOUR = 20;
