@@ -560,6 +560,91 @@ export const PYQS: PastQuestion[] = [
     topicIds: ["p1u9t2"],
   },
 
+  // ── 2017, Paper I ───────────────────────────────────────────────────────
+  {
+    year: 2017, paper: 1, group: "A", number: 1, marks: 40,
+    text: "What is Protestant Ethic? How does Max Weber relate it with capitalism?",
+    topicIds: ["p1u2t3"],
+  },
+  {
+    year: 2017, paper: 1, group: "A", number: 2, marks: 40,
+    text: "How do different sociological perspectives interpret the nature of individual and society?",
+    topicIds: ["p1u3t6"],
+    note: "Tests the perspectives at large rather than one syllabus topic; placed on the individual-and-society topic as the closest fit.",
+  },
+  {
+    year: 2017, paper: 1, group: "A", number: 3, marks: 40,
+    text: "Analyse, following Talcott Parsons, the Functional system problems.",
+    topicIds: ["p1u2t5"],
+  },
+  {
+    year: 2017, paper: 1, group: "A", number: 4, marks: 40,
+    text: "Analyse the role of socialization and learning in the process of cultural transmission.",
+    topicIds: ["p1u3t6", "p1u3t2"],
+  },
+  {
+    year: 2017, paper: 1, group: "A", number: 5, marks: 40,
+    text: "Examine the development of Post Fordism as an era of economic production.",
+    topicIds: ["p1u5t1"],
+  },
+  {
+    year: 2017, paper: 1, group: "B", number: 6, marks: 40,
+    text: "Do you think that secularization leads to the diminution in the social significance of religion?",
+    topicIds: ["p1u7t2"],
+  },
+  {
+    year: 2017, paper: 1, group: "B", number: 7, marks: 40,
+    text: "Distinguish between Questionnaire and Interview as technique of data collection.",
+    topicIds: ["p1u9t2"],
+  },
+  {
+    year: 2017, paper: 1, group: "B", number: 8, marks: 40,
+    text: "Write a note on the impact of technology on society with suitable examples.",
+    topicIds: ["p1u8t3", "p1u8t4"],
+  },
+
+  // ── 2017, Paper II ──────────────────────────────────────────────────────
+  {
+    year: 2017, paper: 2, group: "A", number: 1, marks: 40,
+    text: "Discuss the relevance of the Marxist approach to the study of Indian society.",
+    topicIds: ["p2u1t4"],
+  },
+  {
+    year: 2017, paper: 2, group: "A", number: 2, marks: 40,
+    text: "Write a note on the relationship between caste and politics in contemporary India.",
+    topicIds: ["p2u3t4", "p2u2t3"],
+  },
+  {
+    year: 2017, paper: 2, group: "A", number: 3, marks: 40,
+    text: "What are the causes of juvenile delinquency? Discuss the Juvenile Justice (Care and Protection of Children) Act, 2015.",
+    topicIds: ["p2u8t5", "p2u6t4"],
+  },
+  {
+    year: 2017, paper: 2, group: "A", number: 4, marks: 40,
+    text: "Discuss how the concepts of sanskritization and westernization explain the process of change in Indian Society.",
+    topicIds: ["p2u5t1"],
+  },
+  {
+    year: 2017, paper: 2, group: "A", number: 5, marks: 40,
+    text: "Discuss whether the expansion of educational system in India has been able to produce equalizing effects in society.",
+    topicIds: ["p2u3t6", "p2u4t5"],
+  },
+  {
+    year: 2017, paper: 2, group: "B", number: 6, marks: 40,
+    text: "Write a note on the different forms of family in contemporary India. Explain the reasons for the emergence of different forms of family.",
+    topicIds: ["p2u3t2"],
+  },
+  {
+    year: 2017, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Is religion related to social conflict? Examine.",
+    topicIds: ["p2u3t5", "p2u2t1"],
+  },
+  {
+    year: 2017, paper: 2, group: "B", number: 8, marks: 40,
+    text: "Define environmental movement. Write a note on the major environmental movements in India.",
+    topicIds: ["p2u7t2"],
+  },
+
   // ── 2016, Paper I ───────────────────────────────────────────────────────
   {
     year: 2016, paper: 1, group: "A", number: 1, marks: 40,
@@ -737,9 +822,11 @@ export const PYQS: PastQuestion[] = [
  * test refuses a half-transcribed one, so a partial year can never quietly
  * count as a full one.
  *
- * Outstanding, and worth chasing: 2016 Paper II, both 2017 papers if that year
- * ran, and both 2024 papers. 2024 was the last sitting actually held, so the
- * series ends there — 2025 and 2026 are not missing, they do not exist, and
- * nothing should go looking for them.
+ * Outstanding: 2016 Paper II, and both 2024 papers. 2024 was the last sitting
+ * actually held, so the series ends there — 2025 and 2026 are not missing, they
+ * do not exist, and nothing should go looking for them.
+ *
+ * The 2017 Paper I scan carries no printed year; it arrived paired with a
+ * Paper II sheet that is dated, and is recorded as 2017 on that basis.
  */
-export const PYQ_YEARS = [2014, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2023] as const;
+export const PYQ_YEARS = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023] as const;

@@ -68,6 +68,7 @@ describe("the reading map", () => {
       "p1u2t6", // Merton
       "p1u7t1", // religion and science
       "p2u6t3", // welfare programmes for women
+      "p2u6t4", // children and child welfare
       "p2u8t4", // drug addiction
       "p2u8t6", // old age
     ]);
