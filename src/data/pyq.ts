@@ -515,9 +515,49 @@ export const PYQS: PastQuestion[] = [
     note: "Truncated at a page break in the source PDF.",
   },
 
+  // ── 2014, Paper I ───────────────────────────────────────────────────────
+  {
+    year: 2014, paper: 1, group: "A", number: 1, marks: 40,
+    text: "Analyse how Weber differed from Marx in explaining social change.",
+    topicIds: ["p1u2t3", "p1u2t1"],
+  },
+  {
+    year: 2014, paper: 1, group: "A", number: 2, marks: 40,
+    text: "Examine after Simmel, the nature and role of culture in modern life.",
+    topicIds: ["p1u2t4"],
+  },
+  {
+    year: 2014, paper: 1, group: "A", number: 3, marks: 40,
+    text: "What is post-industrial society? What are its major features?",
+    topicIds: ["p1u5t1"],
+  },
+  {
+    year: 2014, paper: 1, group: "A", number: 4, marks: 40,
+    text: "What is pluralism? Examine the process of secularization in modern society.",
+    topicIds: ["p1u7t4", "p1u7t2"],
+  },
+  {
+    year: 2014, paper: 1, group: "A", number: 5, marks: 40,
+    text: "Examine, in the context of globalization, the relation between technology and social change.",
+    topicIds: ["p1u8t4", "p1u10t4"],
+  },
+  {
+    year: 2014, paper: 1, group: "B", number: 6, marks: 40,
+    text: "What is sociological imagination? How would you distinguish between sociology and common sense?",
+    topicIds: ["p1u1t4"],
+  },
+  {
+    year: 2014, paper: 1, group: "B", number: 7, marks: 40,
+    text: "What is the importance of social research? What steps one should follow to conduct social research?",
+    topicIds: ["p1u9t1"],
+  },
+  {
+    year: 2014, paper: 1, group: "B", number: 8, marks: 40,
+    text: "How is development related to dependency? Explain.",
+    topicIds: ["p1u10t1"],
+  },
+
   // ── 2014, Paper II ──────────────────────────────────────────────────────
-  // Transcribed from the paper itself. Paper I for this year is not held yet,
-  // so 2014 counts only towards Paper II coverage.
   {
     year: 2014, paper: 2, group: "A", number: 1, marks: 40,
     text: "Has Market led Industrialization and urbanization resulted in Western consumerism and materialistic culture creeping in, that adversely affect the plural Indian culture? Explain with examples from contemporary India.",
@@ -604,8 +644,8 @@ export const PYQS: PastQuestion[] = [
 
 
 /**
- * Years in the corpus. 2014 and 2015 are Paper II only — the Paper I sheets for
- * those years have not been found, so those years are partial. Every paper that
- * is here is complete: a test refuses a half-transcribed one.
+ * Years in the corpus. 2014 is complete; 2015 is Paper II only, its Paper I
+ * sheet not yet found. Every paper that is here is whole — a test refuses a
+ * half-transcribed one, so a partial year can never quietly count as a full.
  */
 export const PYQ_YEARS = [2014, 2015, 2018, 2019, 2020, 2021, 2022, 2023] as const;

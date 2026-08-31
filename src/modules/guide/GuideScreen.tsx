@@ -83,7 +83,7 @@ const STEPS: Step[] = [
     ],
     body: [
       "Four ticks make a topic complete: material read, notes and Q&A, PYQs covered, revised. They are weighted, so reading is most of it and revision is the rest — ticking all four on a topic you skimmed helps nobody.",
-      "Fifteen topics say “Not in NCERT — this one needs Essential Sociology.” That is honest rather than unhelpful: school sociology stops at Weber, so Parsons and Merton genuinely are not there, and nor are religion and science, welfare programmes for women, addiction or old age. All six have been asked at least twice since 2018.",
+      "Fifteen topics say “Not in NCERT — this one needs Essential Sociology.” That is honest rather than unhelpful: school sociology stops at Weber, so Simmel, Parsons and Merton genuinely are not there, and nor are religion and science, welfare programmes for women, addiction or old age. All seven of those have been asked at least twice in the papers on record.",
     ],
     go: "chapters",
     goLabel: "Open chapters",
