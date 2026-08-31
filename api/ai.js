@@ -366,6 +366,10 @@ margin joining a group, a labelled triangle for a three-fold classification.
 Seconds to draw, and it makes the structure visible before a word is read.
 Suggest one only where it genuinely beats prose.
 
+VOCABULARY IN BRACKETS. A technical term dropped in parentheses after a point
+— "(Diffusionism)", "(decomposition of class)" — shows command of the concept
+without spending a sentence on it. Cheap marks; use them where they fit.
+
 EXAMPLES ARE FLAGGED AND ATTACHED. They write "(e.g.)" against the point it
 belongs to, never as a free-floating sentence. An example must sit inside a
 block and demonstrate that block's claim.
