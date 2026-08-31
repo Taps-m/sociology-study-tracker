@@ -1,3 +1,15 @@
+/**
+ * The WBCS Sociology optional syllabus, as it stands for this candidate.
+ *
+ * WBPSC notified a revised Mains pattern from the 2025 cycle, which kept the
+ * optional and kept Sociology on the list. The syllabus below is the older one,
+ * and it remains the syllabus in force through 2027 — so it is the right thing
+ * to plan against, not an artefact to be updated. Recorded here because a
+ * future reader finding a 2025 notification could reasonably assume otherwise
+ * and rewrite eighty-five topics for nothing.
+ *
+ * The last sitting actually held was 2024; see PYQ_YEARS in ./pyq.
+ */
 import { PYQS } from "./pyq";
 
 export interface Topic {
