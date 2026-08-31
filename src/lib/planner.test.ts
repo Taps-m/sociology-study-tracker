@@ -14,6 +14,7 @@ import {
   dueForRevision,
   freshness,
   intervalFor,
+  isAtDepth,
   observedPace,
   packWeeks,
   progress,
@@ -36,6 +37,9 @@ import {
   windowLabel,
   LEVELS,
   skippedTopics,
+  ON_RAMP,
+  onRampActive,
+  nextOnRamp,
   suggestedMonths,
   DEPTHS,
 } from "./planner";
@@ -544,5 +548,72 @@ describe("notes", () => {
     const withNote = build([on.check(highYield.id, "read"), on.note(highYield.id, "x")]);
     const without = build([on.check(highYield.id, "read")]);
     expect(progress(withNote).percent).toBe(progress(without).percent);
+  });
+});
+
+describe("the beginner on-ramp", () => {
+  const beginner = (events: StudyEvent[] = []) =>
+    project([on.settings({ ...SETTINGS, level: "beginner" }), ...events]);
+
+  it("opens on stratification rather than on the highest-yield topic", () => {
+    const d = beginner();
+    const first = queue(d)[0]!;
+    expect(first.unit).toBe("Stratification");
+    // And that is genuinely a departure: left to yield, something else leads.
+    const byYield = TOPICS.filter((t) => depthFor(d, t) > 0).sort(
+      (a, b) => bandOf(b) - bandOf(a) || a.estHours - b.estHours,
+    )[0]!;
+    expect(byYield.unit).not.toBe("Stratification");
+  });
+
+  it("runs stratification, then the thinkers, then power", () => {
+    const d = beginner();
+    const units = queue(d)
+      .slice(0, 20)
+      .map((t) => t.unit);
+    const at = (u: string) => units.indexOf(u);
+    expect(at("Stratification")).toBeGreaterThanOrEqual(0);
+    expect(at("Stratification")).toBeLessThan(at("Pathfinders"));
+    expect(at("Pathfinders")).toBeLessThan(at("Politics and Society"));
+  });
+
+  it("names the unit it is starting on and says why", () => {
+    const next = nextOnRamp(beginner());
+    expect(next?.unit).toBe("Stratification");
+    expect(next?.why.length).toBeGreaterThan(30);
+  });
+
+  it("does not walk a graduate in through the front door", () => {
+    const pro = project([on.settings({ ...SETTINGS, level: "pro" })]);
+    expect(onRampActive(pro)).toBe(false);
+    expect(nextOnRamp(pro)).toBe(null);
+  });
+
+  it("still lets a candidate override it by choosing where to start", () => {
+    const d = beginner([on.settings({ startUnit: "Research Methods" })]);
+    expect(queue(d)[0]!.unit).toBe("Research Methods");
+  });
+
+  it("expires on its own once the sequence is finished", () => {
+    const rampTopics = TOPICS.filter((t) =>
+      ON_RAMP.some((r) => r.paper === t.paper && r.unit === t.unit),
+    );
+    const done = rampTopics.flatMap((t) =>
+      CHECKS.map((c) => on.check(t.id, c.id, { prior: true })),
+    );
+    const d = beginner(done);
+    expect(onRampActive(d)).toBe(false);
+    // And ordering hands back to yield without anything else changing.
+    expect(queue(d)[0]!.unit).not.toBe("Stratification");
+  });
+
+  it("reorders the queue without dropping or adding a single topic", () => {
+    // Comparing against another level would not test this: the level also
+    // moves the depth table, so the two queues would legitimately differ.
+    // What must hold is that the on-ramp only sorts — every topic that
+    // qualifies is still present.
+    const d = beginner();
+    const eligible = TOPICS.filter((t) => depthFor(d, t) > 0 && !isAtDepth(d, t));
+    expect(new Set(queue(d).map((t) => t.id))).toEqual(new Set(eligible.map((t) => t.id)));
   });
 });

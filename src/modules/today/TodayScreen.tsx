@@ -1,5 +1,5 @@
 import type { CheckId, Derived } from "../../lib/events";
-import { dailyBudget, isOptional, todaysTasks } from "../../lib/planner";
+import { dailyBudget, isOptional, nextOnRamp, todaysTasks } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 import { TopicRow } from "../../components/TopicRow";
@@ -27,6 +27,7 @@ export function TodayScreen({
 }: { d: Derived; go: (r: RouteId) => void } & Handlers) {
   const tasks = todaysTasks(d);
   const budget = dailyBudget(d);
+  const ramp = nextOnRamp(d);
   const total = tasks.reduce((s, t) => s + t.minutes, 0);
 
   if (tasks.length === 0) {
@@ -45,6 +46,27 @@ export function TodayScreen({
 
   return (
     <div className="grid" style={{ gap: 13, maxWidth: 820 }}>
+      {ramp && (
+        // Why this unit and not the highest-yield one. A queue that silently
+        // reorders itself looks arbitrary; a queue that says why it starts here
+        // is a teacher.
+        <Card>
+          <div
+            style={{
+              fontFamily: C.mono,
+              fontSize: 11.5,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: C.muted,
+            }}
+          >
+            Starting here on purpose
+          </div>
+          <div style={{ fontSize: 15.5, fontWeight: 600, margin: "6px 0 4px" }}>{ramp.unit}</div>
+          <p style={{ fontSize: 14, color: C.muted, margin: 0, lineHeight: 1.7 }}>{ramp.why}</p>
+        </Card>
+      )}
+
       <Card
         title={`${tasks.length} ${tasks.length === 1 ? "task" : "tasks"} today`}
         action={

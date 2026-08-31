@@ -633,18 +633,95 @@ export function hoursLeftOn(d: Derived, topic: Topic): number {
   return Math.round(hoursFor(d, topic) * gap * 10) / 10;
 }
 
+/**
+ * The order a beginner should meet sociology in — which is not the order the
+ * syllabus is printed in, and not the order of what is asked most.
+ *
+ * Faculty who teach this optional at scale changed their own sequence for this
+ * reason: opening at unit one leaves a candidate reading about the discipline
+ * before they have seen the discipline do anything. Stratification comes first
+ * because it is visible from the window — caste, class, gender, who gets
+ * treated how — so the ideas land against something already known. Only then do
+ * the theorists mean anything: Marx on who owns what, Durkheim on what holds a
+ * society together, Weber on why one answer is never enough. Power and the
+ * state follow, because by then there is a structure to hang them on.
+ *
+ * After those three the ordering returns to yield, where it belongs.
+ *
+ * Note this is the WBCS syllabus, not the UPSC one whose unit numbers that
+ * advice is usually given in — "start at chapter five" means stratification,
+ * and stratification is a differently numbered unit here. The sequence is
+ * translated, not copied.
+ */
+export const ON_RAMP: { paper: 1 | 2; unit: string; why: string }[] = [
+  {
+    paper: 1,
+    unit: "Stratification",
+    why: "You can see this one from the window. Caste, class, gender, who is treated how — sociology stops being abstract in about an hour.",
+  },
+  {
+    paper: 1,
+    unit: "Pathfinders",
+    why: "The theorists land properly once you have seen what they were explaining. Marx on who owns what, Durkheim on what holds a society together, Weber on why one cause is never enough.",
+  },
+  {
+    paper: 1,
+    unit: "Politics and Society",
+    why: "Power, the state, the nation. Grand questions, and by now you have the structure to hang them on.",
+  },
+];
+
+/** Where a topic sits in the on-ramp, or Infinity if it is not part of it. */
+function onRampRank(topic: Topic): number {
+  const i = ON_RAMP.findIndex((r) => r.paper === topic.paper && r.unit === topic.unit);
+  return i === -1 ? Infinity : i;
+}
+
+/**
+ * Whether the teaching sequence still applies.
+ *
+ * It expires on its own. Once every on-ramp topic is at depth there is nothing
+ * left to order, and someone who told us they have studied this before never
+ * gets it — they do not need to be walked in through the front door.
+ */
+export function onRampActive(d: Derived): boolean {
+  if (d.settings?.level === "pro") return false;
+  return TOPICS.some((t) => onRampRank(t) < Infinity && depthFor(d, t) > 0 && !isAtDepth(d, t));
+}
+
+/** The next on-ramp unit to work through, with the reason it comes next. */
+export function nextOnRamp(d: Derived): (typeof ON_RAMP)[number] | null {
+  if (!onRampActive(d)) return null;
+  return (
+    ON_RAMP.find((r) =>
+      TOPICS.some(
+        (t) => t.paper === r.paper && t.unit === r.unit && depthFor(d, t) > 0 && !isAtDepth(d, t),
+      ),
+    ) ?? null
+  );
+}
+
 export function queue(d: Derived): Topic[] {
   const start = d.settings?.startUnit;
+  const ramp = onRampActive(d);
+
   return TOPICS.filter(
     // A topic whose boxes are ticked but whose last answer scored under 50% is
     // not finished. Marks measure what the exam measures; checks do not.
     (t) => depthFor(d, t) > 0 && (!isAtDepth(d, t) || needsRework(d, t.id)),
   ).sort((a, b) => {
     if (start) {
-      // A chosen starting unit outranks yield until it is finished, then stops
-      // mattering by itself — its topics drop out of the queue at depth.
+      // A chosen starting unit outranks everything, including the on-ramp: it
+      // is the one place the candidate has told us where they want to begin,
+      // and second-guessing that would be rude. It stops mattering by itself —
+      // its topics drop out of the queue at depth.
       const first = (t: Topic) => (t.unit === start ? 0 : 1);
       if (first(a) !== first(b)) return first(a) - first(b);
+    }
+    if (ramp) {
+      const ra = onRampRank(a);
+      const rb = onRampRank(b);
+      if (ra !== rb) return ra - rb;
     }
     return bandOf(b) - bandOf(a) || a.estHours - b.estHours;
   });
