@@ -146,6 +146,14 @@ export interface AttemptDetail {
   scores?: RubricScores;
   /** The opening of what the model read back, so a misreading is visible. */
   readBack?: string;
+  /**
+   * False when the page could not be read with confidence.
+   *
+   * A score built on a misreading is not a score, and it must not be allowed to
+   * reopen a topic or drag an average down. Recorded so the verdict can refuse
+   * to act on it.
+   */
+  legible?: boolean;
 }
 
 export interface AttemptRecord extends AttemptDetail {
@@ -232,6 +240,7 @@ export function project(events: StudyEvent[]): Derived {
           group: e.group,
           scores: e.scores,
           readBack: e.readBack,
+          legible: e.legible,
         });
         break;
 

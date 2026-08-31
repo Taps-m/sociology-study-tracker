@@ -13,7 +13,7 @@
  *
  * Bump CACHE to force every client onto a new generation.
  */
-const CACHE = "wbcs-v1";
+const CACHE = "wbcs-v2";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -50,11 +50,13 @@ self.addEventListener("fetch", (event) => {
   // Never serve one from a cache, and never store one.
   if (url.pathname.startsWith("/api/")) return;
 
-  // Navigations: try the network so a deploy is picked up immediately, and
-  // fall back to the cached shell when there is no network at all.
+  // Navigations: always ask the network, and explicitly bypass the HTTP cache
+  // while doing it. Without no-store the browser can answer from its own cache
+  // and hand back an index.html pointing at the previous build's assets — the
+  // app then looks like it never updated, which is exactly what happened.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: "no-store" })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put("/index.html", copy));

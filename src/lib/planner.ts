@@ -849,7 +849,19 @@ export const RESURFACE_BELOW = 0.5;
 /** Between the two, it is flagged but not reopened. */
 export const FLAG_BELOW = 0.65;
 
-export type AnswerVerdict = "none" | "rework" | "shaky" | "solid";
+/**
+ * How long a weak answer waits before its topic returns to the queue.
+ *
+ * Seven days, the same as the first revision interval, and chosen for the same
+ * reason: coming back to something a week later is how it sticks. Reopening it
+ * the same afternoon punishes the candidate for having practised — the list
+ * grows the moment they do the hardest thing the app asks of them, which is to
+ * write an answer and find out it was poor. The topic is not hidden in the
+ * meantime; it is listed as waiting, with the date it returns.
+ */
+export const REWORK_COOLDOWN_DAYS = 7;
+
+export type AnswerVerdict = "none" | "unread" | "rework" | "shaky" | "solid";
 
 export function attemptsFor2(d: Derived, topicId: string) {
   return d.attempts.filter((a) => a.topicId === topicId);
@@ -872,15 +884,43 @@ export function latestAttempt(d: Derived, topicId: string) {
 export function answerVerdict(d: Derived, topicId: string): AnswerVerdict {
   const last = latestAttempt(d, topicId);
   if (!last || last.outOf <= 0) return "none";
+  // A page the model could not read produced a number, not a mark. Acting on it
+  // would reopen a topic and dent an average on the strength of bad handwriting
+  // in a photograph, which is a judgement about a camera, not about sociology.
+  if (last.legible === false) return "unread";
   const share = last.marks / last.outOf;
   if (share < RESURFACE_BELOW) return "rework";
   if (share < FLAG_BELOW) return "shaky";
   return "solid";
 }
 
+/** The day a topic marked for rework comes back into the queue. */
+export function reworkDueOn(d: Derived, topicId: string): string | null {
+  if (answerVerdict(d, topicId) !== "rework") return null;
+  const last = latestAttempt(d, topicId);
+  if (!last) return null;
+  const due = new Date(last.at);
+  due.setDate(due.getDate() + REWORK_COOLDOWN_DAYS);
+  return due.toISOString().slice(0, 10);
+}
+
+/** Topics waiting out the cooling-off period, soonest first. */
+export function reworkWaiting(d: Derived, today = new Date()) {
+  return TOPICS.map((t) => ({ topic: t, due: reworkDueOn(d, t.id) }))
+    .filter((r): r is { topic: Topic; due: string } => r.due !== null && r.due > dayKey(today))
+    .sort((a, b) => a.due.localeCompare(b.due));
+}
+
 /** Topics whose last answer was weak enough to reopen them. */
-export function needsRework(d: Derived, topicId: string): boolean {
-  return answerVerdict(d, topicId) === "rework";
+/**
+ * Whether a weak answer has waited long enough to be worth reopening.
+ *
+ * The verdict is immediate; the consequence is not. Everything that reports on
+ * the answer itself reads answerVerdict; only the queue reads this.
+ */
+export function needsRework(d: Derived, topicId: string, today = new Date()): boolean {
+  const due = reworkDueOn(d, topicId);
+  return due !== null && due <= dayKey(today);
 }
 
 /** Every criterion averaged across scored attempts, for the trend. */
