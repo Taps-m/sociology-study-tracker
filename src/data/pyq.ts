@@ -515,6 +515,94 @@ export const PYQS: PastQuestion[] = [
     note: "Truncated at a page break in the source PDF.",
   },
 
+  // ── 2015, Paper I ───────────────────────────────────────────────────────
+  // Transcribed from a typed reproduction rather than a scan of the paper, so
+  // the wording of Q7 carries the source's own garble.
+  {
+    year: 2015, paper: 1, group: "A", number: 1, marks: 40,
+    text: "Discuss Max Weber's view on power. Analyse the three basic types of legitimate authority as distinguished by him.",
+    topicIds: ["p1u2t3", "p1u3t7"],
+  },
+  {
+    year: 2015, paper: 1, group: "A", number: 2, marks: 40,
+    text: "Discuss the concept of pattern variables as formulated by Talcott Parsons.",
+    topicIds: ["p1u2t5"],
+  },
+  {
+    year: 2015, paper: 1, group: "A", number: 3, marks: 40,
+    text: "Sociological approaches to religion have been strongly influenced by the ideas of classical theorists — list the main ideas of Marx, Durkheim and Weber on religion. What do they have in common and what divides them? Is it possible to say which is the most accurate characterization?",
+    topicIds: ["p1u3t8", "p1u2t1", "p1u2t2", "p1u2t3"],
+  },
+  {
+    year: 2015, paper: 1, group: "A", number: 4, marks: 40,
+    text: "What are social movements? Give some old and recent examples of social movements. How do social movements pursue change in comparison to political parties?",
+    topicIds: ["p1u6t3", "p1u6t1"],
+  },
+  {
+    year: 2015, paper: 1, group: "A", number: 5, marks: 40,
+    text: "What is the working class? What social and economic factors account for the shrinking of this class from the mid-twentieth century? Describe the main elements said to be the characterisation of the 'Under Class'. Explain why and how this concept has been criticized by sociologists.",
+    topicIds: ["p1u4t1", "p1u5t3"],
+  },
+  {
+    year: 2015, paper: 1, group: "B", number: 6, marks: 40,
+    text: "Define social theory. Write an essay on the basis of the relationship between theory and research.",
+    topicIds: ["p1u9t1"],
+  },
+  {
+    year: 2015, paper: 1, group: "B", number: 7, marks: 40,
+    text: "What is the observation method? Discuss in detail the merits and demerits of the observation method.",
+    topicIds: ["p1u9t3"],
+    note: "The source reads 'What do observation method?'; transcribed as intended.",
+  },
+  {
+    year: 2015, paper: 1, group: "B", number: 8, marks: 40,
+    text: "Discuss in brief the survey method in social research.",
+    topicIds: ["p1u9t2"],
+  },
+
+  // ── 2016, Paper I ───────────────────────────────────────────────────────
+  {
+    year: 2016, paper: 1, group: "A", number: 1, marks: 40,
+    text: "Explain Karl Marx's analysis of Historical-materialism and Class-struggle.",
+    topicIds: ["p1u2t1"],
+  },
+  {
+    year: 2016, paper: 1, group: "A", number: 2, marks: 40,
+    text: "Discuss Emile Durkheim's theory of Division of Labour.",
+    topicIds: ["p1u2t2"],
+  },
+  {
+    year: 2016, paper: 1, group: "A", number: 3, marks: 40,
+    text: "Indicate the roles of social mobility in the process of social stratification.",
+    topicIds: ["p1u4t2", "p1u4t1"],
+  },
+  {
+    year: 2016, paper: 1, group: "A", number: 4, marks: 40,
+    text: "Examine in the context of modern society the relation between religion and science.",
+    topicIds: ["p1u7t1"],
+  },
+  {
+    year: 2016, paper: 1, group: "A", number: 5, marks: 40,
+    text: "Write an essay on poverty and deprivation in the context of modern India.",
+    topicIds: ["p1u4t1"],
+  },
+  {
+    year: 2016, paper: 1, group: "B", number: 6, marks: 40,
+    text: "Elaborate the importance and sources of hypotheses in social science research.",
+    topicIds: ["p1u9t1"],
+  },
+  {
+    year: 2016, paper: 1, group: "B", number: 7, marks: 40,
+    text: "Write an essay on education as an instrument of social change.",
+    topicIds: ["p1u10t3"],
+  },
+  {
+    year: 2016, paper: 1, group: "B", number: 8, marks: 40,
+    text: "Explain the roles of science and technology in the development of a society.",
+    topicIds: ["p1u8t3", "p1u10t4"],
+    note: "The printed paper reads 'a sciety'; transcribed as intended.",
+  },
+
   // ── 2014, Paper I ───────────────────────────────────────────────────────
   {
     year: 2014, paper: 1, group: "A", number: 1, marks: 40,
@@ -644,8 +732,9 @@ export const PYQS: PastQuestion[] = [
 
 
 /**
- * Years in the corpus. 2014 is complete; 2015 is Paper II only, its Paper I
- * sheet not yet found. Every paper that is here is whole — a test refuses a
- * half-transcribed one, so a partial year can never quietly count as a full.
+ * Years in the corpus. 2014, 2015 and 2018-2023 are complete; 2016 is Paper I
+ * only, its Paper II sheet not yet found. Every paper that is here is whole — a
+ * test refuses a half-transcribed one, so a partial year can never quietly
+ * count as a full one.
  */
-export const PYQ_YEARS = [2014, 2015, 2018, 2019, 2020, 2021, 2022, 2023] as const;
+export const PYQ_YEARS = [2014, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2023] as const;
