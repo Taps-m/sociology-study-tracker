@@ -178,16 +178,28 @@ export async function prepareUpload(file: File): Promise<Upload> {
  * thinkers kept in their place. The shape is the teaching — a paragraph of
  * advice would be forgotten by the next question, a structure is reusable.
  */
-export interface AnswerStructure {
-  demand: { commandWords: string[]; parts: string[]; trap: string };
-  arc: { stage: string; move: string; contextualStatement: string }[];
-  examples: { economic: string; social: string; political: string; technological: string };
-  counter: string[];
-  thinkers: { name: string; use: string; where: string }[];
-  budget: { section: string; minutes: number }[];
+export interface StructureBlock {
+  keyword: string;
+  mechanism: string;
+  thinker?: string;
+  specific?: string;
+  depth: "full" | "brief";
 }
 
-const STRUCTURE_KEY = "wbcs.structures";
+export interface AnswerStructure {
+  demand: { commandWords: string[]; parts: string[]; trap: string };
+  /** The organising principle the command word calls for. */
+  skeleton: string;
+  opening: { type: string; text: string };
+  signpost: string;
+  blocks: StructureBlock[];
+  /** The one line that turns a two-part answer. Empty when there is one part. */
+  pivot?: string;
+  close: { type: string; text: string };
+  minutes: { section: string; minutes: number }[];
+}
+
+const STRUCTURE_KEY = "wbcs.structures.v2";
 
 /**
  * Kept out of the event log on purpose. It is not something the candidate did,
@@ -247,7 +259,7 @@ export async function answerStructure(
 
     const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
     const parsed = JSON.parse(text) as AnswerStructure;
-    if (!parsed?.demand || !Array.isArray(parsed.arc)) {
+    if (!parsed?.demand || !Array.isArray(parsed.blocks)) {
       return { result: null, error: "the reply was not a structure" };
     }
 

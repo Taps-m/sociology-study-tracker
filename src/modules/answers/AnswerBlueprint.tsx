@@ -4,17 +4,18 @@ import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
 /**
- * What the answer needed, when the score says it did not have it.
+ * The skeleton the question was asking for.
  *
- * A mark on its own teaches nothing. "Two out of forty" tells a candidate they
- * failed and leaves them to guess at which of five things went wrong, which is
- * the point at which people stop writing answers altogether — and writing
- * answers is the single most useful thing this app asks anyone to do.
+ * The shape is not invented. It is what a 2nd-rank candidate's answer booklets
+ * actually do, page after page: an opening that carries the seed of the
+ * structure, a signpost line restating the demand, labelled blocks of
+ * keyword-dash-mechanism rather than paragraphs, a pivot sentence where the
+ * question has two halves, and a close that takes a position instead of
+ * summarising. Thinkers budgeted, specifics everywhere, and — the part
+ * candidates get wrong — not every block developed to the same depth.
  *
- * So the low score comes with the skeleton of the answer it should have been.
- * Not a model answer to copy: a structure to write from, in the shape a
- * candidate who scored 176 in Paper I described using — demand first, a
- * What/Why/How arc, examples spread across four domains, thinkers subordinate.
+ * It is a skeleton to write from, never an answer to copy. Copied paragraphs
+ * are worth nothing in a hall where the question will be phrased differently.
  */
 export function AnswerBlueprint({
   question,
@@ -27,11 +28,12 @@ export function AnswerBlueprint({
   topic: string;
   unit: string;
   paper: 1 | 2;
-  /** Opens itself when the last answer was poor, rather than waiting to be found. */
+  /** Offers itself louder when the last answer was poor. */
   weak: boolean;
 }) {
-  const cached = cachedStructure(question);
-  const [structure, setStructure] = useState<AnswerStructure | null>(cached);
+  const [structure, setStructure] = useState<AnswerStructure | null>(() =>
+    cachedStructure(question),
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,8 +58,8 @@ export function AnswerBlueprint({
       <Card title="What this answer needed">
         <p style={{ fontSize: 14, color: C.muted, margin: "0 0 12px", lineHeight: 1.7 }}>
           {weak
-            ? "A mark on its own does not teach anything. Build the skeleton this question was asking for — the demand broken into parts, the argument arc, and where the examples go."
-            : "See the skeleton this question was asking for, and compare it against what you wrote."}
+            ? "A mark on its own teaches nothing. Build the skeleton this question was asking for — the demand broken up, the opening written out, and where each point goes."
+            : "See the skeleton this question was asking for, and hold your answer against it."}
         </p>
         <button
           onClick={() => void build()}
@@ -78,9 +80,7 @@ export function AnswerBlueprint({
         >
           {busy ? "Building…" : "Show me the structure"}
         </button>
-        {error && (
-          <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0" }}>{error}</p>
-        )}
+        {error && <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0" }}>{error}</p>}
       </Card>
     );
   }
@@ -93,6 +93,23 @@ export function AnswerBlueprint({
     color: C.muted,
   };
 
+  /** Written-out lines the candidate could actually put on the page. */
+  const Sentence = ({ children }: { children: React.ReactNode }) => (
+    <p
+      style={{
+        fontSize: 14,
+        lineHeight: 1.75,
+        margin: "7px 0 0",
+        padding: "10px 12px",
+        borderRadius: 8,
+        background: C.accentSoft,
+        borderLeft: `2px solid ${C.accent}`,
+      }}
+    >
+      {children}
+    </p>
+  );
+
   return (
     <Card title="What this answer needed">
       <section>
@@ -104,10 +121,9 @@ export function AnswerBlueprint({
               <strong style={{ color: C.accent }}>
                 {structure.demand.commandWords.join(", ")}
               </strong>
-              .{" "}
+              {structure.skeleton ? ` · shape: ${structure.skeleton}` : ""}.
             </>
           )}
-          Most marks are lost here, before a word of sociology is written.
         </p>
         <ol style={{ margin: "9px 0 0", paddingLeft: 20, fontSize: 14, lineHeight: 1.75 }}>
           {structure.demand.parts.map((p) => (
@@ -132,114 +148,120 @@ export function AnswerBlueprint({
       </section>
 
       <section style={{ marginTop: 20 }}>
-        <div style={label}>The arc — what, why, how</div>
-        <div style={{ display: "grid", gap: 9, marginTop: 8 }}>
-          {structure.arc.map((a) => (
-            <div
-              key={a.stage}
-              style={{
-                padding: "10px 12px",
-                borderRadius: 8,
-                background: C.panel,
-                border: `1px solid ${C.line}`,
-              }}
-            >
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: C.accent }}>{a.stage}</div>
-              <div style={{ fontSize: 14, marginTop: 4, lineHeight: 1.65 }}>{a.move}</div>
-              {a.contextualStatement && (
-                <div
-                  style={{
-                    fontSize: 13.5,
-                    marginTop: 6,
-                    fontStyle: "italic",
-                    color: C.muted,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  “{a.contextualStatement}”
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.6 }}>
-          The lines in quotes are the joins. They are what stops an answer reading as a list of
-          remembered points.
+        <div style={label}>The opening — {structure.opening.type}</div>
+        <Sentence>{structure.opening.text}</Sentence>
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+          Two to four lines, no heading, and it already contains the shape of what follows. A
+          textbook definition here spends the most valuable lines on the page saying nothing.
         </p>
       </section>
 
-      <section style={{ marginTop: 20 }}>
-        <div style={label}>Examples — one from each, explained</div>
-        <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 7 }}>
-          {(
-            [
-              ["Economic", structure.examples.economic],
-              ["Social", structure.examples.social],
-              ["Political", structure.examples.political],
-              ["Technological", structure.examples.technological],
-            ] as const
-          ).map(([k, v]) => (
-            <li key={k} style={{ fontSize: 14, lineHeight: 1.65 }}>
-              <span style={{ color: C.accent, fontWeight: 600 }}>{k}. </span>
-              {v}
-            </li>
-          ))}
-        </ul>
-        <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.6 }}>
-          An example named and not explained earns nothing. Spreading them across the four keeps
-          the answer from reading monotonous.
-        </p>
-      </section>
-
-      {structure.counter.length > 0 && (
+      {structure.signpost && (
         <section style={{ marginTop: 20 }}>
-          <div style={label}>The other side, argued</div>
-          <ul style={{ margin: "8px 0 0", paddingLeft: 20, fontSize: 14, lineHeight: 1.75 }}>
-            {structure.counter.map((c) => (
-              <li key={c}>{c}</li>
-            ))}
-          </ul>
-          <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.6 }}>
-            From what has changed in society, not from a list of critics.
+          <div style={label}>The signpost</div>
+          <p
+            style={{
+              fontSize: 14.5,
+              margin: "7px 0 0",
+              fontWeight: 600,
+              textDecoration: "underline",
+              textUnderlineOffset: 4,
+            }}
+          >
+            {structure.signpost}
           </p>
-        </section>
-      )}
-
-      {structure.thinkers.length > 0 && (
-        <section style={{ marginTop: 20 }}>
-          <div style={label}>Thinkers, in their place</div>
-          <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 5 }}>
-            {structure.thinkers.map((t) => (
-              <li key={t.name} style={{ fontSize: 14, lineHeight: 1.6 }}>
-                <strong>{t.name}</strong> — {t.use}{" "}
-                <span style={{ color: C.muted }}>({t.where})</span>
-              </li>
-            ))}
-          </ul>
-          <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.6 }}>
-            More thinkers is not a better answer. Chasing them is how candidates stop answering
+          <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+            One line, restating the demand as a heading. It costs five seconds and shows you read
             the question.
           </p>
         </section>
       )}
 
-      {structure.budget.length > 0 && (
+      <section style={{ marginTop: 20 }}>
+        <div style={label}>The blocks — keyword, dash, mechanism</div>
+        <div style={{ display: "grid", gap: 8, marginTop: 8 }}>
+          {structure.blocks.map((b, i) => (
+            <div
+              key={b.keyword}
+              style={{
+                padding: "11px 13px",
+                borderRadius: 8,
+                background: C.panel,
+                border: `1px solid ${b.depth === "full" ? C.line : C.hair}`,
+                opacity: b.depth === "full" ? 1 : 0.86,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                <span className="num" style={{ fontSize: 12.5, color: C.muted }}>
+                  {String.fromCharCode(97 + i)})
+                </span>
+                <span
+                  style={{
+                    fontSize: 14.5,
+                    fontWeight: 700,
+                    padding: "1px 7px",
+                    borderRadius: 5,
+                    border: `1px solid ${C.accent}`,
+                    color: C.accent,
+                  }}
+                >
+                  {b.keyword}
+                </span>
+                {b.depth === "brief" && (
+                  <span style={{ fontSize: 11.5, color: C.muted, letterSpacing: "0.06em" }}>
+                    one line — do not dig
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: 14, marginTop: 6, lineHeight: 1.65 }}>{b.mechanism}</div>
+              {(b.thinker || b.specific) && (
+                <div style={{ fontSize: 12.5, color: C.muted, marginTop: 6 }}>
+                  {b.thinker && <>Thinker: {b.thinker}</>}
+                  {b.thinker && b.specific && " · "}
+                  {b.specific && <>Specific: {b.specific}</>}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "9px 0 0", lineHeight: 1.6 }}>
+          Blocks, not paragraphs. The keyword is the point itself. Blocks marked “do not dig” get
+          one line — spending three on an obvious point is where the time goes.
+        </p>
+      </section>
+
+      {structure.pivot && (
+        <section style={{ marginTop: 20 }}>
+          <div style={label}>The pivot</div>
+          <Sentence>{structure.pivot}</Sentence>
+          <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+            One sentence turns the answer to the second half of the question. Starting again
+            instead is how a two-part answer reads as two half answers.
+          </p>
+        </section>
+      )}
+
+      <section style={{ marginTop: 20 }}>
+        <div style={label}>The close — {structure.close.type}</div>
+        <Sentence>{structure.close.text}</Sentence>
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+          Never a summary of what you just wrote. Take a position, or hold the two sides against
+          each other.
+        </p>
+      </section>
+
+      {structure.minutes.length > 0 && (
         <section style={{ marginTop: 20 }}>
           <div style={label}>Thirty-five minutes, spent</div>
           <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 4 }}>
-            {structure.budget.map((b) => (
+            {structure.minutes.map((m) => (
               <li
-                key={b.section}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  fontSize: 14,
-                }}
+                key={m.section}
+                style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 14 }}
               >
-                <span>{b.section}</span>
+                <span>{m.section}</span>
                 <span className="num" style={{ color: C.muted }}>
-                  {b.minutes} min
+                  {m.minutes} min
                 </span>
               </li>
             ))}
@@ -248,9 +270,8 @@ export function AnswerBlueprint({
       )}
 
       <p style={{ fontSize: 12.5, color: C.muted, margin: "18px 0 0", lineHeight: 1.65 }}>
-        A skeleton to write from, not an answer to copy. The method — demand first, what/why/how,
-        examples across four domains, thinkers subordinate — is how a candidate who scored 176 in
-        Paper I described writing his.
+        A skeleton to write from, not an answer to copy — the question will be phrased differently
+        on the day. The shape is taken from a 2nd-rank candidate's own answer booklets.
       </p>
     </Card>
   );

@@ -28,3 +28,7 @@ dist-ssr
 .env.local
 .env*.local
 .vercel
+
+# Reference material: other people's answer scripts. Kept locally,
+# never published — this repository is public.
+answer copy/

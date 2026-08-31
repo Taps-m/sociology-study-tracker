@@ -305,62 +305,82 @@ built on a misreading is worse than no score. No praise anywhere.`;
     case "structure":
       return `${SYSTEM}
 
-Build the skeleton of a 40-mark WBCS answer to this question:
+Build the skeleton of an answer to this question:
 ${json}
 
-The method below is not yours to improvise on. It is how a candidate who
-scored 176 in Paper I says he wrote, and the five faults it corrects are the
-five he says most candidates make.
+The shape below is not invented. It is taken from the answer booklets of a
+candidate who placed 2nd, read alongside a 176-in-Paper-I candidate's own
+account of his method. Follow it.
 
-1. DEMAND ABOVE EVERYTHING. Most answers fail here: the candidate knows the
-   topic, and writes five remembered points without answering what was asked.
-   Break the question into the separate things it actually demands. A question
-   that says "define, then set out types, then distinguish with examples" is
-   three demands, and an answer that does two of them is capped however good
-   the sociology is. Name the command word and say what it obliges.
+THE OPENING — two to four lines, no heading, and it must already contain the
+seed of the structure that follows. Three openings do this; a textbook
+definition for its own sake does not, and wastes the most valuable lines on
+the page.
+  contrast   "Unlike the western world, the middle class in India did not
+             emerge out of economy and trade, but out of profession and
+             administration, which today forms a non-homogeneous and
+             expanding social class." — states the thesis and pre-announces
+             the property the second half will exploit.
+  unpack     Take the question's own terms and say what each contains, so the
+             body is already divided before it begins.
+  anchor     Name the Act, the codes, the scheme and what they do. Factual,
+             no thinker.
 
-2. FLOW IS WHAT / WHY / HOW. Not a list of features. What it is, why it comes
-   about, how it works out — each joined to the next by a contextual statement
-   short enough to be remembered and written under time. Give the actual
-   sentence, not a description of one.
+THE SIGNPOST — one line restating the demand as a heading before the body
+begins. "Emerging issues faced by the middle class —". It costs five seconds
+and tells the examiner you read the question.
 
-3. EXAMPLES CARRY THE MARKS, and they must be diverse or the answer reads
-   monotonous. Give one contemporary Indian example in each of economic,
-   social, political and technological, and say in a clause what each one
-   demonstrates — an example named and not explained earns nothing. Prefer
-   West Bengal and Indian instances.
+THE BLOCKS — the body is labelled blocks, a) b) c), never prose paragraphs.
+Each block is: a two-to-four word keyword, then a dash, then two or three
+lines of mechanism. The keyword is the point itself, not a topic heading.
+Parallel in form, varied in content — spread them across economic, social,
+political, cultural and technological rather than five of one kind.
 
-4. THINKERS ARE SUBORDINATE. More thinkers does not mean a better answer, and
-   chasing them is how candidates stop answering the question. Name only those
-   who do real work, and say where each belongs — usually in brackets beside a
-   claim already made.
+NOT EVERY BLOCK IS EQUAL. This is where candidates waste time. A point that is
+obvious gets one line and no thinker — "Excluded from government schemes, for
+being in the creamier layer" is a whole block in a 2nd-rank answer. Spend the
+depth on the two or three blocks carrying the argument. Mark each block full
+or brief and mean it.
 
-5. THE COUNTER IS ARGUED, NOT LISTED. Where the question asks how far, or to
-   critically examine, do not reach for a roll-call of critics. Argue from
-   substance — what has changed in society that the theory does not capture.
-   Thinkers may close it, in brackets.
+THE PIVOT — where the question has two parts, one line turns the answer
+instead of starting again: "But the failure of these provisions in full letter
+and spirit is the cause of tribal uprising —". Give the sentence.
 
-Length: this is WBCS, not UPSC. Forty marks, about thirty-five minutes, so
-roughly three times a UPSC 250-word answer — there is room for a real argument
-arc, and an answer written to UPSC length will look thin.
+THINKERS ARE BUDGETED. A 10-mark answer may have none at all. A 20-mark
+answer had four to six across the whole page, each doing exactly one job,
+inside a block and never as the block. More thinkers is not a better answer.
+
+SPECIFICS CARRY MORE THAN THINKERS DO. A number, a named Act, a scheme, a
+company, an institution: 42% of the displaced, women's participation at ~20%,
+POSCO, PESA 1996, IITs/NITs/AIIMS, the Baiga of West Bengal. Put a hard
+specific in most blocks. Prefer West Bengal and Indian instances.
+
+THE CLOSE — one or two lines, never a summary of what was just written.
+Either two-sided ("while the labour codes intend to minimise class divisions,
+poor implementation can widen inequality"), or forward-looking with a thinker,
+or an explicit answer to the demand.
+
+LENGTH. This is WBCS: 40 marks in about 35 minutes, so roughly one and a half
+to two times the 20-mark UPSC answer this shape comes from. That means six to
+eight blocks and fuller mechanisms — the same skeleton, not a different one.
 
 Reply with JSON and nothing else, in exactly this shape:
 
-{"demand":{"commandWords":["<the command word or words>"],
-           "parts":["<each separate thing the question obliges you to do>"],
-           "trap":"<the specific way candidates lose marks on this question>"},
- "arc":[{"stage":"What","move":"<what this section establishes>",
-         "contextualStatement":"<the sentence that carries the reader into the next>"},
-        {"stage":"Why","move":"...","contextualStatement":"..."},
-        {"stage":"How","move":"...","contextualStatement":"..."}],
- "examples":{"economic":"<example — what it demonstrates>",
-             "social":"...","political":"...","technological":"..."},
- "counter":["<a substantive limit, argued from what has changed>"],
- "thinkers":[{"name":"<thinker>","use":"<the one claim they support>","where":"<which section>"}],
- "budget":[{"section":"<name>","minutes":0}]}
+{"demand":{"commandWords":["..."],"parts":["<each thing the question obliges>"],
+           "trap":"<how candidates lose marks on this question>"},
+ "skeleton":"<the organising principle the command word calls for — periodisation, typology, consequence blocks, thinker-mapping, significance blocks>",
+ "opening":{"type":"contrast|unpack|anchor","text":"<the actual opening lines, written out>"},
+ "signpost":"<the heading line>",
+ "blocks":[{"keyword":"<2-4 words>","mechanism":"<2-3 lines>",
+            "thinker":"<name, or empty>","specific":"<number, Act, place, case, or empty>",
+            "depth":"full|brief"}],
+ "pivot":"<the turning sentence, or empty if the question has one part>",
+ "close":{"type":"two-sided|forward|answers-demand","text":"<the actual closing lines>"},
+ "minutes":[{"section":"<name>","minutes":0}]}
 
-The budget must total about 35 minutes. No praise, no preamble, no prose
-outside the JSON.`;
+The minutes must total about 35. Write the opening, pivot and close as real
+sentences the candidate could put on the page, not descriptions of them. No
+praise, no prose outside the JSON.`;
 
     default:
       return null;
