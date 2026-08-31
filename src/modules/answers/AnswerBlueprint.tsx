@@ -147,6 +147,48 @@ export function AnswerBlueprint({
         )}
       </section>
 
+      {structure.markUp && (
+        <section style={{ marginTop: 20 }}>
+          <div style={label}>First, mark the question paper</div>
+          <p style={{ fontSize: 14, margin: "7px 0 0", lineHeight: 1.7 }}>
+            Box{" "}
+            {structure.markUp.box.map((w) => (
+              <span
+                key={w}
+                style={{
+                  display: "inline-block",
+                  padding: "1px 6px",
+                  margin: "0 3px",
+                  border: `1px solid ${C.accent}`,
+                  borderRadius: 4,
+                  color: C.accent,
+                  fontWeight: 600,
+                }}
+              >
+                {w}
+              </span>
+            ))}
+            {structure.markUp.underline.length > 0 && (
+              <>
+                , underline{" "}
+                {structure.markUp.underline.map((w, i) => (
+                  <span key={w}>
+                    {i > 0 && ", "}
+                    <span style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>{w}</span>
+                  </span>
+                ))}
+              </>
+            )}
+            .
+          </p>
+          <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+            Five seconds, and it is why these candidates stay on the demand while everyone else
+            drifts. Every script sampled has the question itself annotated before the answer
+            begins.
+          </p>
+        </section>
+      )}
+
       <section style={{ marginTop: 20 }}>
         <div style={label}>The opening — {structure.opening.type}</div>
         <Sentence>{structure.opening.text}</Sentence>
@@ -237,6 +279,18 @@ export function AnswerBlueprint({
           <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
             One sentence turns the answer to the second half of the question. Starting again
             instead is how a two-part answer reads as two half answers.
+          </p>
+        </section>
+      )}
+
+      {structure.diagram && (
+        <section style={{ marginTop: 20 }}>
+          <div style={label}>Worth drawing</div>
+          <p style={{ fontSize: 14, margin: "7px 0 0", lineHeight: 1.7 }}>{structure.diagram}</p>
+          <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+            A boxed label with an arrow branching into numbered points, or a spine down the
+            margin joining a group. Seconds to draw, and the structure is visible before a word
+            is read.
           </p>
         </section>
       )}

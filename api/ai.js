@@ -312,6 +312,11 @@ The shape below is not invented. It is taken from the answer booklets of a
 candidate who placed 2nd, read alongside a 176-in-Paper-I candidate's own
 account of his method. Follow it.
 
+BEFORE WRITING, MARK THE QUESTION. Every one of these scripts has the question
+paper itself annotated: the command word boxed, the object underlined. It takes
+five seconds and it is why their answers stay on the demand while other people
+drift. Say what to box and what to underline.
+
 THE OPENING — two to four lines, no heading, and it must already contain the
 seed of the structure that follows. Three openings do this; a textbook
 definition for its own sake does not, and wastes the most valuable lines on
@@ -355,10 +360,24 @@ company, an institution: 42% of the displaced, women's participation at ~20%,
 POSCO, PESA 1996, IITs/NITs/AIIMS, the Baiga of West Bengal. Put a hard
 specific in most blocks. Prefer West Bengal and Indian instances.
 
+A DIAGRAM WHERE A LIST WOULD BE SLOWER. These candidates draw: a boxed label
+with an arrow branching into three numbered points, a vertical spine down the
+margin joining a group, a labelled triangle for a three-fold classification.
+Seconds to draw, and it makes the structure visible before a word is read.
+Suggest one only where it genuinely beats prose.
+
+EXAMPLES ARE FLAGGED AND ATTACHED. They write "(e.g.)" against the point it
+belongs to, never as a free-floating sentence. An example must sit inside a
+block and demonstrate that block's claim.
+
 THE CLOSE — one or two lines, never a summary of what was just written.
 Either two-sided ("while the labour codes intend to minimise class divisions,
-poor implementation can widen inequality"), or forward-looking with a thinker,
-or an explicit answer to the demand.
+poor implementation can widen inequality"), or concessive, which is the move
+for a question about limitations or criticism ("thus, despite these
+limitations, positivists gave sociology its concrete shape as a discipline"),
+or forward-looking with a thinker, or an explicit answer to the demand. A
+question asking for criticism still wants a position at the end, not a verdict
+of total failure.
 
 LENGTH. This is WBCS: 40 marks in about 35 minutes, so roughly one and a half
 to two times the 20-mark UPSC answer this shape comes from. That means six to
@@ -368,6 +387,7 @@ Reply with JSON and nothing else, in exactly this shape:
 
 {"demand":{"commandWords":["..."],"parts":["<each thing the question obliges>"],
            "trap":"<how candidates lose marks on this question>"},
+ "markUp":{"box":["<the command word to box on the question paper>"],"underline":["<the objects to underline>"]},
  "skeleton":"<the organising principle the command word calls for — periodisation, typology, consequence blocks, thinker-mapping, significance blocks>",
  "opening":{"type":"contrast|unpack|anchor","text":"<the actual opening lines, written out>"},
  "signpost":"<the heading line>",
@@ -375,7 +395,8 @@ Reply with JSON and nothing else, in exactly this shape:
             "thinker":"<name, or empty>","specific":"<number, Act, place, case, or empty>",
             "depth":"full|brief"}],
  "pivot":"<the turning sentence, or empty if the question has one part>",
- "close":{"type":"two-sided|forward|answers-demand","text":"<the actual closing lines>"},
+ "diagram":"<a diagram worth drawing and what it shows, or empty if prose is better>",
+ "close":{"type":"two-sided|concessive|forward|answers-demand","text":"<the actual closing lines>"},
  "minutes":[{"section":"<name>","minutes":0}]}
 
 The minutes must total about 35. Write the opening, pivot and close as real

@@ -188,6 +188,8 @@ export interface StructureBlock {
 
 export interface AnswerStructure {
   demand: { commandWords: string[]; parts: string[]; trap: string };
+  /** What to box and underline on the question paper before writing a word. */
+  markUp?: { box: string[]; underline: string[] };
   /** The organising principle the command word calls for. */
   skeleton: string;
   opening: { type: string; text: string };
@@ -195,6 +197,8 @@ export interface AnswerStructure {
   blocks: StructureBlock[];
   /** The one line that turns a two-part answer. Empty when there is one part. */
   pivot?: string;
+  /** A diagram worth the seconds it costs, or empty when prose is better. */
+  diagram?: string;
   close: { type: string; text: string };
   minutes: { section: string; minutes: number }[];
 }
