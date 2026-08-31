@@ -26,6 +26,9 @@ import {
   revisionState,
   answerVerdict,
   needsRework,
+  reworkDueOn,
+  reworkWaiting,
+  REWORK_COOLDOWN_DAYS,
   rubricAverages,
   selfMarkGap,
   CHECKS,
@@ -352,13 +355,26 @@ describe("answers feed back into the plan", () => {
     expect(needsRework(d, highYield.id)).toBe(false);
   });
 
-  it("puts a finished topic back in the queue when its answer was weak", () => {
+  it("puts a finished topic back in the queue when its answer was weak — after a week", () => {
     const done = atDepth(highYield);
     expect(queue(done).some((t) => t.id === highYield.id)).toBe(false);
 
-    const weak = atDepth(highYield, [on.attempt(highYield.id, 15, 40, 40)]);
-    expect(needsRework(weak, highYield.id)).toBe(true);
-    expect(queue(weak).some((t) => t.id === highYield.id)).toBe(true);
+    // The verdict is immediate. The consequence waits, so that writing an
+    // answer and finding out it was poor does not immediately enlarge the
+    // list — which is a punishment for doing the hardest thing the app asks.
+    const today = atDepth(highYield, [on.attempt(highYield.id, 15, 40, 40)]);
+    expect(answerVerdict(today, highYield.id)).toBe("rework");
+    expect(needsRework(today, highYield.id)).toBe(false);
+    expect(queue(today).some((t) => t.id === highYield.id)).toBe(false);
+    expect(reworkDueOn(today, highYield.id)).not.toBe(null);
+
+    const later = new Date();
+    later.setDate(later.getDate() - (REWORK_COOLDOWN_DAYS + 1));
+    const cooled = atDepth(highYield, [
+      { ...on.attempt(highYield.id, 15, 40, 40), at: later.toISOString() },
+    ]);
+    expect(needsRework(cooled, highYield.id)).toBe(true);
+    expect(queue(cooled).some((t) => t.id === highYield.id)).toBe(true);
   });
 
   it("leaves a finished topic alone when the answer was good", () => {
@@ -733,5 +749,67 @@ describe("today's list keeps what you finished", () => {
     const sum = board.tasks.reduce((s, t) => s + t.minutes, 0);
     expect(board.minutesPlanned).toBe(sum);
     expect(board.minutesDone).toBeLessThanOrEqual(board.minutesPlanned);
+  });
+});
+
+describe("a weak answer waits before it reopens the topic", () => {
+  const asked = TOPICS.find((t) => t.pyq > 0)!;
+  const daysAgo = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.toISOString();
+  };
+  const attempt = (marks: number, at: string, extra = {}) => ({
+    ...on.attempt(asked.id, marks, 40, 35, extra),
+    at,
+  });
+
+  it("says the answer was weak straight away", () => {
+    const d = build([attempt(8, daysAgo(0))]);
+    expect(answerVerdict(d, asked.id)).toBe("rework");
+  });
+
+  it("but does not put it back in the queue the same day", () => {
+    const d = build([attempt(8, daysAgo(0))]);
+    expect(needsRework(d, asked.id)).toBe(false);
+    expect(queue(d).some((t) => t.id === asked.id && !isAtDepth(d, t))).toBe(true);
+  });
+
+  it("reopens it once the cooling-off period has passed", () => {
+    const d = build([attempt(8, daysAgo(REWORK_COOLDOWN_DAYS + 1))]);
+    expect(needsRework(d, asked.id)).toBe(true);
+  });
+
+  it("names the day it is coming back, rather than hiding it", () => {
+    const d = build([attempt(8, daysAgo(0))]);
+    const due = reworkDueOn(d, asked.id)!;
+    expect(due).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(reworkWaiting(d).some((r) => r.topic.id === asked.id)).toBe(true);
+  });
+
+  it("stops listing it as waiting once it is due", () => {
+    const d = build([attempt(8, daysAgo(REWORK_COOLDOWN_DAYS + 1))]);
+    expect(reworkWaiting(d).some((r) => r.topic.id === asked.id)).toBe(false);
+  });
+
+  it("refuses to act on a page the model could not read", () => {
+    // Two out of forty from an unreadable photograph is a judgement about a
+    // camera, not about sociology. It must not reopen a topic.
+    const d = build([attempt(2, daysAgo(0), { legible: false })]);
+    expect(answerVerdict(d, asked.id)).toBe("unread");
+    expect(needsRework(d, asked.id)).toBe(false);
+    expect(reworkDueOn(d, asked.id)).toBe(null);
+  });
+
+  it("still acts on a low score the model could read", () => {
+    const d = build([attempt(2, daysAgo(REWORK_COOLDOWN_DAYS + 1), { legible: true })]);
+    expect(answerVerdict(d, asked.id)).toBe("rework");
+    expect(needsRework(d, asked.id)).toBe(true);
+  });
+
+  it("leaves a good answer alone", () => {
+    const d = build([attempt(30, daysAgo(0))]);
+    expect(answerVerdict(d, asked.id)).toBe("solid");
+    expect(reworkDueOn(d, asked.id)).toBe(null);
   });
 });

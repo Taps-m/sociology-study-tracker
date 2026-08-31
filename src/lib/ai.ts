@@ -12,7 +12,7 @@
  *    their own.
  */
 
-export type AiTask = "critique" | "guidance" | "evaluate" | "insight" | "doubt";
+export type AiTask = "critique" | "guidance" | "evaluate" | "insight" | "doubt" | "structure";
 
 /** The figures an answer was reasoned from, so drift can be detected later. */
 export interface AdviceBasis {
@@ -146,6 +146,100 @@ export async function prepareUpload(file: File): Promise<Upload> {
 }
 
 /** Ask for a page to be read and scored. Returns null if the reply was not usable. */
+/**
+ * The skeleton of an answer, built the way a candidate who scored 176 in Paper I
+ * says he built his.
+ *
+ * Fixed slots, never prose: the demand broken into its separate obligations, a
+ * What/Why/How arc with the contextual sentences that join it, one contemporary
+ * example in each of four domains, a counter argued from substance, and
+ * thinkers kept in their place. The shape is the teaching — a paragraph of
+ * advice would be forgotten by the next question, a structure is reusable.
+ */
+export interface AnswerStructure {
+  demand: { commandWords: string[]; parts: string[]; trap: string };
+  arc: { stage: string; move: string; contextualStatement: string }[];
+  examples: { economic: string; social: string; political: string; technological: string };
+  counter: string[];
+  thinkers: { name: string; use: string; where: string }[];
+  budget: { section: string; minutes: number }[];
+}
+
+const STRUCTURE_KEY = "wbcs.structures";
+
+/**
+ * Kept out of the event log on purpose. It is not something the candidate did,
+ * it costs nothing to fetch again, and a log that syncs between devices should
+ * not carry model output that would grow it for every question ever asked.
+ */
+function structureCache(): Record<string, AnswerStructure> {
+  try {
+    return JSON.parse(localStorage.getItem(STRUCTURE_KEY) ?? "{}") as Record<
+      string,
+      AnswerStructure
+    >;
+  } catch {
+    return {};
+  }
+}
+
+/** A short stable key for a question, so the same one is never paid for twice. */
+function questionKey(question: string): string {
+  let h = 0;
+  const text = question.trim().toLowerCase();
+  for (let i = 0; i < text.length; i++) h = (Math.imul(31, h) + text.charCodeAt(i)) | 0;
+  return `q${(h >>> 0).toString(36)}`;
+}
+
+export function cachedStructure(question: string): AnswerStructure | null {
+  return structureCache()[questionKey(question)] ?? null;
+}
+
+export async function answerStructure(
+  question: string,
+  context: unknown,
+): Promise<{ result: AnswerStructure | null; error: string | null }> {
+  const key = questionKey(question);
+  const hit = structureCache()[key];
+  if (hit) return { result: hit, error: null };
+
+  try {
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: "structure", context, deviceId: deviceId() }),
+    });
+    const payload = (await res.json().catch(() => ({}))) as {
+      body?: string;
+      error?: string;
+      detail?: string;
+    };
+    if (!res.ok) {
+      return {
+        result: null,
+        error: [payload.error ?? `request failed (${res.status})`, payload.detail]
+          .filter(Boolean)
+          .join(" — "),
+      };
+    }
+
+    const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
+    const parsed = JSON.parse(text) as AnswerStructure;
+    if (!parsed?.demand || !Array.isArray(parsed.arc)) {
+      return { result: null, error: "the reply was not a structure" };
+    }
+
+    try {
+      localStorage.setItem(STRUCTURE_KEY, JSON.stringify({ ...structureCache(), [key]: parsed }));
+    } catch {
+      // Full or blocked. It will simply be fetched again next time.
+    }
+    return { result: parsed, error: null };
+  } catch {
+    return { result: null, error: "could not read the reply" };
+  }
+}
+
 export async function evaluate(
   context: unknown,
   file: Upload,

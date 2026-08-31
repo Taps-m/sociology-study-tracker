@@ -297,6 +297,66 @@ Reply with JSON and nothing else, in exactly this shape:
 Set legible to false if the handwriting cannot be read with confidence; a score
 built on a misreading is worse than no score. No praise anywhere.`;
 
+    case "structure":
+      return `${SYSTEM}
+
+Build the skeleton of a 40-mark WBCS answer to this question:
+${json}
+
+The method below is not yours to improvise on. It is how a candidate who
+scored 176 in Paper I says he wrote, and the five faults it corrects are the
+five he says most candidates make.
+
+1. DEMAND ABOVE EVERYTHING. Most answers fail here: the candidate knows the
+   topic, and writes five remembered points without answering what was asked.
+   Break the question into the separate things it actually demands. A question
+   that says "define, then set out types, then distinguish with examples" is
+   three demands, and an answer that does two of them is capped however good
+   the sociology is. Name the command word and say what it obliges.
+
+2. FLOW IS WHAT / WHY / HOW. Not a list of features. What it is, why it comes
+   about, how it works out — each joined to the next by a contextual statement
+   short enough to be remembered and written under time. Give the actual
+   sentence, not a description of one.
+
+3. EXAMPLES CARRY THE MARKS, and they must be diverse or the answer reads
+   monotonous. Give one contemporary Indian example in each of economic,
+   social, political and technological, and say in a clause what each one
+   demonstrates — an example named and not explained earns nothing. Prefer
+   West Bengal and Indian instances.
+
+4. THINKERS ARE SUBORDINATE. More thinkers does not mean a better answer, and
+   chasing them is how candidates stop answering the question. Name only those
+   who do real work, and say where each belongs — usually in brackets beside a
+   claim already made.
+
+5. THE COUNTER IS ARGUED, NOT LISTED. Where the question asks how far, or to
+   critically examine, do not reach for a roll-call of critics. Argue from
+   substance — what has changed in society that the theory does not capture.
+   Thinkers may close it, in brackets.
+
+Length: this is WBCS, not UPSC. Forty marks, about thirty-five minutes, so
+roughly three times a UPSC 250-word answer — there is room for a real argument
+arc, and an answer written to UPSC length will look thin.
+
+Reply with JSON and nothing else, in exactly this shape:
+
+{"demand":{"commandWords":["<the command word or words>"],
+           "parts":["<each separate thing the question obliges you to do>"],
+           "trap":"<the specific way candidates lose marks on this question>"},
+ "arc":[{"stage":"What","move":"<what this section establishes>",
+         "contextualStatement":"<the sentence that carries the reader into the next>"},
+        {"stage":"Why","move":"...","contextualStatement":"..."},
+        {"stage":"How","move":"...","contextualStatement":"..."}],
+ "examples":{"economic":"<example — what it demonstrates>",
+             "social":"...","political":"...","technological":"..."},
+ "counter":["<a substantive limit, argued from what has changed>"],
+ "thinkers":[{"name":"<thinker>","use":"<the one claim they support>","where":"<which section>"}],
+ "budget":[{"section":"<name>","minutes":0}]}
+
+The budget must total about 35 minutes. No praise, no preamble, no prose
+outside the JSON.`;
+
     default:
       return null;
   }

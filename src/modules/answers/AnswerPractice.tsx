@@ -13,6 +13,7 @@ import {
   attemptsOnQuestion,
 } from "../../lib/planner";
 import { evaluate, prepareUpload, type Evaluation } from "../../lib/ai";
+import { AnswerBlueprint } from "./AnswerBlueprint";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
@@ -55,6 +56,7 @@ export function AnswerPractice({
       selfMark?: number;
       questionText?: string;
       group?: "A" | "B";
+      legible?: boolean;
       scores?: Evaluation["scores"];
       readBack?: string;
     },
@@ -144,6 +146,7 @@ export function AnswerPractice({
       group: picked?.group,
       scores: result?.scores,
       readBack: result?.readBack?.slice(0, 200),
+      legible: result?.legible,
     });
 
     setSaved(true);
@@ -310,6 +313,18 @@ export function AnswerPractice({
           />
         )}
       </Card>
+
+      {questionText && (
+        <AnswerBlueprint
+          question={questionText}
+          topic={topic.name}
+          unit={topic.unit}
+          paper={topic.paper}
+          weak={Boolean(
+            result && Object.values(result.scores).reduce((a, b) => a + b, 0) / 50 < 0.5,
+          )}
+        />
+      )}
 
       <Card title="The clock">
         <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
@@ -509,8 +524,10 @@ export function AnswerPractice({
           Save this attempt
         </button>
         {saved && (
-          <p style={{ fontSize: 13.5, color: "var(--good)", margin: "10px 0 0" }}>
-            Saved. Scores under 50% put the topic back in your queue.
+          <p style={{ fontSize: 13.5, color: "var(--good)", margin: "10px 0 0", lineHeight: 1.65 }}>
+            Saved. A weak answer does not reopen the topic today — it comes back in a week,
+            which is when returning to something makes it stick rather than simply punishing
+            you for having written it.
           </p>
         )}
       </Card>
