@@ -128,6 +128,8 @@ const MODULES = [
     note: "Every topic row names a chapter and links the official NCERT PDF. 70 of 85 topics have a verified reference; the rest say plainly that they need Essential Sociology. Chapter numbers were checked against the NCERT contents PDFs, not a coaching site. Remaining: the Essential Sociology chapter map, which needs the contents pages of the edition on the desk." },
   { group: "Screens", name: "How this works (user guide)", status: "done",
     note: "Ten steps with real screenshots of the app taken from the built bundle with a demo log, numbered rings burned in at measured element positions rather than guessed pixels. Tap to zoom, and each step links straight to the screen it describes. 819 kB for eleven images, served from /guide and lazy-loaded." },
+  { group: "Screens", name: "Sync between devices", status: "done",
+    note: "Pass-phrase stretched with PBKDF2, split by HKDF into a sync id and an AES-GCM key; only ciphertext is sent, so the server (and this public repo) cannot read a log. Merging is a union by event id -- free, because the log is append-only -- so two devices used offline reconcile with no conflict. Pull always precedes push. 17 tests." },
   { group: "Owed", name: "Ten years of PYQs", status: "todo",
     note: "Six years are tagged (2018-2023). 2014-2017 and 2024-2026 are missing, and every extra year sharpens the yield weights." },
   { group: "Owed", name: "Real hour estimates", status: "todo",

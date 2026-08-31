@@ -28,6 +28,34 @@ export function sessionOpen(): boolean {
 }
 
 const AVATAR_KEY = "sociology-tracker-avatar";
+const SYNC_PHRASE_KEY = "sociology-tracker-sync-phrase";
+
+/**
+ * The sync pass-phrase, kept on this device so syncing can run without asking
+ * for it on every visit.
+ *
+ * It sits beside the log rather than protecting it: anyone who can read this
+ * key can already read the study log in the same browser. What the phrase
+ * protects is the copy held on the server, and keeping it here does not weaken
+ * that. It is deliberately not in the event log — it is a credential, it has no
+ * history worth keeping, and it must never travel in an export.
+ */
+export function loadSyncPhrase(): string | null {
+  try {
+    return localStorage.getItem(SYNC_PHRASE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveSyncPhrase(phrase: string | null): void {
+  try {
+    if (phrase) localStorage.setItem(SYNC_PHRASE_KEY, phrase);
+    else localStorage.removeItem(SYNC_PHRASE_KEY);
+  } catch {
+    // Sync will simply ask again next time.
+  }
+}
 
 /**
  * The profile photo, kept out of the event log on purpose.

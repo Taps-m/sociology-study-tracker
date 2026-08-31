@@ -39,6 +39,8 @@ import {
   setSessionOpen,
 } from "./lib/storage";
 import { fileToAvatar } from "./lib/avatar";
+import { useSync } from "./lib/useSync";
+import { MIN_PASSPHRASE } from "./lib/sync";
 import { clearAdvice } from "./lib/ai";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
@@ -60,6 +62,7 @@ export default function App() {
   const [events, setEvents] = useState<StudyEvent[]>(() => load());
   const [signedIn, setSignedIn] = useState(sessionOpen);
   const [avatar, setAvatar] = useState<string | null>(loadAvatar);
+  const sync = useSync(events, setEvents);
   const [route, go] = useRoute();
   useEffect(() => save(events), [events]);
 
@@ -168,12 +171,17 @@ export default function App() {
           />
           <StartUnitControl d={d} onChange={(patch) => add(on.settings(patch))} />
           <PaceControl d={d} onChange={(patch) => add(on.settings(patch))} />
+          <SyncControl sync={sync} />
           <Backup
             events={events}
             setEvents={setEvents}
             onErase={() => {
               saveAvatar(null);
               setAvatar(null);
+              // Erasing locally while a copy sits on the server would restore
+              // everything on the next sync, which is the opposite of what the
+              // button says it does.
+              void sync.disconnect(true);
             }}
           />
         </div>
@@ -1045,6 +1053,127 @@ function Setup({
         </button>
       </div>
     </Shell>
+  );
+}
+
+/**
+ * Sync between devices.
+ *
+ * The screen has to carry one honest sentence that most sync settings do not:
+ * that the pass-phrase cannot be recovered. There is no account and no reset
+ * link, by design — the server holds ciphertext it cannot read, which is only
+ * true because nobody there has the key.
+ */
+function SyncControl({ sync }: { sync: ReturnType<typeof useSync> }) {
+  const [draft, setDraft] = useState("");
+  const [showing, setShowing] = useState(false);
+  const [confirmOff, setConfirmOff] = useState(false);
+  const { state } = sync;
+
+  if (!sync.connected) {
+    return (
+      <Section title="Study on more than one device">
+        <Note>
+          Your record lives in this browser, so a phone and a laptop each keep their own.
+          Choose a pass-phrase here, enter the same one on your other device, and the two
+          logs merge — everything you have done on either, in one place.
+        </Note>
+
+        <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+          <input
+            type={showing ? "text" : "password"}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={`A pass-phrase, at least ${MIN_PASSPHRASE} characters`}
+            aria-label="Sync pass-phrase"
+            autoComplete="off"
+            style={{
+              flex: "1 1 240px",
+              minHeight: 42,
+              padding: "0 12px",
+              borderRadius: 8,
+              background: C.surface,
+              border: `1px solid ${C.line}`,
+              color: C.text,
+              fontFamily: C.sans,
+              fontSize: 15,
+            }}
+          />
+          <button onClick={() => setShowing(!showing)} style={btn}>
+            {showing ? "Hide" : "Show"}
+          </button>
+          <button
+            onClick={() => sync.connect(draft.trim())}
+            disabled={draft.trim().length < MIN_PASSPHRASE}
+            style={{
+              ...btn,
+              background: draft.trim().length >= MIN_PASSPHRASE ? C.accent : "transparent",
+              color: draft.trim().length >= MIN_PASSPHRASE ? C.surface : C.muted,
+              borderColor: draft.trim().length >= MIN_PASSPHRASE ? C.accent : C.line,
+              fontWeight: 600,
+            }}
+          >
+            Turn on sync
+          </button>
+        </div>
+
+        <Note>
+          Use a phrase of a few real words — three or four you will not forget. It never
+          leaves this device: it is stretched into a key here, and only encrypted data is
+          sent. Nobody running the server can read your log, which also means{" "}
+          <strong>nobody can recover the phrase for you</strong>. Write it down.
+        </Note>
+        {state.status === "error" && <Note>{state.message}</Note>}
+      </Section>
+    );
+  }
+
+  return (
+    <Section title="Study on more than one device">
+      <Note>
+        {state.status === "syncing"
+          ? "Syncing…"
+          : state.status === "connecting"
+            ? "Unlocking…"
+            : state.status === "error"
+              ? state.message
+              : state.message ||
+                (state.lastSyncedAt
+                  ? `Up to date. Last synced ${new Date(state.lastSyncedAt).toLocaleTimeString()}.`
+                  : "Sync is on.")}
+      </Note>
+
+      <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+        <button onClick={sync.syncNow} disabled={state.status === "syncing"} style={btn}>
+          Sync now
+        </button>
+        {confirmOff ? (
+          <>
+            <button
+              onClick={() => {
+                void sync.disconnect(true);
+                setConfirmOff(false);
+              }}
+              style={{ ...btn, color: "#dc2626", borderColor: "#dc2626" }}
+            >
+              Turn off and delete the synced copy
+            </button>
+            <button onClick={() => setConfirmOff(false)} style={btn}>
+              Keep syncing
+            </button>
+          </>
+        ) : (
+          <button onClick={() => setConfirmOff(true)} style={btn}>
+            Turn off sync
+          </button>
+        )}
+      </div>
+
+      <Note>
+        Turning it off removes the encrypted copy from the server. Nothing on this device is
+        touched, and your other device keeps whatever it already has.
+      </Note>
+    </Section>
   );
 }
 
