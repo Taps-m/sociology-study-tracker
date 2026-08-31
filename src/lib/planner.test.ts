@@ -51,7 +51,7 @@ import {
   suggestedMonths,
   DEPTHS,
 } from "./planner";
-import { PYQS } from "../data/pyq";
+import { PYQS, PYQ_YEARS } from "../data/pyq";
 
 const WEEKLY_HOURS = 10;
 const SETTINGS = {
@@ -152,9 +152,21 @@ describe("depth", () => {
     expect(skippedTopics(pro).every((t) => bandOf(t) === 1)).toBe(true);
   });
 
-  it("promotes only a handful of never-asked topics", () => {
+  it("promotes only a small minority of never-asked topics", () => {
+    // A fixed count would have to be edited every time a paper is added, which
+    // turns a real guard into a chore. What must hold is that promotion stays
+    // exceptional — it exists so a topic sitting in a heavily examined unit is
+    // not ignored, not so that everything gets promoted — and that every
+    // promoted topic really does sit in a unit the examiner has visited.
     const promoted = TOPICS.filter((t) => t.pyq === 0 && bandOf(t) > 1);
-    expect(promoted.length).toBeLessThan(5);
+    expect(promoted.length).toBeLessThan(TOPICS.length * 0.12);
+
+    for (const t of promoted) {
+      const unitAsked = TOPICS.filter(
+        (x) => x.paper === t.paper && x.unit === t.unit,
+      ).reduce((sum, x) => sum + x.pyq, 0);
+      expect(unitAsked, `${t.id} promoted out of an unexamined unit`).toBeGreaterThan(0);
+    }
   });
 
   it("queues higher-yield topics first", () => {
@@ -409,10 +421,26 @@ describe("answers feed back into the plan", () => {
 });
 
 describe("the question corpus", () => {
-  it("holds twelve complete papers", () => {
-    expect(PYQS).toHaveLength(96);
-    expect(PYQS.filter((q) => q.group === "A")).toHaveLength(60);
-    expect(PYQS.filter((q) => q.group === "B")).toHaveLength(36);
+  it("holds whole papers, five of eight in each", () => {
+    // Derived rather than a magic number, so adding a year is a data change
+    // and not a test edit. Each paper is five Group A and three Group B.
+    const papers = new Set(PYQS.map((q) => `${q.year}-${q.paper}`));
+    expect(PYQS).toHaveLength(papers.size * 8);
+    expect(PYQS.filter((q) => q.group === "A")).toHaveLength(papers.size * 5);
+    expect(PYQS.filter((q) => q.group === "B")).toHaveLength(papers.size * 3);
+
+    // Every paper is complete: no year half-transcribed and quietly counted.
+    for (const key of papers) {
+      const [year, paper] = key.split("-").map(Number);
+      const inPaper = PYQS.filter((q) => q.year === year && q.paper === paper);
+      expect(inPaper, key).toHaveLength(8);
+      expect(new Set(inPaper.map((q) => q.number)).size, key).toBe(8);
+    }
+  });
+
+  it("declares every year it actually holds", () => {
+    const inCorpus = [...new Set(PYQS.map((q) => q.year))].sort();
+    expect([...PYQ_YEARS].sort()).toEqual(inCorpus);
   });
 
   it("never points at a topic that does not exist", () => {

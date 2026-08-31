@@ -514,6 +514,98 @@ export const PYQS: PastQuestion[] = [
     topicIds: ["p2u8t9", "p2u6t1"],
     note: "Truncated at a page break in the source PDF.",
   },
+
+  // ── 2014, Paper II ──────────────────────────────────────────────────────
+  // Transcribed from the paper itself. Paper I for this year is not held yet,
+  // so 2014 counts only towards Paper II coverage.
+  {
+    year: 2014, paper: 2, group: "A", number: 1, marks: 40,
+    text: "Has Market led Industrialization and urbanization resulted in Western consumerism and materialistic culture creeping in, that adversely affect the plural Indian culture? Explain with examples from contemporary India.",
+    topicIds: ["p2u5t5", "p2u5t1", "p2u1t1"],
+  },
+  {
+    year: 2014, paper: 2, group: "A", number: 2, marks: 40,
+    text: "Describe the process of social mobility among the lower castes and discuss the role of the Backward Classes Movement in strengthening this process.",
+    topicIds: ["p2u4t3", "p2u5t4"],
+  },
+  {
+    year: 2014, paper: 2, group: "A", number: 3, marks: 40,
+    text: "Discuss how occupational diversification has affected the pattern of social stratification in India.",
+    topicIds: ["p2u4t5"],
+  },
+  {
+    year: 2014, paper: 2, group: "A", number: 4, marks: 40,
+    text: "Discuss the paradoxical nature of change in contemporary Indian society. Describe the factors responsible for it.",
+    topicIds: ["p2u5t2", "p2u1t1"],
+  },
+  {
+    year: 2014, paper: 2, group: "A", number: 5, marks: 40,
+    text: "What have been the functions of democracy in India? Has Democracy been successful in eliminating some of the traditional social inequalities?",
+    topicIds: ["p2u3t4", "p2u4t4"],
+  },
+  {
+    year: 2014, paper: 2, group: "B", number: 6, marks: 40,
+    text: "Describe the salient features of the poverty alleviation programmes. What modifications would you suggest to make them more effective?",
+    topicIds: ["p2u8t1"],
+  },
+  {
+    year: 2014, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Discuss the social consequences of economic reforms like Liberalization, Privatization and Globalization.",
+    topicIds: ["p2u7t1", "p2u4t5"],
+  },
+  {
+    year: 2014, paper: 2, group: "B", number: 8, marks: 40,
+    text: "How do you define development? What are your suggestions to resolve the issues of displacement and environment related to development?",
+    topicIds: ["p2u7t1", "p2u7t2"],
+  },
+
+  // ── 2015, Paper II ──────────────────────────────────────────────────────
+  {
+    year: 2015, paper: 2, group: "A", number: 1, marks: 40,
+    text: "How do you account for the growing rise of violence against women in India? What are some of recent legal provisions to counter such violence? Do you think they are adequate to remedy the present situation?",
+    topicIds: ["p2u6t2", "p2u8t9", "p2u5t3"],
+  },
+  {
+    year: 2015, paper: 2, group: "A", number: 2, marks: 40,
+    text: "What are the ways in which caste and class intersect in contemporary Indian Society? Do you think the nature of this intersection is responsible for the persistent social inequalities in Indian society?",
+    topicIds: ["p2u4t2", "p2u4t1"],
+  },
+  {
+    year: 2015, paper: 2, group: "A", number: 3, marks: 40,
+    text: "What are the changes that have been brought in family and marriage patterns due to industrialization and urbanization in contemporary Indian society?",
+    topicIds: ["p2u3t2", "p2u3t1", "p2u5t5"],
+  },
+  {
+    year: 2015, paper: 2, group: "A", number: 4, marks: 40,
+    text: "What do you understand by M.N. Srinivas's distinction between \"Book View\" and \"Field View\"? How do you think this difference has contributed to Srinivas's understanding of caste in India? What according to you is the contemporary relevance of this distinction?",
+    topicIds: ["p2u1t3", "p2u2t3"],
+  },
+  {
+    year: 2015, paper: 2, group: "A", number: 5, marks: 40,
+    text: "What do you understand by the concept of secularism and secularization? Employing these two concepts, evaluate the role and significance of religion in contemporary Indian society.",
+    topicIds: ["p2u3t5", "p2u5t1"],
+  },
+  {
+    year: 2015, paper: 2, group: "B", number: 6, marks: 40,
+    text: "Write a critical essay on nature and role of environmental movements in India.",
+    topicIds: ["p2u7t2"],
+  },
+  {
+    year: 2015, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Is the description of India as a 'Unity in Diversity' a misleading one that veils persistent social segregation and structural inequalities? Cite contemporary examples.",
+    topicIds: ["p2u1t1", "p2u4t1"],
+  },
+  {
+    year: 2015, paper: 2, group: "B", number: 8, marks: 40,
+    text: "Critically evaluate the debates around the Family planning policies in India.",
+    topicIds: ["p2u8t7", "p2u6t3"],
+  },
 ];
 
-export const PYQ_YEARS = [2018, 2019, 2020, 2021, 2022, 2023] as const;
+
+/**
+ * Years in the corpus. 2014 and 2015 are Paper II only — the Paper I sheets for
+ * those years have not been found, so those years are partial. Every paper that
+ * is here is complete: a test refuses a half-transcribed one.
+ */
+export const PYQ_YEARS = [2014, 2015, 2018, 2019, 2020, 2021, 2022, 2023] as const;
