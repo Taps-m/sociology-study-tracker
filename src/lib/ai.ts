@@ -118,6 +118,28 @@ export interface Evaluation {
  * cost down. PDFs are sent as they are — they are already compressed, and
  * re-rendering one in the browser would need a PDF library we do not want.
  */
+/**
+ * How many pages one answer may run to.
+ *
+ * Forty marks in thirty-five minutes is three to five sides of handwriting, so
+ * a single photograph was never going to be the whole answer. Eight leaves room
+ * for a long one and still keeps the request inside the proxy's ceiling.
+ */
+export const MAX_PAGES = 8;
+
+/**
+ * Pages are resized harder than a single page was.
+ *
+ * One page at 1400px was comfortable; five of them would not fit in a request.
+ * 1200px still reads handwriting reliably — the model needs to make out words,
+ * not admire the paper — and at quality 0.72 a typical page lands near 200 kB,
+ * so five pages is about a megabyte.
+ */
+export async function prepareUploads(files: File[]): Promise<Upload[]> {
+  const chosen = files.slice(0, MAX_PAGES);
+  return Promise.all(chosen.map((f) => prepareUpload(f)));
+}
+
 export async function prepareUpload(file: File): Promise<Upload> {
   const asBase64 = (blob: Blob) =>
     new Promise<string>((resolve, reject) => {
@@ -132,14 +154,14 @@ export async function prepareUpload(file: File): Promise<Upload> {
   }
 
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 1400 / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
   canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
   const blob = await new Promise<Blob | null>((r) =>
-    canvas.toBlob(r, "image/jpeg", 0.82),
+    canvas.toBlob(r, "image/jpeg", 0.72),
   );
   if (!blob) throw new Error("could not prepare the image");
   return { mimeType: "image/jpeg", data: await asBase64(blob) };
@@ -242,13 +264,22 @@ export async function answerStructure(
 
 export async function evaluate(
   context: unknown,
-  file: Upload,
+  files: Upload[],
 ): Promise<{ result: Evaluation | null; error: string | null }> {
   try {
     const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ task: "evaluate", context, file, deviceId: deviceId() }),
+      // `file` as well as `files`: a deployment can serve a cached client for a
+      // while after the proxy updates, and an answer refused because the two
+      // halves disagree about a field name is a page of handwriting wasted.
+      body: JSON.stringify({
+        task: "evaluate",
+        context,
+        files,
+        file: files[0],
+        deviceId: deviceId(),
+      }),
     });
 
     const payload = (await res.json().catch(() => ({}))) as {

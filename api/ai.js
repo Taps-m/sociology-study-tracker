@@ -38,7 +38,9 @@ const MONTHLY_CAP = Number(process.env.MONTHLY_CAP || 800);
 const MAX_BODY_BYTES = 24 * 1024;
 // An answer arrives as a photograph or a PDF of handwriting, so this task alone
 // needs room. The client resizes first; this is the ceiling, not the target.
-const MAX_EVAL_BODY_BYTES = 6 * 1024 * 1024;
+const MAX_EVAL_BODY_BYTES = 14 * 1024 * 1024;
+/** Sides of handwriting one answer may run to. */
+const MAX_PAGES = 8;
 const PER_DEVICE_PER_HOUR = 20;
 const EVAL_PER_DEVICE_PER_DAY = 8;
 
@@ -272,7 +274,10 @@ Name the thinkers involved. Do not invent statistics, dates or case law.`;
       return `${SYSTEM}
 
 The candidate has written a 40-mark answer by hand and photographed or scanned
-it. The question, and anything else known about the attempt:
+it. It may run to several pages: the images that follow are the pages of one
+single answer, in the order they were written. Read them as one continuous
+piece of writing before marking, and never treat a page as a separate answer.
+The question, and anything else known about the attempt:
 ${json}
 
 Read the page. Then mark it against these five criteria, each out of 10:
@@ -397,7 +402,15 @@ export default async function handler(req, res) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(500).json({ error: "GEMINI_API_KEY is not set" });
 
-  const { task, context, deviceId, file } = req.body || {};
+  const { task, context, deviceId, file, files } = req.body || {};
+
+  // One answer is three to five sides of handwriting, so an evaluation arrives
+  // as several pages. `file` is still accepted: a browser can be running a
+  // cached client from before this change, and refusing it would throw away a
+  // page somebody has just written.
+  const pages = (Array.isArray(files) ? files : file ? [file] : [])
+    .filter((f) => f?.data && f?.mimeType)
+    .slice(0, MAX_PAGES);
 
   const raw = JSON.stringify(req.body || {});
   const ceiling = task === "evaluate" ? MAX_EVAL_BODY_BYTES : MAX_BODY_BYTES;
@@ -425,10 +438,10 @@ export default async function handler(req, res) {
             {
               parts: [
                 { text: prompt },
-                // A photograph or PDF of the handwritten page, when there is one.
-                ...(file?.data && file?.mimeType
-                  ? [{ inline_data: { mime_type: file.mimeType, data: file.data } }]
-                  : []),
+                // The pages of the answer, in the order they were written.
+                ...pages.map((f) => ({
+                  inline_data: { mime_type: f.mimeType, data: f.data },
+                })),
               ],
             },
           ],

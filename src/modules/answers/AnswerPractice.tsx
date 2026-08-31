@@ -12,7 +12,7 @@ import {
   questionsForUnit,
   attemptsOnQuestion,
 } from "../../lib/planner";
-import { evaluate, prepareUpload, type Evaluation } from "../../lib/ai";
+import { evaluate, prepareUploads, MAX_PAGES, type Evaluation } from "../../lib/ai";
 import { AnswerBlueprint } from "./AnswerBlueprint";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -75,12 +75,15 @@ export function AnswerPractice({
   const [result, setResult] = useState<Evaluation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  // The pages of one answer, in the order they were written.
+  const [pages, setPages] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // A question picked for the previous topic must not follow you to the next.
     setPicked(null);
     setWritingOwn(false);
+    setPages([]);
   }, [topicId]);
 
   useEffect(() => {
@@ -100,11 +103,23 @@ export function AnswerPractice({
   const averages = rubricAverages(d);
   const gap = selfMarkGap(d);
 
-  async function upload(file: File) {
+  function addPages(chosen: File[]) {
+    setError(null);
+    setPages((prev) => {
+      const next = [...prev, ...chosen];
+      if (next.length > MAX_PAGES) {
+        setError(`An answer can be at most ${MAX_PAGES} pages. The extra ones were not added.`);
+      }
+      return next.slice(0, MAX_PAGES);
+    });
+  }
+
+  async function readPages() {
+    if (pages.length === 0) return;
     setBusy(true);
     setError(null);
     try {
-      const prepared = await prepareUpload(file);
+      const prepared = await prepareUploads(pages);
       const res = await evaluate(
         {
           // questionText, not the textarea: a picked past question has to reach
@@ -118,6 +133,7 @@ export function AnswerPractice({
           paper: topic.paper === 1 ? "I" : "II",
           minutesTaken: minutes,
           targetMinutes: TARGET_MINUTES,
+          pages: prepared.length,
         },
         prepared,
       );
@@ -426,20 +442,102 @@ export function AnswerPractice({
         <input
           ref={fileRef}
           type="file"
+          multiple
           accept="image/*,application/pdf"
           onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) upload(f);
+            addPages(Array.from(e.target.files ?? []));
+            // Cleared so the same page can be picked again after a removal.
+            e.target.value = "";
           }}
           style={{ fontSize: 14 }}
         />
         <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0", lineHeight: 1.6 }}>
-          A photograph of the page, or a PDF. The image is resized in your browser,
-          sent to be read, and never stored — only the scores are kept.
+          Photograph every side you wrote — a 40-mark answer usually runs to three or four,
+          and they are read as one continuous piece in the order below. Up to {MAX_PAGES}.
+          Images are resized in your browser, sent to be read, and never stored; only the
+          scores are kept.
         </p>
 
+        {pages.length > 0 && (
+          <ul style={{ margin: "12px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 6 }}>
+            {pages.map((f, i) => (
+              <li
+                key={`${f.name}-${i}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 11px",
+                  borderRadius: 8,
+                  background: C.raised,
+                  border: `1px solid ${C.line}`,
+                  fontSize: 13.5,
+                }}
+              >
+                <span className="num" style={{ color: C.muted, flex: "0 0 auto" }}>
+                  Page {i + 1}
+                </span>
+                <span
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    color: C.muted,
+                  }}
+                >
+                  {f.name}
+                </span>
+                <button
+                  onClick={() => setPages((prev) => prev.filter((_, j) => j !== i))}
+                  aria-label={`Remove page ${i + 1}`}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: C.muted,
+                    font: "inherit",
+                    fontSize: 16,
+                    lineHeight: 1,
+                    cursor: "pointer",
+                    padding: "2px 4px",
+                  }}
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {pages.length > 0 && (
+          <button
+            onClick={() => void readPages()}
+            disabled={busy}
+            style={{
+              width: "100%",
+              minHeight: 44,
+              marginTop: 12,
+              borderRadius: 9,
+              border: "none",
+              background: busy ? C.panel : C.accent,
+              color: busy ? C.muted : C.accentInk,
+              font: "inherit",
+              fontSize: 14.5,
+              fontWeight: 600,
+              cursor: busy ? "default" : "pointer",
+            }}
+          >
+            {busy
+              ? "Reading…"
+              : `Have ${pages.length} ${pages.length === 1 ? "page" : "pages"} read`}
+          </button>
+        )}
+
         {busy && (
-          <p style={{ fontSize: 14, color: C.muted, marginTop: 12 }}>Reading the page…</p>
+          <p style={{ fontSize: 14, color: C.muted, marginTop: 12 }}>
+            Reading {pages.length} {pages.length === 1 ? "page" : "pages"} as one answer…
+          </p>
         )}
         {error && (
           <p style={{ fontSize: 13.5, color: C.warn, marginTop: 12, lineHeight: 1.6 }}>
