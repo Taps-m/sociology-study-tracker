@@ -736,5 +736,10 @@ export const PYQS: PastQuestion[] = [
  * only, its Paper II sheet not yet found. Every paper that is here is whole — a
  * test refuses a half-transcribed one, so a partial year can never quietly
  * count as a full one.
+ *
+ * Outstanding, and worth chasing: 2016 Paper II, both 2017 papers if that year
+ * ran, and both 2024 papers. 2024 was the last sitting actually held, so the
+ * series ends there — 2025 and 2026 are not missing, they do not exist, and
+ * nothing should go looking for them.
  */
 export const PYQ_YEARS = [2014, 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2023] as const;
