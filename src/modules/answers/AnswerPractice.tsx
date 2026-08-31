@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { PastQuestion } from "../../data/pyq";
 import { TOPICS } from "../../data/syllabus";
 import type { Topic } from "../../data/syllabus";
 import type { Derived } from "../../lib/events";
@@ -7,6 +8,9 @@ import {
   queue,
   rubricAverages,
   selfMarkGap,
+  questionsForTopic,
+  questionsForUnit,
+  attemptsOnQuestion,
 } from "../../lib/planner";
 import { evaluate, prepareUpload, type Evaluation } from "../../lib/ai";
 import { C } from "../../lib/theme";
@@ -50,6 +54,7 @@ export function AnswerPractice({
     detail: {
       selfMark?: number;
       questionText?: string;
+      group?: "A" | "B";
       scores?: Evaluation["scores"];
       readBack?: string;
     },
@@ -57,7 +62,10 @@ export function AnswerPractice({
 }) {
   const suggested = queue(d).slice(0, 12);
   const [topicId, setTopicId] = useState(suggested[0]?.id ?? TOPICS[0]!.id);
+  // A picked past question, or your own wording. Never both.
+  const [picked, setPicked] = useState<PastQuestion | null>(null);
   const [question, setQuestion] = useState("");
+  const [writingOwn, setWritingOwn] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [selfMark, setSelfMark] = useState("");
@@ -68,12 +76,22 @@ export function AnswerPractice({
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // A question picked for the previous topic must not follow you to the next.
+    setPicked(null);
+    setWritingOwn(false);
+  }, [topicId]);
+
+  useEffect(() => {
     if (!running) return;
     const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => window.clearInterval(id);
   }, [running]);
 
   const topic = TOPICS.find((t) => t.id === topicId)!;
+  const onTopic = questionsForTopic(topic.id);
+  const nearby = onTopic.length === 0 ? questionsForUnit(topic.paper, topic.unit, topic.id) : [];
+  const offered = onTopic.length > 0 ? onTopic : nearby;
+  const questionText = picked ? picked.text : question.trim();
   const minutes = Math.max(1, Math.round(seconds / 60));
   const over = seconds > TARGET_MINUTES * 60;
   const stats = attemptStats(d);
@@ -87,7 +105,12 @@ export function AnswerPractice({
       const prepared = await prepareUpload(file);
       const res = await evaluate(
         {
-          question: question.trim() || `A 40-mark question on: ${topic.name}`,
+          // questionText, not the textarea: a picked past question has to reach
+          // the marker, or it is grading an answer against a question it cannot
+          // see and the whole picker is decoration.
+          question: questionText || `A 40-mark question on: ${topic.name}`,
+          askedByWbcsIn: picked?.year,
+          group: picked?.group,
           topic: topic.name,
           unit: topic.unit,
           paper: topic.paper === 1 ? "I" : "II",
@@ -114,7 +137,11 @@ export function AnswerPractice({
 
     onAttempt(topic.id, marks, OUT_OF, minutes, {
       selfMark: selfMark === "" ? undefined : Number(selfMark),
-      questionText: question.trim() || undefined,
+      questionText: questionText || undefined,
+      // Recorded for the first time here. Group B is answered two-from-three
+      // and is where candidates quietly lose marks, and the blind-spot report
+      // could not see it while every attempt arrived without a group.
+      group: picked?.group,
       scores: result?.scores,
       readBack: result?.readBack?.slice(0, 200),
     });
@@ -125,6 +152,8 @@ export function AnswerPractice({
     setSelfMark("");
     setResult(null);
     setQuestion("");
+    setPicked(null);
+    setWritingOwn(false);
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -168,26 +197,118 @@ export function AnswerPractice({
           </optgroup>
         </select>
 
-        <label style={{ display: "block", fontSize: 14, color: C.muted, marginBottom: 6 }}>
-          The question (optional — paste a past question, or leave it)
-        </label>
-        <textarea
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          rows={2}
-          placeholder="e.g. Examine with appropriate examples how Durkheim and Merton explicate anomie. (40)"
-          style={{
-            width: "100%",
-            padding: 10,
-            borderRadius: 8,
-            background: C.raised,
-            border: `1px solid ${C.line}`,
-            color: C.text,
-            font: "inherit",
-            fontSize: 14.5,
-            resize: "vertical",
+        <div style={{ fontSize: 14, color: C.muted, marginBottom: 8 }}>
+          {onTopic.length > 0
+            ? `WBCS has asked this topic ${onTopic.length} ${onTopic.length === 1 ? "time" : "times"} since 2018. Pick one to answer.`
+            : nearby.length > 0
+              ? `WBCS has not asked this topic directly since 2018. Here is what it asked elsewhere in ${topic.unit} — the examiner's own phrasing, on neighbouring ground.`
+              : "No past question on this topic, or anywhere in its unit, between 2018 and 2023."}
+        </div>
+
+        {offered.length > 0 && (
+          <div style={{ display: "grid", gap: 7, maxHeight: 300, overflowY: "auto" }}>
+            {offered.map((q) => {
+              const on = picked?.text === q.text;
+              const before = attemptsOnQuestion(d, q.text);
+              const last = before[before.length - 1];
+              return (
+                <button
+                  key={`${q.year}-${q.paper}-${q.number}`}
+                  onClick={() => {
+                    setPicked(on ? null : q);
+                    setWritingOwn(false);
+                  }}
+                  aria-pressed={on}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "10px 12px",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                    font: "inherit",
+                    background: on ? C.accentSoft : C.raised,
+                    border: `1px solid ${on ? C.accent : C.line}`,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      fontSize: 12,
+                      color: on ? C.accent : C.muted,
+                      fontFamily: C.mono,
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    <span>{q.year}</span>
+                    <span>·</span>
+                    <span>Paper {q.paper === 1 ? "I" : "II"}</span>
+                    <span>·</span>
+                    <span>Group {q.group}</span>
+                    <span>·</span>
+                    <span>{q.marks} marks</span>
+                    {last && (
+                      // Written before, and what it scored. The point of keeping
+                      // a record is that it can tell you this.
+                      <span style={{ color: C.warn, letterSpacing: 0 }}>
+                        · written {last.at.slice(0, 10)} — {last.marks}/{last.outOf}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 14, lineHeight: 1.6, marginTop: 5, color: C.text }}>
+                    {q.text}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <button
+          onClick={() => {
+            setWritingOwn(!writingOwn);
+            setPicked(null);
           }}
-        />
+          style={{
+            marginTop: offered.length > 0 ? 10 : 0,
+            padding: 0,
+            background: "none",
+            border: "none",
+            color: C.muted,
+            font: "inherit",
+            fontSize: 13,
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+            cursor: "pointer",
+          }}
+        >
+          {writingOwn ? "Never mind" : "Write my own question, or answer without one"}
+        </button>
+
+        {writingOwn && (
+          <textarea
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            rows={2}
+            autoFocus
+            placeholder="Paste a question, or leave this empty and just write on the topic."
+            style={{
+              width: "100%",
+              marginTop: 8,
+              padding: 10,
+              borderRadius: 8,
+              background: C.raised,
+              border: `1px solid ${C.line}`,
+              color: C.text,
+              font: "inherit",
+              fontSize: 14.5,
+              resize: "vertical",
+            }}
+          />
+        )}
       </Card>
 
       <Card title="The clock">

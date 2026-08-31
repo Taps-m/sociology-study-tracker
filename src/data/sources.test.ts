@@ -51,15 +51,18 @@ describe("the reading map", () => {
   });
 
   it("names exactly which repeatedly-asked topics the free path cannot start", () => {
-    // School sociology stops at Weber, so Parsons and Merton are absent
-    // despite three appearances each since 2018; youth and addiction are
-    // absent for the same reason at the other end of the syllabus. These are
-    // not holes to be filled with plausible-looking chapter references — they
-    // are the four topics that justify owning Essential Sociology, and the app
+    // School sociology stops at Weber, so Parsons and Merton are absent; the
+    // religion-and-science debate, women's welfare programmes, addiction and
+    // old age are absent for the same reason at the other end of the syllabus.
+    // These are not holes to fill with plausible-looking chapter references —
+    // they are the topics that justify owning Essential Sociology, and the app
     // says so on the row. If this list grows the map has drifted; if it shrinks
     // without the book arriving, check nobody has invented a citation.
+    //
+    // These counts are derived from the question corpus, so this test also
+    // guards the mapping in pyq.ts: retag a question and the list moves.
     const gaps = TOPICS.filter((t) => t.pyq >= 2 && isUncovered(t.id)).map((t) => t.id);
-    expect(gaps).toEqual(["p1u2t5", "p1u2t6", "p2u8t3", "p2u8t4"]);
+    expect(gaps).toEqual(["p1u2t5", "p1u2t6", "p1u7t1", "p2u6t3", "p2u8t4", "p2u8t6"]);
   });
 
   it("has a reading of some kind for every topic it lists", () => {

@@ -32,6 +32,8 @@ import {
   blindSpots,
   groupBAtRisk,
   questionsForTopic,
+  questionsForUnit,
+  attemptsOnQuestion,
   unitExposure,
   windowEnd,
   windowLabel,
@@ -615,5 +617,58 @@ describe("the beginner on-ramp", () => {
     const d = beginner();
     const eligible = TOPICS.filter((t) => depthFor(d, t) > 0 && !isAtDepth(d, t));
     expect(new Set(queue(d).map((t) => t.id))).toEqual(new Set(eligible.map((t) => t.id)));
+  });
+});
+
+describe("choosing a past question to practise", () => {
+  const asked = TOPICS.find((t) => questionsForTopic(t.id).length > 0)!;
+
+  it("offers the real questions asked on a topic, newest first", () => {
+    const qs = questionsForTopic(asked.id);
+    expect(qs.length).toBeGreaterThan(0);
+    for (const q of qs) expect(q.topicIds).toContain(asked.id);
+    const years = qs.map((q) => q.year);
+    expect(years).toEqual([...years].sort((a, b) => b - a));
+  });
+
+  it("matches the per-topic count the syllabus advertises", () => {
+    // If these ever disagree, one of the two is lying to the candidate.
+    for (const t of TOPICS) {
+      expect(questionsForTopic(t.id).length, t.id).toBe(t.pyq);
+    }
+  });
+
+  it("falls back to the rest of the unit for a topic never asked directly", () => {
+    const never = TOPICS.find(
+      (t) => t.pyq === 0 && questionsForUnit(t.paper, t.unit, t.id).length > 0,
+    )!;
+    expect(never).toBeDefined();
+    const nearby = questionsForUnit(never.paper, never.unit, never.id);
+    // Real questions from the same unit, and none of them already on the topic.
+    for (const q of nearby) expect(q.topicIds).not.toContain(never.id);
+  });
+
+  it("does not offer a unit question twice", () => {
+    const t = TOPICS[0]!;
+    const nearby = questionsForUnit(t.paper, t.unit, t.id);
+    const keys = nearby.map((q) => `${q.year}-${q.paper}-${q.number}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("remembers that a question has been answered before, and what it scored", () => {
+    const q = questionsForTopic(asked.id)[0]!;
+    const d = build([
+      on.attempt(asked.id, 22, 40, 35, { questionText: q.text, group: q.group }),
+    ]);
+    const before = attemptsOnQuestion(d, q.text);
+    expect(before).toHaveLength(1);
+    expect(before[0]!.marks).toBe(22);
+    expect(attemptsOnQuestion(d, "a question never written")).toHaveLength(0);
+  });
+
+  it("records which group an answer came from, so Group B can be watched", () => {
+    const q = questionsForTopic(asked.id)[0]!;
+    const d = build([on.attempt(asked.id, 20, 40, 35, { questionText: q.text, group: "B" })]);
+    expect(d.attempts[0]!.group).toBe("B");
   });
 });

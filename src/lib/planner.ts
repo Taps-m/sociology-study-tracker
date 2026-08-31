@@ -1002,7 +1002,32 @@ export function groupBAtRisk(d: Derived): number {
 
 /** The corpus, filtered to one topic. */
 export function questionsForTopic(topicId: string) {
-  return PYQS.filter((q) => q.topicIds.includes(topicId));
+  return PYQS.filter((q) => q.topicIds.includes(topicId)).sort((a, b) => b.year - a.year);
+}
+
+/**
+ * Every question asked anywhere in a topic's unit, minus the ones already
+ * listed against the topic itself.
+ *
+ * The fallback for a topic WBCS has never asked directly. Practising a
+ * neighbouring question is far better than inventing one: it is still the real
+ * examiner's phrasing, still the real command words, and the unit is what the
+ * paper actually sets around.
+ */
+export function questionsForUnit(paper: 1 | 2, unit: string, excludeTopicId?: string) {
+  const inUnit = new Set(
+    TOPICS.filter((t) => t.paper === paper && t.unit === unit).map((t) => t.id),
+  );
+  return PYQS.filter(
+    (q) =>
+      q.topicIds.some((id) => inUnit.has(id)) &&
+      !(excludeTopicId && q.topicIds.includes(excludeTopicId)),
+  ).sort((a, b) => b.year - a.year);
+}
+
+/** Answers already written against a given question's text. */
+export function attemptsOnQuestion(d: Derived, text: string) {
+  return d.attempts.filter((a) => a.questionText === text);
 }
 
 // ── what to do today ──────────────────────────────────────────────────────
