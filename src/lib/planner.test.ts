@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { TOPICS } from "../data/syllabus";
 import { on, project } from "./events";
-import type { Settings, StudyEvent } from "./events";
+import type { Derived, Settings, StudyEvent } from "./events";
 import {
   attemptStats,
   bandOf,
@@ -35,6 +35,9 @@ import {
   questionsForUnit,
   attemptsOnQuestion,
   unitExposure,
+  todaysBoard,
+  completedToday,
+  todaysTasks,
   windowEnd,
   windowLabel,
   LEVELS,
@@ -670,5 +673,65 @@ describe("choosing a past question to practise", () => {
     const q = questionsForTopic(asked.id)[0]!;
     const d = build([on.attempt(asked.id, 20, 40, 35, { questionText: q.text, group: "B" })]);
     expect(d.attempts[0]!.group).toBe("B");
+  });
+});
+
+describe("today's list keeps what you finished", () => {
+  const topicOf = (d: Derived) => todaysTasks(d)[0]!;
+
+  it("does not remove a task the moment it is ticked", () => {
+    const before = build([]);
+    const first = topicOf(before);
+    const after = build([on.check(first.topic.id, first.check)]);
+
+    const board = todaysBoard(after);
+    expect(board.tasks.some((t) => t.id === first.id)).toBe(true);
+    expect(board.tasks.find((t) => t.id === first.id)?.done).toBe(true);
+    expect(board.done).toBe(1);
+  });
+
+  it("counts what is done against what was listed", () => {
+    const before = build([]);
+    const first = topicOf(before);
+    const after = build([on.check(first.topic.id, first.check)]);
+    const board = todaysBoard(after);
+    expect(board.total).toBeGreaterThanOrEqual(board.done);
+    expect(board.done).toBeLessThanOrEqual(board.tasks.length);
+  });
+
+  it("puts finished work first, and leaves the rest to do", () => {
+    const before = build([]);
+    const first = topicOf(before);
+    const board = todaysBoard(build([on.check(first.topic.id, first.check)]));
+    expect(board.tasks[0]!.done).toBe(true);
+    expect(board.tasks.slice(board.done).every((t) => !t.done)).toBe(true);
+  });
+
+  it("does not credit you for knowledge you said you already had", () => {
+    // Marking prior knowledge on setup day must not fill the list with
+    // congratulations for work nobody did.
+    const first = topicOf(build([]));
+    const d = build([on.check(first.topic.id, first.check, { prior: true })]);
+    expect(completedToday(d)).toHaveLength(0);
+    expect(todaysBoard(d).done).toBe(0);
+  });
+
+  it("forgets yesterday's ticks, so each day starts clean", () => {
+    const first = topicOf(build([]));
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const stale = {
+      ...on.check(first.topic.id, first.check),
+      at: yesterday.toISOString(),
+    };
+    expect(completedToday(build([stale]))).toHaveLength(0);
+  });
+
+  it("keeps the minutes honest: done plus remaining is what was planned", () => {
+    const first = topicOf(build([]));
+    const board = todaysBoard(build([on.check(first.topic.id, first.check)]));
+    const sum = board.tasks.reduce((s, t) => s + t.minutes, 0);
+    expect(board.minutesPlanned).toBe(sum);
+    expect(board.minutesDone).toBeLessThanOrEqual(board.minutesPlanned);
   });
 });

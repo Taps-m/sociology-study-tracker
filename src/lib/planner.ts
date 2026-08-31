@@ -1038,6 +1038,8 @@ export interface Task {
   check: CheckId;
   label: string;
   minutes: number;
+  /** Ticked today. Kept on the list rather than removed — see todaysBoard. */
+  done?: boolean;
 }
 
 /** Today's share of the weekly commitment, in minutes. */
@@ -1099,6 +1101,83 @@ export function todaysTasks(d: Derived, limit = 5): Task[] {
   }
 
   return out.slice(0, limit);
+}
+
+/** The local calendar day, as the log writes it. */
+function dayKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
+/**
+ * What was ticked today, rebuilt as tasks.
+ *
+ * Knowledge marked as already held is excluded: it was never today's work, and
+ * a list that congratulated you for it on the day you set the app up would be
+ * flattering you with someone else's effort.
+ */
+export function completedToday(d: Derived, today = new Date()): Task[] {
+  const key = dayKey(today);
+  const out: Task[] = [];
+
+  for (const topic of TOPICS) {
+    const checks = d.checks[topic.id];
+    if (!checks) continue;
+    for (const c of CHECKS) {
+      const rec = checks[c.id];
+      if (!rec || rec.prior) continue;
+      // The log stores an ISO instant; compare on the local day it fell in.
+      if (dayKey(new Date(rec.at)) !== key) continue;
+      out.push({
+        id: `${topic.id}:${c.id}`,
+        topic,
+        check: c.id,
+        label: `${c.label}: ${topic.name}`,
+        minutes: Math.max(10, Math.round(hoursFor(d, topic) * c.weight * 60)),
+        done: true,
+      });
+    }
+  }
+  return out;
+}
+
+export interface TodaysBoard {
+  /** Finished first, then what is left. Both stay on screen all day. */
+  tasks: Task[];
+  done: number;
+  total: number;
+  minutesDone: number;
+  minutesPlanned: number;
+  budget: number;
+}
+
+/**
+ * Today's list, including the things already crossed off.
+ *
+ * Removing a task the moment it is ticked was the old behaviour and it read as
+ * deletion rather than progress: you did the work and the screen took the row
+ * away, with nothing to show for it. A checklist has to keep what you finished
+ * visible, or it cannot show you that you are getting somewhere.
+ *
+ * The count of remaining items is trimmed by what is already done, so a
+ * productive morning does not keep growing the list it is trying to clear.
+ */
+export function todaysBoard(d: Derived, limit = 5, today = new Date()): TodaysBoard {
+  const done = completedToday(d, today);
+  const remaining = todaysTasks(d, Math.max(1, limit - done.length));
+  const tasks = [...done, ...remaining];
+  const minutesDone = done.reduce((s, t) => s + t.minutes, 0);
+
+  return {
+    tasks,
+    done: done.length,
+    total: tasks.length,
+    minutesDone,
+    minutesPlanned: minutesDone + remaining.reduce((s, t) => s + t.minutes, 0),
+    budget: dailyBudget(d),
+  };
 }
 
 export type { Settings };

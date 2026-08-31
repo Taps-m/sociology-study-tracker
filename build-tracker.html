@@ -136,6 +136,8 @@ const MODULES = [
     note: "Choosing a topic in Answer Practice now lists the real WBCS questions asked on it, newest first, with what you scored the last time you answered that exact question. A topic never asked directly falls back to the rest of its unit -- the examiner's own phrasing on neighbouring ground -- rather than an invented question. Fixed two bugs on the way: the picked question was not reaching the marker, and no attempt had ever recorded its group, so the Group B report had nothing to read." },
   { group: "Engine", name: "Question counts derived, not stored", status: "done",
     note: "Each topic's asked-since-2018 count is now counted from the question corpus at load. It had been written by hand, and 32 of 85 had drifted from the questions they claimed to summarise -- while driving yield band, planned depth and the order of the whole queue. The plan was being built on a stale copy of its own evidence." },
+  { group: "Screens", name: "Ticking looks like progress", status: "done",
+    note: "A ticked task used to vanish, because the list was computed from what remained -- doing the work deleted the row. Finished items now stay in place, turn green and carry a done mark, with a 2 of 5 count in the corner. The dashboard and Today's Study read one board so they cannot disagree. Prior knowledge is excluded and yesterday's ticks clear overnight." },
   { group: "Owed", name: "Ten years of PYQs", status: "todo",
     note: "Six years are tagged (2018-2023). 2014-2017 and 2024-2026 are missing, and every extra year sharpens the yield weights." },
   { group: "Owed", name: "Real hour estimates", status: "todo",
