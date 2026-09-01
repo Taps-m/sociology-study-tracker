@@ -8,6 +8,7 @@ import {
   type ModelAnswer,
 } from "../../lib/ai";
 import { TOPICS } from "../../data/syllabus";
+import { standardReadingsFor, stdLine } from "../../data/standardBooks";
 import { ModelAnswerView } from "./ModelAnswerView";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -29,12 +30,15 @@ import { Card } from "../../app/Shell";
  */
 export function AnswerBlueprint({
   question,
+  topicId,
   topic,
   unit,
   paper,
   weak,
 }: {
   question: string;
+  /** Which chapters the candidate can actually open. */
+  topicId: string;
   topic: string;
   unit: string;
   paper: 1 | 2;
@@ -73,6 +77,16 @@ export function AnswerBlueprint({
   /** Every topic this paper can examine — the model's allowed vocabulary. */
   const paperTopics = TOPICS.filter((t) => t.paper === paper);
 
+  /**
+   * The chapters this topic actually has on the shelf.
+   *
+   * Sent with the question so the answer is built out of what these three
+   * books contain rather than out of whatever the model has read. A model that
+   * reaches for a fashionable framework the candidate cannot look up gives
+   * them something they can neither check nor revise from.
+   */
+  const books = standardReadingsFor(topicId).map(stdLine);
+
   async function buildAnswer() {
     if (answer) {
       setView("model");
@@ -90,6 +104,7 @@ export function AnswerBlueprint({
         marks: 40,
         minutes: 35,
         syllabusTopics: paperTopics.map((t) => ({ id: t.id, unit: t.unit, name: t.name })),
+        books,
       },
       paperTopics.map((t) => t.id),
     );
@@ -117,6 +132,7 @@ export function AnswerBlueprint({
       paper: paper === 1 ? "I" : "II",
       marks: 40,
       minutes: 35,
+      books,
     });
     setBusy(false);
     if (res.result) {

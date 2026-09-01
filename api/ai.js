@@ -345,6 +345,19 @@ DRAW ONE THING. Where a branch diagram would carry a group faster than prose,
 give it: a label and three to five items. Where prose is genuinely better,
 return an empty diagram rather than forcing one.
 
+SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
+exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
+and Perspectives and Shankar Rao's Principles of Sociology that cover this
+topic. Those three are the candidate's entire shelf. Take the sociology from
+what is in them — their thinkers, concepts, classifications and debates. Do not
+import a school, a framework or a named study from outside them, and do not
+cite a book, paper, report or website the candidate does not have: a reference
+they cannot open is one they cannot check, and an unverifiable one is worse
+than none. Indian facts, Acts, schemes, Census and survey figures are the
+exception — those are the exam's own general-studies ground and are expected.
+If "books" is empty, say so in one line and build the answer only from the
+syllabus topics, without inventing a citation to fill the hole.
+
 PLAIN EXAM ENGLISH. Write the way a well-prepared candidate writes under time,
 not the way a journal article reads. Short sentences. Ordinary words for the
 joining and the explaining — "shows", "leads to", "breaks down", not
@@ -459,6 +472,19 @@ limitations, positivists gave sociology its concrete shape as a discipline"),
 or forward-looking with a thinker, or an explicit answer to the demand. A
 question asking for criticism still wants a position at the end, not a verdict
 of total failure.
+
+SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
+exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
+and Perspectives and Shankar Rao's Principles of Sociology that cover this
+topic. Those three are the candidate's entire shelf. Take the sociology from
+what is in them — their thinkers, concepts, classifications and debates. Do not
+import a school, a framework or a named study from outside them, and do not
+cite a book, paper, report or website the candidate does not have: a reference
+they cannot open is one they cannot check, and an unverifiable one is worse
+than none. Indian facts, Acts, schemes, Census and survey figures are the
+exception — those are the exam's own general-studies ground and are expected.
+If "books" is empty, say so in one line and build the answer only from the
+syllabus topics, without inventing a citation to fill the hole.
 
 PLAIN EXAM ENGLISH. Write the way a well-prepared candidate writes under time,
 not the way a journal article reads. Short sentences. Ordinary words for the

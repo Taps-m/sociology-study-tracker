@@ -333,6 +333,7 @@ export function AnswerPractice({
       {questionText && (
         <AnswerBlueprint
           question={questionText}
+          topicId={topic.id}
           topic={topic.name}
           unit={topic.unit}
           paper={topic.paper}
