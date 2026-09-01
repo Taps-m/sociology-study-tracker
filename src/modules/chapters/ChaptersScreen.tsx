@@ -8,6 +8,7 @@ import { TopicRow } from "../../components/TopicRow";
 import { briefFor } from "../../data/briefs";
 import { MindMap, Takeaways } from "../plan/MindMap";
 import { unitEmphasis, unitShare, unitShareLabel } from "../../data/weightage";
+import { UnitMix } from "./UnitMix";
 
 type Handlers = {
   onToggle: (id: string, c: CheckId) => void;
@@ -117,6 +118,8 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
             >
               Paper {paper === 1 ? "I" : "II"}
             </h2>
+
+            <UnitMix paper={paper} />
 
             {units.map(({ unit, topics, all }) => {
               const key = `${paper}|${unit}`;

@@ -37,6 +37,23 @@
   --tint-3: #eafaf1;
   --tint-3-line: #b3e3c8;
 
+  /*
+   * Slice colours, for the one chart in this app.
+   *
+   * Okabe-Ito: the standard qualitative palette designed to stay distinguishable
+   * under the common forms of colour blindness. Chosen rather than eyeballed,
+   * because a candidate who cannot tell Pathfinders from Research Methods is
+   * reading the chart wrong and has no way to know it. Six is the whole set used
+   * here — everything past the fifth unit folds into one "Others" slice, which
+   * is what keeps it readable.
+   */
+  --slice-0: #0072b2;
+  --slice-1: #e69f00;
+  --slice-2: #009e73;
+  --slice-3: #d55e00;
+  --slice-4: #56b4e9;
+  --slice-5: #9aa4b8;
+
   /* The rail and header stay dark in both themes, as in the design. */
   --rail: #101b3d;
   --rail-2: #16234a;
@@ -71,6 +88,14 @@
   --tint-2-line: rgba(244, 114, 160, 0.34);
   --tint-3: rgba(74, 222, 128, 0.10);
   --tint-3-line: rgba(74, 222, 128, 0.32);
+
+  /* Lifted a step for the dark surface; the same six hues, same order. */
+  --slice-0: #4ea3dd;
+  --slice-1: #f2b134;
+  --slice-2: #35c39b;
+  --slice-3: #f07f3c;
+  --slice-4: #8fd0f5;
+  --slice-5: #7f8a9e;
 
   --rail: #0d131a;
   --rail-2: #11171d;
