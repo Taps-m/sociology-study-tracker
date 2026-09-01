@@ -251,6 +251,7 @@ export async function answerStructure(
       body?: string;
       error?: string;
       detail?: string;
+      truncated?: boolean;
     };
     if (!res.ok) {
       return {
@@ -262,9 +263,27 @@ export async function answerStructure(
     }
 
     const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
-    const parsed = JSON.parse(text) as AnswerStructure;
+
+    let parsed: AnswerStructure;
+    try {
+      parsed = JSON.parse(text) as AnswerStructure;
+    } catch {
+      // Say which failure this is. The first version answered every one of them
+      // with "could not read the reply", which told nobody anything — including
+      // the person who wrote it.
+      return {
+        result: null,
+        error: payload.truncated
+          ? "The structure came back cut off — it was longer than the reply could hold. Try again; if it keeps happening the limit needs raising."
+          : `The reply was not the JSON this expects. It began: ${text.slice(0, 120) || "(nothing)"}`,
+      };
+    }
+
     if (!parsed?.demand || !Array.isArray(parsed.blocks)) {
-      return { result: null, error: "the reply was not a structure" };
+      return {
+        result: null,
+        error: "The reply parsed but was not a structure — no demand or no blocks in it.",
+      };
     }
 
     try {
@@ -273,8 +292,11 @@ export async function answerStructure(
       // Full or blocked. It will simply be fetched again next time.
     }
     return { result: parsed, error: null };
-  } catch {
-    return { result: null, error: "could not read the reply" };
+  } catch (e) {
+    return {
+      result: null,
+      error: `Could not reach the structure service: ${e instanceof Error ? e.message : String(e)}`,
+    };
   }
 }
 
@@ -302,6 +324,7 @@ export async function evaluate(
       body?: string;
       error?: string;
       detail?: string;
+      truncated?: boolean;
     };
 
     if (!res.ok) {
@@ -316,11 +339,25 @@ export async function evaluate(
     // The model was asked for JSON alone, but a stray fence is common enough
     // to be worth surviving.
     const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
-    const parsed = JSON.parse(text) as Evaluation;
-    if (!parsed?.scores) return { result: null, error: "the reply was not a score" };
-    return { result: parsed, error: null };
-  } catch {
-    return { result: null, error: "could not read the reply" };
+    try {
+      const parsed = JSON.parse(text) as Evaluation;
+      if (!parsed?.scores) {
+        return { result: null, error: "The reply parsed but carried no scores." };
+      }
+      return { result: parsed, error: null };
+    } catch {
+      return {
+        result: null,
+        error: payload.truncated
+          ? "The marking came back cut off. Try again — the pages may be more than one reply can carry."
+          : `The reply was not the JSON this expects. It began: ${text.slice(0, 120) || "(nothing)"}`,
+      };
+    }
+  } catch (e) {
+    return {
+      result: null,
+      error: `Could not reach the marker: ${e instanceof Error ? e.message : String(e)}`,
+    };
   }
 }
 

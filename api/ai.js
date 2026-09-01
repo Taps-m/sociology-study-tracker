@@ -33,6 +33,16 @@
  * mistaken for a working cap.
  */
 
+/** Output ceilings, per task. See the note where this is used. */
+const TOKEN_BUDGET = {
+  critique: 2048,
+  guidance: 2048,
+  insight: 2048,
+  doubt: 2048,
+  evaluate: 3072,
+  structure: 8192,
+};
+
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 const MONTHLY_CAP = Number(process.env.MONTHLY_CAP || 800);
 const MAX_BODY_BYTES = 24 * 1024;
@@ -492,12 +502,17 @@ export default async function handler(req, res) {
           ],
           generationConfig: {
             temperature: 0.4,
-            // Generous on purpose. Newer models spend part of this budget
-            // thinking before they write, so a ceiling sized for the visible
-            // answer truncates it mid-sentence. The cap is not a charge — only
-            // tokens actually produced are billed, and the prompts ask for
-            // short answers.
-            maxOutputTokens: 2048,
+            // Sized per task, because they are not the same size. A critique is
+            // 120 words; an answer skeleton is a JSON object carrying eight
+            // blocks, three written-out sentences and a time budget, and one
+            // ceiling for both truncates the larger one mid-object — which then
+            // fails to parse and reaches the candidate as "could not read the
+            // reply", a message that says nothing to anyone.
+            //
+            // Newer models also spend part of this budget thinking before they
+            // write, so the visible answer is not the whole cost. The cap is not
+            // a charge: only tokens actually produced are billed.
+            maxOutputTokens: TOKEN_BUDGET[task] ?? 2048,
           },
         }),
       },
