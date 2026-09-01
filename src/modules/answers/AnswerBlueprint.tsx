@@ -172,39 +172,58 @@ export function AnswerBlueprint({
           {view === "structure" ? (
             <>
               <StructureBody structure={structure} />
+              {/* The next step, and it should look like one. This was a grey
+                  line of text above a ghost button, sitting under a full-width
+                  dismiss — so the way out of the window was the loudest thing
+                  on it and the useful action was the quietest. */}
               <div
                 style={{
-                  marginTop: 24,
-                  paddingTop: 18,
-                  borderTop: `1px solid ${C.line}`,
+                  marginTop: 26,
+                  padding: "16px 18px",
+                  borderRadius: 11,
+                  background: C.accentSoft,
+                  border: `1px solid ${C.accent}`,
                 }}
               >
-                <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 10px", lineHeight: 1.7 }}>
-                  Still looking at a blank page? A full answer, written to this shape and kept
-                  inside your syllabus — to adapt, not to reproduce.
+                <div style={{ fontSize: 15.5, fontWeight: 700, color: C.text }}>
+                  Still looking at a blank page?
+                </div>
+                <p style={{ fontSize: 13.5, color: C.muted, margin: "6px 0 14px", lineHeight: 1.7 }}>
+                  A full answer written to this shape and kept inside your syllabus, with every
+                  part marked compulsory or yours to change. To adapt, not to reproduce.
                 </p>
                 <button
                   onClick={() => void buildAnswer()}
                   disabled={answerBusy}
                   style={{
-                    minHeight: 44,
-                    padding: "0 18px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    width: "100%",
+                    minHeight: 48,
                     borderRadius: 9,
-                    border: `1px solid ${C.line}`,
-                    background: "transparent",
-                    color: C.accent,
+                    border: "none",
+                    background: answerBusy ? C.panel : C.accent,
+                    color: answerBusy ? C.muted : C.accentInk,
                     font: "inherit",
-                    fontSize: 14.5,
-                    fontWeight: 600,
+                    fontSize: 15,
+                    fontWeight: 700,
                     cursor: answerBusy ? "default" : "pointer",
                   }}
                 >
                   {answerBusy
-                    ? "Writing…"
+                    ? "Writing the answer…"
                     : answer
                       ? "Open the model answer"
                       : "Write me a model answer"}
+                  {!answerBusy && <span aria-hidden>→</span>}
                 </button>
+                {answerBusy && (
+                  <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0" }}>
+                    A full 40-mark answer takes a few seconds.
+                  </p>
+                )}
                 {answerError && (
                   <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0", lineHeight: 1.6 }}>
                     {answerError}
@@ -321,24 +340,27 @@ function Overlay({
 
         {children}
 
-        <button
-          onClick={onClose}
-          style={{
-            width: "100%",
-            minHeight: 44,
-            marginTop: 22,
-            borderRadius: 9,
-            border: `1px solid ${C.line}`,
-            background: "transparent",
-            color: C.text,
-            font: "inherit",
-            fontSize: 14.5,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Close and get back to writing
-        </button>
+        {/* A quiet way out. The × above closes too, so a full-width bordered
+            button here was a second copy of the least important action, drawn
+            larger than the most important one. */}
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "8px 4px",
+              background: "none",
+              border: "none",
+              color: C.muted,
+              font: "inherit",
+              fontSize: 13.5,
+              cursor: "pointer",
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+            }}
+          >
+            Close and get back to writing
+          </button>
+        </div>
       </div>
     </div>
   );
