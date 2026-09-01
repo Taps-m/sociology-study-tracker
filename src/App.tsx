@@ -730,6 +730,10 @@ function Setup({
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
   const [known, setKnown] = useState<string[]>([]);
+  // Folded away by default. Most people setting this up have studied none of
+  // it, and eighteen unit chips were the longest thing on the page for a
+  // question whose usual answer is "no".
+  const [showKnown, setShowKnown] = useState(false);
 
   const papers = [1, 2].map((paper) => ({
     paper,
@@ -880,58 +884,92 @@ function Setup({
           </Field>
 
           <section style={panelStyle}>
-            <div style={{ fontSize: 14.5, color: C.text, marginBottom: 4 }}>
-              Already know any of this?
-            </div>
-            <div style={{ fontSize: 13.5, color: C.muted, marginBottom: 14, lineHeight: 1.6 }}>
-              Tick the units you have studied before. They start part-complete instead of at zero.
-            </div>
-
-            {papers.map(({ paper, units }) => (
-              <div key={paper} style={{ marginBottom: 14 }}>
-                <div
-                  style={{
-                    fontFamily: C.mono,
-                    fontSize: 12,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: C.muted,
-                    marginBottom: 8,
-                  }}
+            <button
+              onClick={() => setShowKnown(!showKnown)}
+              aria-expanded={showKnown}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                width: "100%",
+                padding: 0,
+                border: "none",
+                background: "transparent",
+                color: C.text,
+                font: "inherit",
+                textAlign: "left",
+                cursor: "pointer",
+              }}
+            >
+              <span>
+                <span style={{ fontSize: 14.5, display: "block" }}>Already know any of this?</span>
+                <span
+                  style={{ fontSize: 13, color: C.muted, display: "block", marginTop: 3 }}
                 >
-                  Paper {paper === 1 ? "I" : "II"}
+                  {known.length === 0
+                    ? "Optional — leave it if you are starting from zero."
+                    : `${known.length} ${known.length === 1 ? "unit" : "units"} ticked.`}
+                </span>
+              </span>
+              <span aria-hidden style={{ color: C.muted, fontSize: 18, flex: "0 0 auto" }}>
+                {showKnown ? "−" : "+"}
+              </span>
+            </button>
+
+            {showKnown && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 13.5, color: C.muted, marginBottom: 14, lineHeight: 1.6 }}>
+                  Tick the units you have studied before. They start part-complete instead of at
+                  zero.
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {units.map((u) => {
-                    const isOn = known.includes(u);
-                    return (
-                      <button
-                        key={u}
-                        onClick={() => setKnown(isOn ? known.filter((k) => k !== u) : [...known, u])}
-                        aria-pressed={isOn}
-                        style={{
-                          fontFamily: C.sans,
-                          fontSize: 13.5,
-                          padding: "8px 12px",
-                          minHeight: 36,
-                          borderRadius: 999,
-                          cursor: "pointer",
-                          background: isOn ? "rgba(95, 211, 243, 0.12)" : "transparent",
-                          color: isOn ? C.accent : C.muted,
-                          border: `1px solid ${isOn ? C.accent : C.line}`,
-                        }}
-                      >
-                        {isOn ? "✓ " : ""}
-                        {u}
-                      </button>
-                    );
-                  })}
-                </div>
+
+                {papers.map(({ paper, units }) => (
+                  <div key={paper} style={{ marginBottom: 14 }}>
+                    <div
+                      style={{
+                        fontFamily: C.mono,
+                        fontSize: 12,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: C.muted,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Paper {paper === 1 ? "I" : "II"}
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {units.map((u) => {
+                        const isOn = known.includes(u);
+                        return (
+                          <button
+                            key={u}
+                            onClick={() =>
+                              setKnown(isOn ? known.filter((k) => k !== u) : [...known, u])
+                            }
+                            aria-pressed={isOn}
+                            style={{
+                              fontFamily: C.sans,
+                              fontSize: 13.5,
+                              padding: "8px 12px",
+                              minHeight: 36,
+                              borderRadius: 999,
+                              cursor: "pointer",
+                              background: isOn ? C.accentSoft : "transparent",
+                              color: isOn ? C.accent : C.muted,
+                              border: `1px solid ${isOn ? C.accent : C.line}`,
+                            }}
+                          >
+                            {isOn ? "✓ " : ""}
+                            {u}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-            <div style={{ fontSize: 12.5, color: C.muted }}>
-              {known.length === 0 ? "Nothing ticked — starting from zero." : `${known.length} ticked.`}
-            </div>
+            )}
           </section>
 
           <section style={panelStyle}>
