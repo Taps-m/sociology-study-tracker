@@ -19,6 +19,7 @@ import {
   stdJump,
   stdLine,
 } from "../data/standardBooks";
+import { chapterBadge, TOTAL_QUESTIONS } from "../data/weightage";
 import { NoteEditor } from "./NoteEditor";
 
 const chip = {
@@ -283,10 +284,15 @@ function WhereToRead({ topicId }: { topicId: string }) {
       {standard.length > 0 && (
         <>
           <div style={shelf}>Standard books</div>
+          <div style={{ fontSize: 11.5, color: C.muted, marginTop: 3, lineHeight: 1.5 }}>
+            Percentages are counted from the {TOTAL_QUESTIONS} real questions of the last ten
+            years, not from anybody's guess at what matters.
+          </div>
           <div style={{ marginTop: 4, display: "grid", gap: 3 }}>
             {standard.map((r) => {
               const stranded = notOnDesk(r);
               const jump = stdJump(r);
+              const badge = chapterBadge(r);
               return (
                 <div
                   key={`${r.book}-${r.chapter}-${r.from ?? 0}`}
@@ -304,6 +310,25 @@ function WhereToRead({ topicId }: { topicId: string }) {
                   )}
                   {stranded && (
                     <span style={{ color: C.warn }}> · not in the copy you have</span>
+                  )}
+                  {/*
+                    What the whole chapter is worth and how long it runs. Two
+                    facts, no verdict: the queue already decides the order, and
+                    a percentage that told you to skip something would be
+                    guessing on your behalf about a paper that offers choice.
+                  */}
+                  {badge && r.kind === "covers" && !stranded && (
+                    <div
+                      title={badge.full}
+                      style={{
+                        fontSize: 11.5,
+                        color: C.muted,
+                        marginTop: 2,
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      {badge.short}
+                    </div>
                   )}
                 </div>
               );
