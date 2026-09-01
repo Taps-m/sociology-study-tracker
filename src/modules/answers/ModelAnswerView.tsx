@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ModelAnswer, ModelAnswerPart } from "../../lib/ai";
+import type { Diagram as DiagramData, ModelAnswer, ModelAnswerPart } from "../../lib/ai";
 import { C } from "../../lib/theme";
 
 /**
@@ -151,8 +151,13 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
   );
 }
 
-/** A branch diagram: a label, a spine, and the items hanging off it. */
-function Diagram({ diagram }: { diagram: ModelAnswer["diagram"] }) {
+/**
+ * A branch diagram: a label, a spine, and the items hanging off it.
+ *
+ * Shared with the skeleton, so what the structure tells you to draw and what
+ * the model answer draws are the same picture rendered by the same code.
+ */
+export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
   if (!diagram?.label || diagram.items.length === 0) return null;
   return (
     <section style={{ marginTop: 24 }}>

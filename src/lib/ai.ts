@@ -202,6 +202,12 @@ export interface StructureBlock {
   must?: Obligation;
 }
 
+/** A branch diagram: one label, and the items hanging off it. */
+export interface Diagram {
+  label: string;
+  items: { name: string; note: string }[];
+}
+
 export interface AnswerStructure {
   demand: { commandWords: string[]; parts: string[]; trap: string };
   /** What to box and underline on the question paper before writing a word. */
@@ -213,8 +219,15 @@ export interface AnswerStructure {
   blocks: StructureBlock[];
   /** The one line that turns a two-part answer. Empty when there is one part. */
   pivot?: string;
-  /** A diagram worth the seconds it costs, or empty when prose is better. */
-  diagram?: string;
+  /**
+   * The diagram to copy onto the page, in the same shape the model answer uses
+   * so the two can be held against each other. It used to be a sentence
+   * describing a diagram, which is not something anyone can draw, and which
+   * nothing stopped the minutes budget from contradicting.
+   */
+  diagram?: Diagram;
+  /** Why prose beats a diagram here. Present only when there is no diagram. */
+  insteadOfDiagram?: string;
   close: { type: string; text: string };
   minutes: { section: string; minutes: number }[];
 }
@@ -241,7 +254,7 @@ export interface ModelAnswerPart {
 
 export interface ModelAnswer {
   parts: ModelAnswerPart[];
-  diagram: { label: string; items: { name: string; note: string }[] };
+  diagram: Diagram;
   usedTopics: string[];
   words: number;
   /** Ids the model claimed that are not in the syllabus. Shown, never hidden. */
@@ -250,7 +263,7 @@ export interface ModelAnswer {
 
 const MODEL_KEY = "wbcs.models.v2";
 
-const STRUCTURE_KEY = "wbcs.structures.v3";
+const STRUCTURE_KEY = "wbcs.structures.v4";
 
 /**
  * Kept out of the event log on purpose. It is not something the candidate did,
@@ -288,22 +301,16 @@ export async function answerStructure(
   const hit = structureCache()[key];
   if (hit) return { result: hit, error: null };
 
-  try {
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ task: "structure", context, deviceId: deviceId() }),
-    });
-    const payload = (await res.json().catch(() => ({}))) as {
-      body?: string;
-      error?: string;
-      detail?: string;
-      truncated?: boolean;
-    };
-    if (!res.ok) {
+  {
+    const { status, payload, error: reachError } = await askService(
+      { task: "structure", context, deviceId: deviceId() },
+      120_000,
+    );
+    if (reachError) return { result: null, error: reachError };
+    if (status < 200 || status >= 300) {
       return {
         result: null,
-        error: [payload.error ?? `request failed (${res.status})`, payload.detail]
+        error: [payload.error ?? `request failed (${status})`, payload.detail]
           .filter(Boolean)
           .join(" — "),
       };
@@ -326,6 +333,31 @@ export async function answerStructure(
       };
     }
 
+    // An older reply, or an older cache, carried `diagram` as a sentence. Take
+    // it as a label rather than letting a string reach a renderer expecting an
+    // object — the cache key moved too, so this is belt and braces.
+    const d = parsed.diagram as unknown;
+    parsed.diagram =
+      typeof d === "string"
+        ? { label: d, items: [] }
+        : d && typeof d === "object" && Array.isArray((d as Diagram).items)
+          ? (d as Diagram)
+          : { label: "", items: [] };
+
+    // The budget may not bill for a diagram that was not given. The prompt says
+    // so; this is what happens when it says so and does it anyway.
+    if (!parsed.diagram.label && Array.isArray(parsed.minutes)) {
+      const phantom = parsed.minutes.filter((m) => /diagram/i.test(m.section ?? ""));
+      if (phantom.length > 0 && phantom.length < parsed.minutes.length) {
+        const freed = phantom.reduce((a, m) => a + (m.minutes || 0), 0);
+        parsed.minutes = parsed.minutes.filter((m) => !/diagram/i.test(m.section ?? ""));
+        // Give the minutes back to the close rather than losing them: the total
+        // still reads thirty-five, which is the only number that matters.
+        const last = parsed.minutes[parsed.minutes.length - 1];
+        if (last) last.minutes += freed;
+      }
+    }
+
     if (!parsed?.demand || !Array.isArray(parsed.blocks)) {
       return {
         result: null,
@@ -339,11 +371,6 @@ export async function answerStructure(
       // Full or blocked. It will simply be fetched again next time.
     }
     return { result: parsed, error: null };
-  } catch (e) {
-    return {
-      result: null,
-      error: `Could not reach the structure service: ${e instanceof Error ? e.message : String(e)}`,
-    };
   }
 }
 
@@ -359,6 +386,95 @@ export function cachedModelAnswer(question: string): ModelAnswer | null {
   return modelCache()[questionKey(question)] ?? null;
 }
 
+/**
+ * One POST to the answer service, for the calls that take a minute.
+ *
+ * Three things the plain `fetch` did not do. It asks the server to stream a
+ * heartbeat, so the connection is never idle long enough for a phone network or
+ * a proxy to close it — the closure is what reached the page as the useless
+ * "Failed to fetch". It gives up on its own terms after a stated time, so a
+ * request that will never land says so instead of hanging. And it turns the
+ * three ways this can fail into three different sentences, because "Failed to
+ * fetch" is the same words whether the model broke, the connection died or the
+ * phone is simply offline, and a candidate cannot act on any of them.
+ */
+export async function askService(
+  body: Record<string, unknown>,
+  timeoutMs: number,
+): Promise<{ status: number; payload: Payload; error: string | null }> {
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), timeoutMs);
+  try {
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, stream: true }),
+      signal: abort.signal,
+    });
+
+    // A server old enough not to know about the heartbeat, or any error the
+    // platform answered before the handler ran, is still ordinary JSON.
+    const kind = res.headers.get("content-type") ?? "";
+    if (!kind.includes("ndjson")) {
+      const payload = (await res.json().catch(() => ({}))) as Payload;
+      return { status: res.status, payload, error: null };
+    }
+
+    // Newline-delimited: pings while it works, then one line that is the reply.
+    const text = await res.text();
+    let last: Payload | null = null;
+    for (const line of text.split("\n")) {
+      const t = line.trim();
+      if (!t) continue;
+      let obj: Payload;
+      try {
+        obj = JSON.parse(t) as Payload;
+      } catch {
+        continue;
+      }
+      if (obj.ping !== undefined) continue;
+      last = obj;
+    }
+    if (!last) {
+      return {
+        status: 0,
+        payload: {},
+        error:
+          "The connection closed before the answer arrived. It is usually the network rather than the answer — try again.",
+      };
+    }
+    return { status: last.status ?? res.status, payload: last, error: null };
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      return {
+        status: 0,
+        payload: {},
+        error: `It took longer than ${Math.round(timeoutMs / 1000)} seconds and was given up on. Try again — a second attempt is usually faster.`,
+      };
+    }
+    const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+    return {
+      status: 0,
+      payload: {},
+      error: offline
+        ? "You are offline. Everything else in the app still works; this one needs the network."
+        : `Could not reach the answer service: ${e instanceof Error ? e.message : String(e)}`,
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** What a reply can carry, whichever channel it came down. */
+interface Payload {
+  status?: number;
+  ping?: number;
+  body?: string;
+  error?: string;
+  detail?: string;
+  truncated?: boolean;
+}
+
 export async function modelAnswer(
   question: string,
   context: unknown,
@@ -368,22 +484,18 @@ export async function modelAnswer(
   const hit = modelCache()[key];
   if (hit) return { result: hit, error: null };
 
-  try {
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ task: "model", context, deviceId: deviceId() }),
-    });
-    const payload = (await res.json().catch(() => ({}))) as {
-      body?: string;
-      error?: string;
-      detail?: string;
-      truncated?: boolean;
-    };
-    if (!res.ok) {
+  {
+    // A full answer is about a thousand words. Three minutes is generous for
+    // that and still short enough that a dead request does not hang the button.
+    const { status, payload, error: reachError } = await askService(
+      { task: "model", context, deviceId: deviceId() },
+      180_000,
+    );
+    if (reachError) return { result: null, error: reachError };
+    if (status < 200 || status >= 300) {
       return {
         result: null,
-        error: [payload.error ?? `request failed (${res.status})`, payload.detail]
+        error: [payload.error ?? `request failed (${status})`, payload.detail]
           .filter(Boolean)
           .join(" — "),
       };
@@ -418,11 +530,6 @@ export async function modelAnswer(
       // Full or blocked; it will be fetched again next time.
     }
     return { result: parsed, error: null };
-  } catch (e) {
-    return {
-      result: null,
-      error: `Could not reach the answer service: ${e instanceof Error ? e.message : String(e)}`,
-    };
   }
 }
 

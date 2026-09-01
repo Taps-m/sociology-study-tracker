@@ -9,7 +9,7 @@ import {
 } from "../../lib/ai";
 import { TOPICS } from "../../data/syllabus";
 import { standardReadingsFor, stdLine } from "../../data/standardBooks";
-import { ModelAnswerView } from "./ModelAnswerView";
+import { Diagram, ModelAnswerView } from "./ModelAnswerView";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
@@ -105,6 +105,9 @@ export function AnswerBlueprint({
         minutes: 35,
         syllabusTopics: paperTopics.map((t) => ({ id: t.id, unit: t.unit, name: t.name })),
         books,
+        // The skeleton has already told the candidate what to draw. Send it, so
+        // the written answer draws that and not a second, different picture.
+        diagram: structure?.diagram?.label ? structure.diagram : undefined,
       },
       paperTopics.map((t) => t.id),
     );
@@ -601,10 +604,22 @@ function StructureBody({ structure }: { structure: AnswerStructure }) {
         </section>
       )}
 
-      {structure.diagram && (
+      {/*
+        Always shown, either way. A diagram that is worth three minutes of a
+        thirty-five minute answer is worth being told about explicitly, and so
+        is the decision not to draw one — an absent section and a budget line
+        that mentions a diagram cannot both be right, and the candidate is the
+        one who pays for working out which.
+      */}
+      {structure.diagram?.label ? (
+        <Diagram diagram={structure.diagram} />
+      ) : (
         <section style={{ marginTop: 20 }}>
           <div style={label}>Worth drawing</div>
-          <p style={{ fontSize: 14, margin: "7px 0 0", lineHeight: 1.7 }}>{structure.diagram}</p>
+          <p style={{ fontSize: 14, margin: "7px 0 0", lineHeight: 1.7, color: C.muted }}>
+            {structure.insteadOfDiagram ||
+              "Nothing here. Prose is faster than a diagram for this question — don't spend the minutes."}
+          </p>
         </section>
       )}
 

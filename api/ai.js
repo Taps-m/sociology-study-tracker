@@ -345,6 +345,13 @@ DRAW ONE THING. Where a branch diagram would carry a group faster than prose,
 give it: a label and three to five items. Where prose is genuinely better,
 return an empty diagram rather than forcing one.
 
+If the context carries "diagram", the skeleton has already prescribed one and
+the candidate has already been told to draw it. Draw that one. Keep its label
+and its items unless one of them is plainly wrong for the answer you have
+written, and if you do change it, change it because the answer moved — not to
+show a different idea. A model answer whose diagram contradicts the skeleton it
+came from teaches the candidate to trust neither.
+
 SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
 exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
 and Perspectives and Shankar Rao's Principles of Sociology that cover this
@@ -454,7 +461,16 @@ A DIAGRAM WHERE A LIST WOULD BE SLOWER. These candidates draw: a boxed label
 with an arrow branching into three numbered points, a vertical spine down the
 margin joining a group, a labelled triangle for a three-fold classification.
 Seconds to draw, and it makes the structure visible before a word is read.
-Suggest one only where it genuinely beats prose.
+
+Give the diagram itself, not a description of one — a label and three to five
+named items, so the candidate can copy it onto the page without deciding
+anything. Where prose genuinely beats a diagram, return an empty label and an
+empty items list and say why in "insteadOfDiagram".
+
+AND THEN BE CONSISTENT ABOUT IT. If you return no diagram, no line in "minutes"
+may mention one. Budgeting three minutes for a diagram you did not give sends a
+candidate looking for something that is not on the page, and it is the sort of
+small incoherence that makes them stop trusting the rest.
 
 VOCABULARY IN BRACKETS. A technical term dropped in parentheses after a point
 — "(Diffusionism)", "(decomposition of class)" — shows command of the concept
@@ -519,7 +535,8 @@ Reply with JSON and nothing else, in exactly this shape:
             "thinker":"<name, or empty>","specific":"<number, Act, place, case, or empty>",
             "depth":"full|brief"}],
  "pivot":"<the turning sentence, or empty if the question has one part>",
- "diagram":"<a diagram worth drawing and what it shows, or empty if prose is better>",
+ "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
+ "insteadOfDiagram":"<one line, only when there is no diagram>",
  "close":{"type":"two-sided|concessive|forward|answers-demand","text":"<the actual closing lines>"},
  "minutes":[{"section":"<name>","minutes":0}]}
 
@@ -531,6 +548,16 @@ praise, no prose outside the JSON.`;
       return null;
   }
 }
+
+/**
+ * A model answer is a thousand words; the call that writes it is not quick.
+ *
+ * Vercel's default is generous, but leaving it implicit means the ceiling can
+ * change under the project without anyone noticing, and what that looks like
+ * from the browser is "Failed to fetch" — no status, no body, nothing to read.
+ * Stated here so the limit is a decision rather than a default.
+ */
+export const config = { maxDuration: 300 };
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
@@ -592,6 +619,54 @@ export default async function handler(req, res) {
   const denied = await allow(deviceId, task);
   if (denied) return res.status(429).json({ error: denied });
 
+  /**
+   * The long tasks answer down a heartbeat, not down a silence.
+   *
+   * Writing a full answer takes a minute or more, and for that whole minute the
+   * old code sent the browser nothing at all. An idle HTTPS connection is
+   * exactly what a phone network, a home router or a corporate proxy will quietly
+   * close, and a closed connection reaches the page as `TypeError: Failed to
+   * fetch` — the one error that carries no status and no body, so neither the
+   * candidate nor this file can tell whether the model failed, the function was
+   * cut off, or the network gave up. Vercel says the same thing in its own docs:
+   * over HTTP/1.1 there is no protocol keep-alive, so stream something.
+   *
+   * So these two write newline-delimited JSON: a ping every few seconds while
+   * the model works, then one final line carrying the real reply. Bytes keep
+   * moving, nothing in between has an idle connection to reap, and the client
+   * gets a progress signal for free.
+   *
+   * Opt-in, because a browser may still be running a cached copy of the client
+   * from before this existed. Without `stream` the response is the plain JSON
+   * object it has always been.
+   */
+  const streaming = req.body?.stream === true;
+  let beat = null;
+
+  if (streaming) {
+    res.status(200);
+    res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    // Tell any proxy in front not to sit on the bytes and defeat the point.
+    res.setHeader("X-Accel-Buffering", "no");
+    res.write('{"ping":0}\n');
+    beat = setInterval(() => {
+      try {
+        res.write('{"ping":1}\n');
+      } catch {
+        // The client has gone. The interval is cleared in reply().
+      }
+    }, 5000);
+  }
+
+  /** One reply, whichever channel this request asked for. */
+  const reply = (status, obj) => {
+    if (!streaming) return res.status(status).json(obj);
+    if (beat) clearInterval(beat);
+    res.write(JSON.stringify({ status, ...obj }) + "\n");
+    return res.end();
+  };
+
   try {
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
@@ -630,7 +705,7 @@ export default async function handler(req, res) {
 
     if (!r.ok) {
       const detail = await r.text();
-      return res.status(502).json({ error: "model call failed", detail: detail.slice(0, 400) });
+      return reply(502, { error: "model call failed", detail: detail.slice(0, 400) });
     }
 
     const data = await r.json();
@@ -639,13 +714,13 @@ export default async function handler(req, res) {
 
     if (!body) {
       // A model that spent its whole budget thinking returns no text at all.
-      return res.status(502).json({
+      return reply(502, {
         error: "empty response from model",
         detail: candidate?.finishReason ? `finishReason: ${candidate.finishReason}` : undefined,
       });
     }
 
-    return res.status(200).json({
+    return reply(200, {
       body,
       model: MODEL,
       generatedAt: new Date().toISOString(),
@@ -653,6 +728,6 @@ export default async function handler(req, res) {
       truncated: candidate?.finishReason === "MAX_TOKENS",
     });
   } catch (e) {
-    return res.status(502).json({ error: "model call failed", detail: String(e).slice(0, 200) });
+    return reply(502, { error: "model call failed", detail: String(e).slice(0, 200) });
   }
 }
