@@ -1,4 +1,5 @@
 import { PYQS } from "./pyq";
+import { TOPICS } from "./syllabus";
 import { stdChapter, STANDARD_READINGS, type StdBookId, type StdReading } from "./standardBooks";
 
 /**
@@ -159,4 +160,65 @@ export function chapterBadge(r: StdReading): { short: string; full: string } | n
         ? `${pages} pages, and no question in the last ten years of papers has come from this chapter.`
         : `This chapter accounts for ${w.pct.toFixed(1)}% of the questions asked in the last ten years — ${w.questions} of ${TOTAL_QUESTIONS} — and runs to ${pages} pages, which is what to plan the evening around. The page range on this line points at the part covering this topic.`,
   };
+}
+
+/**
+ * What a whole unit is worth, as a share of its own paper.
+ *
+ * This is the figure that belongs on a unit row, and it replaced the estimated
+ * hours that used to sit there. "31h" against Pathfinders is a mountain, and it
+ * was a mountain measured with my own guesses at how long each topic takes —
+ * an intimidating number that was not even reliable. The share of the paper is
+ * measured from the real papers, and it pulls you toward a unit rather than
+ * warning you off it.
+ *
+ * Against its own paper rather than both, because nobody sits Paper I and Paper
+ * II as one exam: under the Paper I heading, the units add up to Paper I.
+ */
+export function unitShare(paper: 1 | 2, unit: string): number {
+  const inUnit = new Set(TOPICS.filter((t) => t.paper === paper && t.unit === unit).map((t) => t.id));
+  if (inUnit.size === 0) return 0;
+
+  const papersQuestions = PYQS.filter((q) => q.paper === paper && q.topicIds.length > 0);
+  if (papersQuestions.length === 0) return 0;
+
+  let units = 0;
+  for (const q of papersQuestions) {
+    const hits = q.topicIds.filter((id) => inUnit.has(id)).length;
+    if (hits > 0) units += hits / q.topicIds.length;
+  }
+  return (units / papersQuestions.length) * 100;
+}
+
+/** The unit row's label: a percentage, or nothing rather than a bare zero. */
+export function unitShareLabel(paper: 1 | 2, unit: string): string | null {
+  const pct = unitShare(paper, unit);
+  if (pct === 0) return null;
+  return pct < 0.5 ? "<1%" : `${Math.round(pct)}%`;
+}
+
+/**
+ * How loudly to say it.
+ *
+ * Banded against the paper's own average rather than a fixed number, because a
+ * paper with ten units averages ten per cent and one with eight averages twelve
+ * and a half — a threshold that suits one mislabels the other. Heavy is half
+ * again above average, quiet is comfortably below it, and everything else is
+ * left alone. One or two units end up marked in each paper, which is the point:
+ * a screen where everything is highlighted has highlighted nothing.
+ *
+ * Only the top is coloured. Nothing is greyed out as not worth doing — the
+ * quiet end is merely quiet, because the paper offers choice and a unit worth
+ * two and a half per cent can still be the question you can answer.
+ */
+export type UnitEmphasis = "heavy" | "normal" | "quiet";
+
+export function unitEmphasis(paper: 1 | 2, unit: string): UnitEmphasis {
+  const units = [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))];
+  if (units.length === 0) return "normal";
+  const average = 100 / units.length;
+  const pct = unitShare(paper, unit);
+  if (pct >= average * 1.5) return "heavy";
+  if (pct <= average * 0.6) return "quiet";
+  return "normal";
 }

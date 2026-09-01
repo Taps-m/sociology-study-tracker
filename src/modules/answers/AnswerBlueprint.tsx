@@ -10,6 +10,7 @@ import {
 } from "../../lib/ai";
 import { TOPICS } from "../../data/syllabus";
 import { standardReadingsFor, stdLine } from "../../data/standardBooks";
+import { BOOK_SCAN, scanPagesRead, scanPagesTotal, scanPending } from "../../data/bookScan";
 import { Diagram, ModelAnswerView } from "./ModelAnswerView";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -279,6 +280,50 @@ export function AnswerBlueprint({
                   <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0", lineHeight: 1.6 }}>
                     {answerError}
                   </p>
+                )}
+
+                {/*
+                  Where the words in this answer actually come from.
+                  The books are cited beside the answer, but until they have
+                  been read into text the model has not seen a page of them —
+                  it writes from what it knows and the citation sits next to it.
+                  That is a real difference and it is not the reader's job to
+                  guess at it, so the state is on the screen until it changes.
+                */}
+                {!answerBusy && scanPending() && (
+                  <div
+                    style={{
+                      marginTop: 12,
+                      paddingTop: 10,
+                      borderTop: `1px solid ${C.line}`,
+                      fontSize: 12,
+                      color: C.muted,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <span style={{ color: C.warn, fontWeight: 600 }}>Books not read yet</span> —{" "}
+                    <span className="num">{scanPagesRead()}</span> of{" "}
+                    <span className="num">{scanPagesTotal()}</span> pages scanned. Until this
+                    finishes, the answer is written from the model's own knowledge with your
+                    chapters cited beside it, not out of the chapters themselves.
+                    <div style={{ marginTop: 6, height: 3, background: C.hair, borderRadius: 2 }}>
+                      <div
+                        style={{
+                          width: `${Math.max(1, (scanPagesRead() / scanPagesTotal()) * 100)}%`,
+                          height: "100%",
+                          background: C.accent,
+                          borderRadius: 2,
+                        }}
+                      />
+                    </div>
+                    <div style={{ marginTop: 5, fontSize: 11.5 }}>
+                      Sangwan <span className="num">{BOOK_SCAN.sangwan.read}</span>/
+                      <span className="num">{BOOK_SCAN.sangwan.total}</span> · Haralambos{" "}
+                      <span className="num">{BOOK_SCAN.haralambos.read}</span>/
+                      <span className="num">{BOOK_SCAN.haralambos.total}</span> · Shankar Rao
+                      already readable
+                    </div>
+                  </div>
                 )}
               </div>
             </>

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { TOPICS } from "../../data/syllabus";
 import type { CheckId, Derived } from "../../lib/events";
-import { bandOf, completionOf, depthFor, hoursFor, isOptional } from "../../lib/planner";
+import { bandOf, completionOf, depthFor,  isOptional } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 import { TopicRow } from "../../components/TopicRow";
 import { briefFor } from "../../data/briefs";
 import { MindMap, Takeaways } from "../plan/MindMap";
+import { unitEmphasis, unitShare, unitShareLabel } from "../../data/weightage";
 
 type Handlers = {
   onToggle: (id: string, c: CheckId) => void;
@@ -38,7 +39,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
     return true;
   };
 
-  const papers = [1, 2].map((paper) => ({
+  const papers = ([1, 2] as const).map((paper) => ({
     paper,
     units: [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))]
       .map((unit) => ({
@@ -121,7 +122,17 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
               const key = `${paper}|${unit}`;
               const isOpen = open === key;
               const done = all.filter((t) => completionOf(d, t.id) >= depthFor(d, t)).length;
-              const hours = Math.round(all.reduce((s, t) => s + hoursFor(d, t), 0));
+              /*
+                What this unit is worth, not what it will cost. The hours that
+                used to sit here were a total of remaining work — "31h" against
+                Pathfinders — which reads as a mountain, and they were computed
+                from my own estimates of how long each topic takes rather than
+                from anything measured. The share of the paper comes from the
+                real questions and points a candidate at a unit rather than
+                warning them off it.
+              */
+              const shareLabel = unitShareLabel(paper, unit);
+              const emphasis = unitEmphasis(paper, unit);
 
               return (
                 <section key={key} className="card">
@@ -148,7 +159,22 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
                   >
                     <span style={{ flex: 1, minWidth: 0 }}>{unit}</span>
                     <span className="num" style={{ fontSize: 13.5, color: C.muted, whiteSpace: "nowrap" }}>
-                      {done}/{all.length} · {hours}h
+                      {done}/{all.length}
+                      {shareLabel && (
+                        <>
+                          {" · "}
+                          <span
+                            title={`${unitShare(paper, unit).toFixed(1)}% of the questions asked in Paper ${paper === 1 ? "I" : "II"} over the last ten years came from this unit.`}
+                            style={{
+                              color: emphasis === "heavy" ? C.accent : C.muted,
+                              fontWeight: emphasis === "heavy" ? 700 : 400,
+                              opacity: emphasis === "quiet" ? 0.65 : 1,
+                            }}
+                          >
+                            {shareLabel}
+                          </span>
+                        </>
+                      )}
                     </span>
                     <span aria-hidden style={{ color: C.muted }}>
                       {isOpen ? "−" : "+"}

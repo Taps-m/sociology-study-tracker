@@ -35,3 +35,6 @@ answer copy/
 
 # Reference textbooks. Copyrighted, and this repository is public.
 standard books/
+
+# OCR of the paid books. Same reason as "standard books/": this repo is public.
+book-text/

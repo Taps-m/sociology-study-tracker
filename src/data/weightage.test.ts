@@ -1,7 +1,16 @@
 import { expect, it } from "vitest";
 import { PYQS } from "./pyq";
 import { STANDARD_READINGS, STD_BOOKS, type StdBookId } from "./standardBooks";
-import { TOTAL_QUESTIONS, chapterBadge, chapterPages, chapterWeight } from "./weightage";
+import { TOPICS } from "./syllabus";
+import {
+  TOTAL_QUESTIONS,
+  chapterBadge,
+  chapterPages,
+  chapterWeight,
+  unitEmphasis,
+  unitShare,
+  unitShareLabel,
+} from "./weightage";
 
 /**
  * The weights are derived from the question corpus, so what has to be pinned is
@@ -85,4 +94,35 @@ it("says under 1% rather than rounding a real chapter down to nothing", () => {
       if (w.pct === 0) expect(badge.short).toMatch(/not asked in 10 years/);
     }
   }
+});
+
+it("each paper's units account for the whole of that paper", () => {
+  for (const paper of [1, 2] as const) {
+    const units = [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))];
+    const total = units.reduce((a, u) => a + unitShare(paper, u), 0);
+    expect(total, `paper ${paper}`).toBeCloseTo(100, 6);
+  }
+});
+
+/**
+ * The banding is relative to each paper's own average, so it has to mark a few
+ * units and not most of them. A screen where everything is highlighted has
+ * highlighted nothing.
+ */
+it("marks a handful of units, not half of them", () => {
+  for (const paper of [1, 2] as const) {
+    const units = [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))];
+    const heavy = units.filter((u) => unitEmphasis(paper, u) === "heavy");
+    expect(heavy.length, `paper ${paper} heavy`).toBeGreaterThan(0);
+    expect(heavy.length, `paper ${paper} heavy`).toBeLessThanOrEqual(Math.ceil(units.length / 4));
+  }
+});
+
+it("the heaviest unit in Paper I is the theorists, and it is marked", () => {
+  expect(unitShare(1, "Pathfinders")).toBeGreaterThan(20);
+  expect(unitEmphasis(1, "Pathfinders")).toBe("heavy");
+});
+
+it("a unit with no questions shows nothing rather than a bare zero", () => {
+  expect(unitShareLabel(1, "No Such Unit")).toBeNull();
 });
