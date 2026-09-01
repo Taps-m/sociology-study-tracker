@@ -1,5 +1,14 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { answerStructure, cachedStructure, type AnswerStructure } from "../../lib/ai";
+import {
+  answerStructure,
+  cachedStructure,
+  cachedModelAnswer,
+  modelAnswer,
+  type AnswerStructure,
+  type ModelAnswer,
+} from "../../lib/ai";
+import { TOPICS } from "../../data/syllabus";
+import { ModelAnswerView } from "./ModelAnswerView";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
@@ -38,6 +47,12 @@ export function AnswerBlueprint({
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The written answer, behind the skeleton rather than beside it: it is the
+  // thing to reach for once the structure has not been enough.
+  const [answer, setAnswer] = useState<ModelAnswer | null>(() => cachedModelAnswer(question));
+  const [view, setView] = useState<"structure" | "model">("structure");
+  const [answerBusy, setAnswerBusy] = useState(false);
+  const [answerError, setAnswerError] = useState<string | null>(null);
 
   // Escape closes it, and the page behind stops scrolling while it is up —
   // without that the background slides around under the window on a phone.
@@ -55,8 +70,41 @@ export function AnswerBlueprint({
     };
   }, [open]);
 
+  /** Every topic this paper can examine — the model's allowed vocabulary. */
+  const paperTopics = TOPICS.filter((t) => t.paper === paper);
+
+  async function buildAnswer() {
+    if (answer) {
+      setView("model");
+      return;
+    }
+    setAnswerBusy(true);
+    setAnswerError(null);
+    const res = await modelAnswer(
+      question,
+      {
+        question,
+        topic,
+        unit,
+        paper: paper === 1 ? "I" : "II",
+        marks: 40,
+        minutes: 35,
+        syllabusTopics: paperTopics.map((t) => ({ id: t.id, unit: t.unit, name: t.name })),
+      },
+      paperTopics.map((t) => t.id),
+    );
+    setAnswerBusy(false);
+    if (res.result) {
+      setAnswer(res.result);
+      setView("model");
+    } else {
+      setAnswerError(res.error);
+    }
+  }
+
   async function show() {
     if (structure) {
+      setView("structure");
       setOpen(true);
       return;
     }
@@ -73,6 +121,7 @@ export function AnswerBlueprint({
     setBusy(false);
     if (res.result) {
       setStructure(res.result);
+      setView("structure");
       setOpen(true);
     } else {
       setError(res.error);
@@ -116,8 +165,75 @@ export function AnswerBlueprint({
       </Card>
 
       {open && structure && (
-        <Overlay onClose={() => setOpen(false)}>
-          <StructureBody structure={structure} />
+        <Overlay
+          onClose={() => setOpen(false)}
+          title={view === "model" ? "A model answer" : "What this answer needed"}
+        >
+          {view === "structure" ? (
+            <>
+              <StructureBody structure={structure} />
+              <div
+                style={{
+                  marginTop: 24,
+                  paddingTop: 18,
+                  borderTop: `1px solid ${C.line}`,
+                }}
+              >
+                <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 10px", lineHeight: 1.7 }}>
+                  Still looking at a blank page? A full answer, written to this shape and kept
+                  inside your syllabus — to adapt, not to reproduce.
+                </p>
+                <button
+                  onClick={() => void buildAnswer()}
+                  disabled={answerBusy}
+                  style={{
+                    minHeight: 44,
+                    padding: "0 18px",
+                    borderRadius: 9,
+                    border: `1px solid ${C.line}`,
+                    background: "transparent",
+                    color: C.accent,
+                    font: "inherit",
+                    fontSize: 14.5,
+                    fontWeight: 600,
+                    cursor: answerBusy ? "default" : "pointer",
+                  }}
+                >
+                  {answerBusy
+                    ? "Writing…"
+                    : answer
+                      ? "Open the model answer"
+                      : "Write me a model answer"}
+                </button>
+                {answerError && (
+                  <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0", lineHeight: 1.6 }}>
+                    {answerError}
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            answer && (
+              <>
+                <button
+                  onClick={() => setView("structure")}
+                  style={{
+                    padding: 0,
+                    marginTop: 10,
+                    background: "none",
+                    border: "none",
+                    color: C.accent,
+                    font: "inherit",
+                    fontSize: 13.5,
+                    cursor: "pointer",
+                  }}
+                >
+                  ← Back to the structure
+                </button>
+                <ModelAnswerView answer={answer} />
+              </>
+            )
+          )}
         </Overlay>
       )}
     </>
@@ -128,12 +244,20 @@ export function AnswerBlueprint({
  * The window itself. Clicking the backdrop closes; clicking inside does not,
  * which is the whole reason the inner div stops the event.
  */
-function Overlay({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+function Overlay({
+  onClose,
+  title,
+  children,
+}: {
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="What this answer needed"
+      aria-label={title}
       onClick={onClose}
       style={{
         position: "fixed",
@@ -171,7 +295,7 @@ function Overlay({ onClose, children }: { onClose: () => void; children: ReactNo
           }}
         >
           <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>
-            What this answer needed
+            {title}
           </h2>
           <button
             onClick={onClose}

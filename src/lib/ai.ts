@@ -12,7 +12,14 @@
  *    their own.
  */
 
-export type AiTask = "critique" | "guidance" | "evaluate" | "insight" | "doubt" | "structure";
+export type AiTask =
+  | "critique"
+  | "guidance"
+  | "evaluate"
+  | "insight"
+  | "doubt"
+  | "structure"
+  | "model";
 
 /** The figures an answer was reasoned from, so drift can be detected later. */
 export interface AdviceBasis {
@@ -203,6 +210,36 @@ export interface AnswerStructure {
   minutes: { section: string; minutes: number }[];
 }
 
+/**
+ * A full answer, written the way the scripts are written, for when the skeleton
+ * is not enough and the page is still blank.
+ *
+ * Every part carries the phrases to underline, given verbatim from its own
+ * text, so the marking up is reliable rather than a matter of hoping the model
+ * emits the right markup. `usedTopics` is the model naming which syllabus
+ * topics it drew on — it is checked, because an answer that wanders outside the
+ * syllabus teaches a candidate something that cannot be asked.
+ */
+export interface ModelAnswerPart {
+  kind: "opening" | "signpost" | "block" | "pivot" | "close";
+  keyword: string;
+  text: string;
+  underline: string[];
+  thinker?: string;
+  specific?: string;
+}
+
+export interface ModelAnswer {
+  parts: ModelAnswerPart[];
+  diagram: { label: string; items: { name: string; note: string }[] };
+  usedTopics: string[];
+  words: number;
+  /** Ids the model claimed that are not in the syllabus. Shown, never hidden. */
+  offSyllabus?: string[];
+}
+
+const MODEL_KEY = "wbcs.models.v1";
+
 const STRUCTURE_KEY = "wbcs.structures.v2";
 
 /**
@@ -296,6 +333,85 @@ export async function answerStructure(
     return {
       result: null,
       error: `Could not reach the structure service: ${e instanceof Error ? e.message : String(e)}`,
+    };
+  }
+}
+
+function modelCache(): Record<string, ModelAnswer> {
+  try {
+    return JSON.parse(localStorage.getItem(MODEL_KEY) ?? "{}") as Record<string, ModelAnswer>;
+  } catch {
+    return {};
+  }
+}
+
+export function cachedModelAnswer(question: string): ModelAnswer | null {
+  return modelCache()[questionKey(question)] ?? null;
+}
+
+export async function modelAnswer(
+  question: string,
+  context: unknown,
+  syllabusIds: string[],
+): Promise<{ result: ModelAnswer | null; error: string | null }> {
+  const key = questionKey(question);
+  const hit = modelCache()[key];
+  if (hit) return { result: hit, error: null };
+
+  try {
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: "model", context, deviceId: deviceId() }),
+    });
+    const payload = (await res.json().catch(() => ({}))) as {
+      body?: string;
+      error?: string;
+      detail?: string;
+      truncated?: boolean;
+    };
+    if (!res.ok) {
+      return {
+        result: null,
+        error: [payload.error ?? `request failed (${res.status})`, payload.detail]
+          .filter(Boolean)
+          .join(" — "),
+      };
+    }
+
+    const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
+    let parsed: ModelAnswer;
+    try {
+      parsed = JSON.parse(text) as ModelAnswer;
+    } catch {
+      return {
+        result: null,
+        error: payload.truncated
+          ? "The answer came back cut off — it ran longer than the reply could hold. Try again."
+          : `The reply was not the JSON this expects. It began: ${text.slice(0, 120) || "(nothing)"}`,
+      };
+    }
+    if (!Array.isArray(parsed?.parts) || parsed.parts.length === 0) {
+      return { result: null, error: "The reply parsed but carried no answer." };
+    }
+
+    // Check the syllabus claim rather than trusting it. A model answer that
+    // strays outside the syllabus costs a candidate time on something that
+    // cannot be asked, so where it happens the app says so on the page.
+    const allowed = new Set(syllabusIds);
+    parsed.offSyllabus = (parsed.usedTopics ?? []).filter((id) => !allowed.has(id));
+    parsed.diagram = parsed.diagram ?? { label: "", items: [] };
+
+    try {
+      localStorage.setItem(MODEL_KEY, JSON.stringify({ ...modelCache(), [key]: parsed }));
+    } catch {
+      // Full or blocked; it will be fetched again next time.
+    }
+    return { result: parsed, error: null };
+  } catch (e) {
+    return {
+      result: null,
+      error: `Could not reach the answer service: ${e instanceof Error ? e.message : String(e)}`,
     };
   }
 }

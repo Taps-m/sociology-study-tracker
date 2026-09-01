@@ -41,6 +41,8 @@ const TOKEN_BUDGET = {
   doubt: 2048,
   evaluate: 3072,
   structure: 8192,
+  // A full 900-1100 word answer, plus the model's thinking before it.
+  model: 16384,
 };
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
@@ -311,6 +313,54 @@ Reply with JSON and nothing else, in exactly this shape:
 
 Set legible to false if the handwriting cannot be read with confidence; a score
 built on a misreading is worse than no score. No praise anywhere.`;
+
+    case "model":
+      return `${SYSTEM}
+
+Write a full 40-mark WBCS answer to this question, as a model the candidate
+will adapt rather than copy:
+${json}
+
+STAY INSIDE THE SYLLABUS. The context carries syllabusTopics: every topic this
+paper can examine, with its id. Every concept, thinker and debate you use must
+belong to one of them. Do not reach for a fashionable idea from outside the
+list because it would impress — in the hall it earns nothing, and a candidate
+who learns it from you has spent time on something that cannot be asked. List
+in usedTopics the ids you actually drew on, and use nothing you cannot name.
+
+WRITE IT THE WAY THE SCRIPTS DO. The same skeleton as the structure task: an
+opening of two to four lines that carries the shape of what follows and is not
+a textbook definition; a signpost line restating the demand; labelled blocks of
+keyword-then-mechanism rather than paragraphs; a pivot sentence where the
+question has two halves; a close that takes a position. Blocks are deliberately
+unequal — the obvious one gets a line, the ones carrying the argument get four.
+
+MARK IT UP. In every part, list under "underline" the exact phrases from that
+part's own text that should be underlined in the answer booklet: the technical
+terms, the named Acts, the figures. Give the phrase exactly as it appears in
+the text or it cannot be marked. Two to five per part, not every other word —
+underlining everything is the same as underlining nothing.
+
+DRAW ONE THING. Where a branch diagram would carry a group faster than prose,
+give it: a label and three to five items. Where prose is genuinely better,
+return an empty diagram rather than forcing one.
+
+LENGTH. Forty marks, about thirty-five minutes of writing: aim at 900 to 1100
+words across all parts. This is roughly triple a UPSC 250-word answer; do not
+write a compressed one.
+
+Reply with JSON and nothing else, in exactly this shape:
+
+{"parts":[{"kind":"opening","keyword":"","text":"<the actual sentences>","underline":["<exact phrase from this text>"]},
+          {"kind":"signpost","keyword":"","text":"...","underline":[]},
+          {"kind":"block","keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<or empty>","specific":"<or empty>"},
+          {"kind":"pivot","keyword":"","text":"...","underline":[]},
+          {"kind":"close","keyword":"","text":"...","underline":["..."]}],
+ "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
+ "usedTopics":["<syllabus topic id>"],
+ "words":0}
+
+No praise, no preamble, no prose outside the JSON.`;
 
     case "structure":
       return `${SYSTEM}
