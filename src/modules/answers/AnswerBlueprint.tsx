@@ -1,21 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { answerStructure, cachedStructure, type AnswerStructure } from "../../lib/ai";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
 /**
- * The skeleton the question was asking for.
+ * The skeleton the question was asking for, in a window over the page.
  *
- * The shape is not invented. It is what a 2nd-rank candidate's answer booklets
- * actually do, page after page: an opening that carries the seed of the
- * structure, a signpost line restating the demand, labelled blocks of
- * keyword-dash-mechanism rather than paragraphs, a pivot sentence where the
- * question has two halves, and a close that takes a position instead of
- * summarising. Thinkers budgeted, specifics everywhere, and — the part
- * candidates get wrong — not every block developed to the same depth.
+ * It used to render inline, which pushed the timer and the upload a screen and
+ * a half down: you read the structure and then had to scroll back past all of
+ * it to get on with writing. A structure is something you read once and put
+ * down, so it belongs over the page rather than in it — open it, read it, close
+ * it, carry on where you were.
  *
- * It is a skeleton to write from, never an answer to copy. Copied paragraphs
- * are worth nothing in a hall where the question will be phrased differently.
+ * The shape it shows is not invented. It is what a 2nd-rank candidate's answer
+ * booklets do, page after page: an opening carrying the seed of the structure,
+ * a signpost line, keyword-dash-mechanism blocks of deliberately unequal depth,
+ * a pivot sentence where the question has two halves, and a close that takes a
+ * position. A skeleton to write from, never an answer to copy.
  */
 export function AnswerBlueprint({
   question,
@@ -34,10 +35,31 @@ export function AnswerBlueprint({
   const [structure, setStructure] = useState<AnswerStructure | null>(() =>
     cachedStructure(question),
   );
+  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function build() {
+  // Escape closes it, and the page behind stops scrolling while it is up —
+  // without that the background slides around under the window on a phone.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  async function show() {
+    if (structure) {
+      setOpen(true);
+      return;
+    }
     setBusy(true);
     setError(null);
     const res = await answerStructure(question, {
@@ -48,21 +70,27 @@ export function AnswerBlueprint({
       marks: 40,
       minutes: 35,
     });
-    if (res.result) setStructure(res.result);
-    else setError(res.error);
     setBusy(false);
+    if (res.result) {
+      setStructure(res.result);
+      setOpen(true);
+    } else {
+      setError(res.error);
+    }
   }
 
-  if (!structure) {
-    return (
+  return (
+    <>
       <Card title="What this answer needed">
         <p style={{ fontSize: 14, color: C.muted, margin: "0 0 12px", lineHeight: 1.7 }}>
           {weak
-            ? "A mark on its own teaches nothing. Build the skeleton this question was asking for — the demand broken up, the opening written out, and where each point goes."
-            : "See the skeleton this question was asking for, and hold your answer against it."}
+            ? "A mark on its own teaches nothing. Open the skeleton this question was asking for — the demand broken up, the opening written out, and where each point goes."
+            : structure
+              ? "Built already. Open it and hold your answer against it."
+              : "See the skeleton this question was asking for, and hold your answer against it."}
         </p>
         <button
-          onClick={() => void build()}
+          onClick={() => void show()}
           disabled={busy}
           style={{
             minHeight: 44,
@@ -78,23 +106,131 @@ export function AnswerBlueprint({
             cursor: busy ? "default" : "pointer",
           }}
         >
-          {busy ? "Building…" : "Show me the structure"}
+          {busy ? "Building…" : structure ? "Open the structure" : "Show me the structure"}
         </button>
-        {error && <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0" }}>{error}</p>}
+        {error && (
+          <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0", lineHeight: 1.6 }}>
+            {error}
+          </p>
+        )}
       </Card>
-    );
-  }
 
-  const label = {
-    fontFamily: C.mono,
-    fontSize: 11,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase" as const,
-    color: C.muted,
-  };
+      {open && structure && (
+        <Overlay onClose={() => setOpen(false)}>
+          <StructureBody structure={structure} />
+        </Overlay>
+      )}
+    </>
+  );
+}
 
-  /** Written-out lines the candidate could actually put on the page. */
-  const Sentence = ({ children }: { children: React.ReactNode }) => (
+/**
+ * The window itself. Clicking the backdrop closes; clicking inside does not,
+ * which is the whole reason the inner div stops the event.
+ */
+function Overlay({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="What this answer needed"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 80,
+        background: "rgba(8, 11, 15, 0.55)",
+        backdropFilter: "blur(2px)",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        padding: "3vh 14px",
+        overflowY: "auto",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: 720,
+          background: C.surface,
+          border: `1px solid ${C.line}`,
+          borderRadius: 14,
+          boxShadow: "0 24px 60px rgba(0,0,0,0.28)",
+          padding: "20px 22px 26px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 12,
+            marginBottom: 6,
+          }}
+        >
+          <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>
+            What this answer needed
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            autoFocus
+            style={{
+              flex: "0 0 auto",
+              minWidth: 34,
+              minHeight: 34,
+              borderRadius: 8,
+              border: `1px solid ${C.line}`,
+              background: C.panel,
+              color: C.muted,
+              font: "inherit",
+              fontSize: 17,
+              lineHeight: 1,
+              cursor: "pointer",
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        {children}
+
+        <button
+          onClick={onClose}
+          style={{
+            width: "100%",
+            minHeight: 44,
+            marginTop: 22,
+            borderRadius: 9,
+            border: `1px solid ${C.line}`,
+            background: "transparent",
+            color: C.text,
+            font: "inherit",
+            fontSize: 14.5,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Close and get back to writing
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const label = {
+  fontFamily: C.mono,
+  fontSize: 11,
+  letterSpacing: "0.12em",
+  textTransform: "uppercase" as const,
+  color: C.muted,
+};
+
+/** A line the candidate could put on the page as it stands. */
+function Sentence({ children }: { children: ReactNode }) {
+  return (
     <p
       style={{
         fontSize: 14,
@@ -109,22 +245,22 @@ export function AnswerBlueprint({
       {children}
     </p>
   );
+}
 
+function StructureBody({ structure }: { structure: AnswerStructure }) {
   return (
-    <Card title="What this answer needed">
-      <section>
+    <div>
+      <section style={{ marginTop: 14 }}>
         <div style={label}>The demand</div>
-        <p style={{ fontSize: 14, margin: "6px 0 0", lineHeight: 1.7 }}>
-          {structure.demand.commandWords.length > 0 && (
-            <>
-              Command:{" "}
-              <strong style={{ color: C.accent }}>
-                {structure.demand.commandWords.join(", ")}
-              </strong>
-              {structure.skeleton ? ` · shape: ${structure.skeleton}` : ""}.
-            </>
-          )}
-        </p>
+        {structure.demand.commandWords.length > 0 && (
+          <p style={{ fontSize: 14, margin: "6px 0 0", lineHeight: 1.7 }}>
+            Command:{" "}
+            <strong style={{ color: C.accent }}>
+              {structure.demand.commandWords.join(", ")}
+            </strong>
+            {structure.skeleton ? ` · shape: ${structure.skeleton}` : ""}.
+          </p>
+        )}
         <ol style={{ margin: "9px 0 0", paddingLeft: 20, fontSize: 14, lineHeight: 1.75 }}>
           {structure.demand.parts.map((p) => (
             <li key={p}>{p}</li>
@@ -150,7 +286,7 @@ export function AnswerBlueprint({
       {structure.markUp && (
         <section style={{ marginTop: 20 }}>
           <div style={label}>First, mark the question paper</div>
-          <p style={{ fontSize: 14, margin: "7px 0 0", lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, margin: "7px 0 0", lineHeight: 1.8 }}>
             Box{" "}
             {structure.markUp.box.map((w) => (
               <span
@@ -183,8 +319,7 @@ export function AnswerBlueprint({
           </p>
           <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
             Five seconds, and it is why these candidates stay on the demand while everyone else
-            drifts. Every script sampled has the question itself annotated before the answer
-            begins.
+            drifts onto the topic.
           </p>
         </section>
       )}
@@ -193,8 +328,8 @@ export function AnswerBlueprint({
         <div style={label}>The opening — {structure.opening.type}</div>
         <Sentence>{structure.opening.text}</Sentence>
         <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
-          Two to four lines, no heading, and it already contains the shape of what follows. A
-          textbook definition here spends the most valuable lines on the page saying nothing.
+          Two to four lines, no heading, already carrying the shape of what follows. A textbook
+          definition here spends the most valuable lines on the page saying nothing.
         </p>
       </section>
 
@@ -211,10 +346,6 @@ export function AnswerBlueprint({
             }}
           >
             {structure.signpost}
-          </p>
-          <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
-            One line, restating the demand as a heading. It costs five seconds and shows you read
-            the question.
           </p>
         </section>
       )}
@@ -267,8 +398,8 @@ export function AnswerBlueprint({
           ))}
         </div>
         <p style={{ fontSize: 12.5, color: C.muted, margin: "9px 0 0", lineHeight: 1.6 }}>
-          Blocks, not paragraphs. The keyword is the point itself. Blocks marked “do not dig” get
-          one line — spending three on an obvious point is where the time goes.
+          Blocks, not paragraphs. Those marked “do not dig” get one line — spending three on an
+          obvious point is where the time goes.
         </p>
       </section>
 
@@ -277,8 +408,8 @@ export function AnswerBlueprint({
           <div style={label}>The pivot</div>
           <Sentence>{structure.pivot}</Sentence>
           <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
-            One sentence turns the answer to the second half of the question. Starting again
-            instead is how a two-part answer reads as two half answers.
+            One sentence turns the answer to the second half. Starting again instead is how a
+            two-part answer reads as two half answers.
           </p>
         </section>
       )}
@@ -287,11 +418,6 @@ export function AnswerBlueprint({
         <section style={{ marginTop: 20 }}>
           <div style={label}>Worth drawing</div>
           <p style={{ fontSize: 14, margin: "7px 0 0", lineHeight: 1.7 }}>{structure.diagram}</p>
-          <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
-            A boxed label with an arrow branching into numbered points, or a spine down the
-            margin joining a group. Seconds to draw, and the structure is visible before a word
-            is read.
-          </p>
         </section>
       )}
 
@@ -327,6 +453,6 @@ export function AnswerBlueprint({
         A skeleton to write from, not an answer to copy — the question will be phrased differently
         on the day. The shape is taken from a 2nd-rank candidate's own answer booklets.
       </p>
-    </Card>
+    </div>
   );
 }
