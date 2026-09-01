@@ -261,7 +261,7 @@ export interface ModelAnswer {
   offSyllabus?: string[];
 }
 
-const MODEL_KEY = "wbcs.models.v2";
+const MODEL_KEY = "wbcs.models.v3";
 
 const STRUCTURE_KEY = "wbcs.structures.v4";
 
@@ -398,6 +398,45 @@ export function cachedModelAnswer(question: string): ModelAnswer | null {
  * fetch" is the same words whether the model broke, the connection died or the
  * phone is simply offline, and a candidate cannot act on any of them.
  */
+/**
+ * How long a model answer actually takes, measured rather than assumed.
+ *
+ * The button used to say "a few seconds" under it. A thousand words is not a
+ * few seconds, and a candidate who is told five and waits fifty concludes the
+ * thing is broken and stops using it — which is worse than being told a minute
+ * up front. So each completed call records its own duration and the app quotes
+ * the median of the last few back. Until there are any, it says it does not
+ * know yet, which is at least true.
+ */
+const TIMING_KEY = "wbcs.answerTimings.v1";
+const TIMINGS_KEPT = 7;
+
+function timings(): number[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(TIMING_KEY) ?? "[]") as unknown;
+    return Array.isArray(raw) ? raw.filter((n): n is number => typeof n === "number" && n > 0) : [];
+  } catch {
+    return [];
+  }
+}
+
+function recordTiming(ms: number) {
+  if (!Number.isFinite(ms) || ms <= 0) return;
+  try {
+    const next = [...timings(), Math.round(ms)].slice(-TIMINGS_KEPT);
+    localStorage.setItem(TIMING_KEY, JSON.stringify(next));
+  } catch {
+    // Full or blocked. The estimate simply stays unknown.
+  }
+}
+
+/** The median of what this device has seen, in seconds. Null until it knows. */
+export function typicalAnswerSeconds(): number | null {
+  const all = [...timings()].sort((a, b) => a - b);
+  if (all.length === 0) return null;
+  return Math.round(all[Math.floor(all.length / 2)]! / 1000);
+}
+
 export async function askService(
   body: Record<string, unknown>,
   timeoutMs: number,
@@ -473,6 +512,7 @@ interface Payload {
   error?: string;
   detail?: string;
   truncated?: boolean;
+  ms?: number;
 }
 
 export async function modelAnswer(
@@ -523,6 +563,8 @@ export async function modelAnswer(
     const allowed = new Set(syllabusIds);
     parsed.offSyllabus = (parsed.usedTopics ?? []).filter((id) => !allowed.has(id));
     parsed.diagram = parsed.diagram ?? { label: "", items: [] };
+
+    if (payload.ms) recordTiming(payload.ms);
 
     try {
       localStorage.setItem(MODEL_KEY, JSON.stringify({ ...modelCache(), [key]: parsed }));

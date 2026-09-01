@@ -385,3 +385,94 @@ input[type="range"]::-moz-range-thumb {
     visibility: hidden;
   }
 }
+
+/*
+ * The exam diagram, drawn rather than listed.
+ *
+ * "Draw this" over a bulleted list is not an instruction anyone can follow with
+ * a pen. What these scripts actually put on the page is a boxed label with a
+ * spine and arrows branching off it, so that is what this draws: the shape is
+ * the information, and the candidate copies it rather than reinventing it under
+ * time. Connectors are drawn in CSS rather than as an image so they survive the
+ * dark theme and any length of label.
+ */
+.tree {
+  display: flex;
+  align-items: center;
+}
+
+.tree-root {
+  flex: 0 0 auto;
+  max-width: 160px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--accent);
+  border-radius: 9px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+}
+
+/* The stroke joining the box to the spine. */
+.tree-link {
+  flex: 0 0 24px;
+  height: 1.5px;
+  background: var(--line);
+}
+
+.tree-branches {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 0 2px 26px;
+  list-style: none;
+  border-left: 1.5px solid var(--line);
+  display: grid;
+  gap: 12px;
+}
+
+.tree-branch {
+  position: relative;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* The stroke out to the branch. */
+.tree-branch::before {
+  content: "";
+  position: absolute;
+  left: -26px;
+  top: 0.62em;
+  width: 19px;
+  height: 1.5px;
+  background: var(--line);
+}
+
+/* And its arrowhead, because that is what is on the page. */
+.tree-branch::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: calc(0.62em - 3px);
+  border: 4px solid transparent;
+  border-left-color: var(--line);
+  border-right-width: 0;
+}
+
+@media (max-width: 520px) {
+  .tree {
+    display: block;
+  }
+  .tree-root {
+    max-width: none;
+  }
+  .tree-link {
+    display: none;
+  }
+  .tree-branches {
+    margin-top: 12px;
+    padding-left: 22px;
+  }
+}

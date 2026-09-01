@@ -152,10 +152,15 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
 }
 
 /**
- * A branch diagram: a label, a spine, and the items hanging off it.
+ * The diagram, as a thing to copy rather than a thing to read.
  *
- * Shared with the skeleton, so what the structure tells you to draw and what
- * the model answer draws are the same picture rendered by the same code.
+ * It used to render as a box beside a numbered list, under the heading "Draw
+ * this" — which is not an instruction anybody can follow with a pen. What the
+ * scripts actually put on the page is a boxed label, a spine, and arrows out to
+ * short branches, and the shape carries as much of the meaning as the words do.
+ * So the shape is drawn here, connectors and arrowheads included, and the
+ * caption says what it costs in minutes: a diagram that takes five is not worth
+ * drawing in a thirty-five minute answer.
  */
 export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
   if (!diagram?.label || diagram.items.length === 0) return null;
@@ -168,42 +173,30 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
           letterSpacing: "0.12em",
           textTransform: "uppercase",
           color: C.muted,
-          marginBottom: 8,
+          marginBottom: 10,
         }}
       >
-        Draw this
+        Copy this onto the page
       </div>
-      <div style={{ display: "flex", gap: 12, alignItems: "stretch" }}>
-        <div
-          style={{
-            display: "grid",
-            placeItems: "center",
-            flex: "0 0 130px",
-            padding: "10px 12px",
-            border: `1.5px solid ${C.accent}`,
-            borderRadius: 8,
-            color: C.accent,
-            fontSize: 13.5,
-            fontWeight: 600,
-            textAlign: "center",
-            lineHeight: 1.45,
-          }}
-        >
-          {diagram.label}
-        </div>
-        <div style={{ width: 1, background: C.line, flex: "0 0 1px" }} />
-        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 7, flex: 1 }}>
-          {diagram.items.map((it, i) => (
-            <li key={it.name} style={{ fontSize: 14, lineHeight: 1.6 }}>
-              <span className="num" style={{ color: C.muted, marginRight: 6 }}>
-                {i + 1}
-              </span>
+
+      <div className="tree">
+        <div className="tree-root">{diagram.label}</div>
+        <div className="tree-link" aria-hidden />
+        <ol className="tree-branches">
+          {diagram.items.map((it) => (
+            <li key={it.name} className="tree-branch">
               <strong>{it.name}</strong>
               {it.note && <span style={{ color: C.muted }}> — {it.note}</span>}
             </li>
           ))}
-        </ul>
+        </ol>
       </div>
+
+      <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
+        One box, one spine, <span className="num">{diagram.items.length}</span> arrows. Draw it
+        where it falls in the answer, not at the end — a diagram after the conclusion reads as an
+        afterthought. Ninety seconds with a pen, and it does the work of a paragraph.
+      </p>
     </section>
   );
 }

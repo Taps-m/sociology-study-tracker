@@ -345,6 +345,15 @@ DRAW ONE THING. Where a branch diagram would carry a group faster than prose,
 give it: a label and three to five items. Where prose is genuinely better,
 return an empty diagram rather than forcing one.
 
+IT HAS TO BE DRAWABLE. This is copied onto paper with a pen, in about ninety
+seconds, by someone with thirty-five minutes for the whole answer. So: the box
+holds the subject in TWO TO FOUR WORDS — "Social Mobility", not "Classification
+Framework of Social Mobility Systems and Types". Each branch name is FOUR WORDS
+AT MOST and each note EIGHT AT MOST, because they are written along an arrow in
+a hand that is already tired. Three to five branches; six is a list wearing a
+diagram's clothes. If what you want to show cannot survive being cut to that,
+it is not a diagram — return an empty one and let the prose carry it.
+
 If the context carries "diagram", the skeleton has already prescribed one and
 the candidate has already been told to draw it. Draw that one. Keep its label
 and its items unless one of them is plainly wrong for the answer you have
@@ -466,6 +475,15 @@ Give the diagram itself, not a description of one — a label and three to five
 named items, so the candidate can copy it onto the page without deciding
 anything. Where prose genuinely beats a diagram, return an empty label and an
 empty items list and say why in "insteadOfDiagram".
+
+IT HAS TO BE DRAWABLE. This is copied onto paper with a pen, in about ninety
+seconds, by someone with thirty-five minutes for the whole answer. So: the box
+holds the subject in TWO TO FOUR WORDS — "Social Mobility", not "Classification
+Framework of Social Mobility Systems and Types". Each branch name is FOUR WORDS
+AT MOST and each note EIGHT AT MOST, because they are written along an arrow in
+a hand that is already tired. Three to five branches; six is a list wearing a
+diagram's clothes. If what you want to show cannot survive being cut to that,
+it is not a diagram — return an empty one and let the prose carry it.
 
 AND THEN BE CONSISTENT ABOUT IT. If you return no diagram, no line in "minutes"
 may mention one. Budgeting three minutes for a diagram you did not give sends a
@@ -667,6 +685,8 @@ export default async function handler(req, res) {
     return res.end();
   };
 
+  const startedAt = Date.now();
+
   try {
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
@@ -724,6 +744,11 @@ export default async function handler(req, res) {
       body,
       model: MODEL,
       generatedAt: new Date().toISOString(),
+      // How long the model itself took. The client keeps these so the app can
+      // tell a candidate what the wait actually is instead of guessing at it —
+      // the first guess said "a few seconds" and was out by an order of
+      // magnitude, which is how a working feature gets read as a broken one.
+      ms: Date.now() - startedAt,
       // MAX_TOKENS here means the answer was cut short, not that it failed.
       truncated: candidate?.finishReason === "MAX_TOKENS",
     });

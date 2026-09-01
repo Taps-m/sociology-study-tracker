@@ -4,6 +4,7 @@ import {
   cachedStructure,
   cachedModelAnswer,
   modelAnswer,
+  typicalAnswerSeconds,
   type AnswerStructure,
   type ModelAnswer,
 } from "../../lib/ai";
@@ -57,6 +58,28 @@ export function AnswerBlueprint({
   const [view, setView] = useState<"structure" | "model">("structure");
   const [answerBusy, setAnswerBusy] = useState(false);
   const [answerError, setAnswerError] = useState<string | null>(null);
+
+  /**
+   * Seconds on the clock while the answer is written.
+   *
+   * A button that says "Writing…" for a minute with nothing moving is
+   * indistinguishable from a button that has hung, and the honest fix is not a
+   * spinner but a number: at twenty seconds you can see it is still working,
+   * and you can decide for yourself whether to wait. The expected figure beside
+   * it is the median of what this device has actually measured, not a guess.
+   */
+  const [waited, setWaited] = useState(0);
+  const expected = typicalAnswerSeconds();
+
+  useEffect(() => {
+    if (!answerBusy) {
+      setWaited(0);
+      return;
+    }
+    const started = Date.now();
+    const t = setInterval(() => setWaited(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => clearInterval(t);
+  }, [answerBusy]);
 
   // Escape closes it, and the page behind stops scrolling while it is up —
   // without that the background slides around under the window on a phone.
@@ -231,16 +254,25 @@ export function AnswerBlueprint({
                     cursor: answerBusy ? "default" : "pointer",
                   }}
                 >
-                  {answerBusy
-                    ? "Writing the answer…"
-                    : answer
-                      ? "Open the model answer"
-                      : "Write me a model answer"}
+                  {answerBusy ? (
+                    <>
+                      Writing the answer…
+                      <span className="num" style={{ fontVariantNumeric: "tabular-nums" }}>
+                        {waited}s
+                      </span>
+                    </>
+                  ) : answer ? (
+                    "Open the model answer"
+                  ) : (
+                    "Write me a model answer"
+                  )}
                   {!answerBusy && <span aria-hidden>→</span>}
                 </button>
                 {answerBusy && (
-                  <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0" }}>
-                    A full 40-mark answer takes a few seconds.
+                  <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0", lineHeight: 1.6 }}>
+                    {expected === null
+                      ? "A thousand words, written from scratch — expect the better part of a minute. It is timed from here on, so next time this line will say what it actually takes."
+                      : `About ${expected}s is normal on this device. It is written once and then kept, so opening it again is instant.`}
                   </p>
                 )}
                 {answerError && (
