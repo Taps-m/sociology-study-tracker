@@ -158,24 +158,46 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
                     }}
                   >
                     <span style={{ flex: 1, minWidth: 0 }}>{unit}</span>
-                    <span className="num" style={{ fontSize: 13.5, color: C.muted, whiteSpace: "nowrap" }}>
+                    <span
+                      className="num"
+                      style={{
+                        fontSize: 13,
+                        color: C.muted,
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
+                      }}
+                    >
                       {done}/{all.length}
-                      {shareLabel && (
-                        <>
-                          {" · "}
-                          <span
-                            title={`${unitShare(paper, unit).toFixed(1)}% of the questions asked in Paper ${paper === 1 ? "I" : "II"} over the last ten years came from this unit.`}
-                            style={{
-                              color: emphasis === "heavy" ? C.accent : C.muted,
-                              fontWeight: emphasis === "heavy" ? 700 : 400,
-                              opacity: emphasis === "quiet" ? 0.65 : 1,
-                            }}
-                          >
-                            {shareLabel}
-                          </span>
-                        </>
-                      )}
                     </span>
+
+                    {/*
+                      The share of the paper, carrying its own label.
+                      Sitting bare beside "0/6" it read as a progress figure —
+                      "0/6 · 28%" looks like 28% done, which is the opposite of
+                      what it means. It is also the most useful number on this
+                      screen, and it was set at the same weight as everything
+                      else in the corner of the row, so nobody saw it.
+                    */}
+                    {shareLabel && (
+                      <span
+                        title={`${unitShare(paper, unit).toFixed(1)}% of the questions asked in Paper ${paper === 1 ? "I" : "II"} over the last ten years came from this unit.`}
+                        style={{
+                          flexShrink: 0,
+                          marginLeft: 10,
+                          padding: "3px 10px",
+                          borderRadius: 999,
+                          whiteSpace: "nowrap",
+                          fontSize: emphasis === "heavy" ? 13.5 : 12.5,
+                          fontWeight: emphasis === "heavy" ? 700 : 600,
+                          background: emphasis === "heavy" ? C.accentSoft : C.raised,
+                          color: emphasis === "heavy" ? C.accent : C.muted,
+                          border: `1px solid ${emphasis === "heavy" ? C.accent : C.line}`,
+                          opacity: emphasis === "quiet" ? 0.75 : 1,
+                        }}
+                      >
+                        <span className="num">{shareLabel}</span> of paper
+                      </span>
+                    )}
                     <span aria-hidden style={{ color: C.muted }}>
                       {isOpen ? "−" : "+"}
                     </span>
