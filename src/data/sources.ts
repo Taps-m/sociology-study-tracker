@@ -10,13 +10,14 @@
  * not against a coaching site's summary — a wrong chapter number costs an hour
  * of searching and is worse than no reference at all.
  *
- * The standard path is Essential Sociology (Sangwan, Seema and Jakhar), which
- * is organised by the exam syllabus rather than by the discipline. Its chapter
- * map is not here yet: it will be filled from the contents pages of the edition
- * actually on the desk, for the same reason.
+ * The standard path — Sangwan, Haralambos and Shankar Rao — now lives in
+ * ./standardBooks, built the same way from the contents pages of the copies
+ * actually on the desk. The two files are meant to be read side by side: NCERT
+ * to understand a topic the first time, the standard books to write a 40-mark
+ * answer about it.
  *
- * Where neither covers a topic, this file says so. It does not invent a
- * reference to fill the gap.
+ * Where neither covers a topic, both files say so. Neither invents a reference
+ * to fill the gap.
  */
 
 export type BookId = "ncert11a" | "ncert11b" | "ncert12a" | "ncert12b";

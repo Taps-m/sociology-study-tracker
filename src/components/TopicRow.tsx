@@ -13,6 +13,12 @@ import {
 } from "../lib/planner";
 import { C } from "../lib/theme";
 import { chapterUrl, readingLine, readingsFor } from "../data/sources";
+import {
+  notOnDesk,
+  standardReadingsFor,
+  stdJump,
+  stdLine,
+} from "../data/standardBooks";
 import { NoteEditor } from "./NoteEditor";
 
 const chip = {
@@ -217,42 +223,94 @@ export function TopicRow({
  * knowing which twenty pages to read. So this names a chapter and links the
  * PDF rather than naming a book and wishing you luck.
  *
- * A chapter that only touches the topic says so, because sending someone to
- * read a background chapter under the impression it will finish the topic is
- * how a plan quietly falls behind.
+ * Two shelves, kept visibly apart. NCERT is free and downloadable and is where
+ * a topic is understood the first time; the three standard books are what a
+ * 40-mark answer is written out of. A chapter that only touches the topic says
+ * so, because sending someone to read a background chapter under the
+ * impression it will finish the topic is how a plan quietly falls behind.
  */
 function WhereToRead({ topicId }: { topicId: string }) {
   const readings = readingsFor(topicId);
+  const standard = standardReadingsFor(topicId);
 
-  if (readings.length === 0) {
+  if (readings.length === 0 && standard.length === 0) {
     return (
       <div style={{ fontSize: 12.5, color: C.muted, marginTop: 7, lineHeight: 1.5 }}>
-        Not in NCERT — this one needs Essential Sociology.
+        No chapter for this in NCERT or in the three standard books — it needs
+        current affairs and your own notes.
       </div>
     );
   }
 
+  const shelf = {
+    fontFamily: C.mono,
+    fontSize: 10.5,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase" as const,
+    color: C.muted,
+    marginTop: 9,
+  };
+
   return (
-    <div style={{ marginTop: 7, display: "grid", gap: 3 }}>
-      {readings.map((r) => (
-        <a
-          key={`${r.book}-${r.chapter}`}
-          href={chapterUrl(r.book, r.chapter)}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            fontSize: 12.5,
-            lineHeight: 1.5,
-            color: r.kind === "covers" ? C.accent : C.muted,
-            textDecoration: "none",
-          }}
-        >
-          {r.kind === "background" ? "background · " : "read · "}
-          <span style={{ textDecoration: "underline", textUnderlineOffset: 2 }}>
-            {readingLine(r)}
-          </span>
-        </a>
-      ))}
+    <div style={{ marginTop: 7 }}>
+      {readings.length > 0 && (
+        <>
+          <div style={shelf}>Free · NCERT</div>
+          <div style={{ marginTop: 4, display: "grid", gap: 3 }}>
+            {readings.map((r) => (
+              <a
+                key={`${r.book}-${r.chapter}`}
+                href={chapterUrl(r.book, r.chapter)}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: 12.5,
+                  lineHeight: 1.5,
+                  color: r.kind === "covers" ? C.accent : C.muted,
+                  textDecoration: "none",
+                }}
+              >
+                {r.kind === "background" ? "background · " : "read · "}
+                <span style={{ textDecoration: "underline", textUnderlineOffset: 2 }}>
+                  {readingLine(r)}
+                </span>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+
+      {standard.length > 0 && (
+        <>
+          <div style={shelf}>Standard books</div>
+          <div style={{ marginTop: 4, display: "grid", gap: 3 }}>
+            {standard.map((r) => {
+              const stranded = notOnDesk(r);
+              const jump = stdJump(r);
+              return (
+                <div
+                  key={`${r.book}-${r.chapter}-${r.from ?? 0}`}
+                  style={{
+                    fontSize: 12.5,
+                    lineHeight: 1.5,
+                    color: stranded ? C.muted : r.kind === "covers" ? C.text : C.muted,
+                    opacity: stranded ? 0.7 : 1,
+                  }}
+                >
+                  {r.kind === "background" ? "background · " : "read · "}
+                  {stdLine(r)}
+                  {jump !== null && !stranded && (
+                    <span className="num" style={{ color: C.muted }}> · PDF p. {jump}</span>
+                  )}
+                  {stranded && (
+                    <span style={{ color: C.warn }}> · not in the copy you have</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
