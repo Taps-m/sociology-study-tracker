@@ -1089,8 +1089,43 @@ function Setup({
         >
           Not now — log out
         </button>
+
+        <Byline />
       </div>
     </Shell>
+  );
+}
+
+/**
+ * Who made this, and the copyright line.
+ *
+ * Both were on every screen except the one a new user actually opens first.
+ * Setup does not use the app shell — it has no rail and no footer — so it fell
+ * through the gap, and the front door of the product carried no attribution at
+ * all. Shared between Setup and the lock screen so the two cannot drift.
+ */
+function Byline() {
+  return (
+    <footer
+      style={{
+        marginTop: 28,
+        paddingTop: 18,
+        borderTop: `1px solid ${C.line}`,
+        textAlign: "center",
+      }}
+    >
+      <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.7 }}>
+        Designed and built by{" "}
+        <span style={{ color: C.text, fontWeight: 600 }}>Tapomoy</span>
+        <br />
+        <span style={{ fontSize: 12.5 }}>
+          for candidates preparing Sociology for the WBCS Main examination
+        </span>
+      </p>
+      <p style={{ fontSize: 12, color: C.muted, margin: "12px 0 0" }}>
+        Copyright © {new Date().getFullYear()} Tapomoy. All rights reserved.
+      </p>
+    </footer>
   );
 }
 
@@ -1366,24 +1401,7 @@ function LockScreen({
           {started ? "Carry on" : "Set up"}
         </button>
 
-        {/* The person who built this. It is his name on the copyright line at
-            the foot of every page; the door is the right place to say it
-            plainly rather than in small print. */}
-        <p
-          style={{
-            fontSize: 13,
-            color: C.muted,
-            margin: "26px 0 0",
-            lineHeight: 1.7,
-          }}
-        >
-          Designed and built by{" "}
-          <span style={{ color: C.text, fontWeight: 600 }}>Tapomoy</span>
-          <br />
-          <span style={{ fontSize: 12.5 }}>
-            for candidates preparing Sociology for the WBCS Main examination
-          </span>
-        </p>
+        <Byline />
       </div>
     </Shell>
   );
