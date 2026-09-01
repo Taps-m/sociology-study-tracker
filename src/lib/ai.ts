@@ -185,12 +185,21 @@ export async function prepareUpload(file: File): Promise<Upload> {
  * thinkers kept in their place. The shape is the teaching — a paragraph of
  * advice would be forgotten by the next question, a structure is reusable.
  */
+/**
+ * "core" means the demand is not met without it. "yours" means the idea has to
+ * appear but the example and the phrasing should be the candidate's own — which
+ * is most of the examples, and is the difference between using a model answer
+ * and copying one.
+ */
+export type Obligation = "core" | "yours";
+
 export interface StructureBlock {
   keyword: string;
   mechanism: string;
   thinker?: string;
   specific?: string;
   depth: "full" | "brief";
+  must?: Obligation;
 }
 
 export interface AnswerStructure {
@@ -227,6 +236,7 @@ export interface ModelAnswerPart {
   underline: string[];
   thinker?: string;
   specific?: string;
+  must?: Obligation;
 }
 
 export interface ModelAnswer {
@@ -238,9 +248,9 @@ export interface ModelAnswer {
   offSyllabus?: string[];
 }
 
-const MODEL_KEY = "wbcs.models.v1";
+const MODEL_KEY = "wbcs.models.v2";
 
-const STRUCTURE_KEY = "wbcs.structures.v2";
+const STRUCTURE_KEY = "wbcs.structures.v3";
 
 /**
  * Kept out of the event log on purpose. It is not something the candidate did,

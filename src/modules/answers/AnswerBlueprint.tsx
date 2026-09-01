@@ -344,6 +344,29 @@ function Overlay({
   );
 }
 
+/** Says at a glance whether a part must appear as given, or is yours to fill. */
+function MustBadge({ must }: { must?: "core" | "yours" }) {
+  if (!must) return null;
+  const core = must === "core";
+  return (
+    <span
+      style={{
+        flex: "0 0 auto",
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        padding: "2px 7px",
+        borderRadius: 999,
+        color: core ? C.warn : C.good,
+        background: core ? C.warnSoft : C.goodSoft,
+      }}
+    >
+      {core ? "must include" : "your own"}
+    </span>
+  );
+}
+
 const label = {
   fontFamily: C.mono,
   fontSize: 11,
@@ -504,6 +527,7 @@ function StructureBody({ structure }: { structure: AnswerStructure }) {
                 >
                   {b.keyword}
                 </span>
+                <MustBadge must={b.must} />
                 {b.depth === "brief" && (
                   <span style={{ fontSize: 11.5, color: C.muted, letterSpacing: "0.06em" }}>
                     one line — do not dig
@@ -523,7 +547,8 @@ function StructureBody({ structure }: { structure: AnswerStructure }) {
         </div>
         <p style={{ fontSize: 12.5, color: C.muted, margin: "9px 0 0", lineHeight: 1.6 }}>
           Blocks, not paragraphs. Those marked “do not dig” get one line — spending three on an
-          obvious point is where the time goes.
+          obvious point is where the time goes. “Must include” means the demand is not met
+          without it; “your own” means the idea belongs there but the example should be yours.
         </p>
       </section>
 

@@ -51,6 +51,29 @@ function marked(text: string, phrases: string[]): ReactNode {
   return pieces;
 }
 
+/** Says at a glance whether a part must appear as given, or is yours to fill. */
+function MustBadge({ must }: { must?: "core" | "yours" }) {
+  if (!must) return null;
+  const core = must === "core";
+  return (
+    <span
+      style={{
+        flex: "0 0 auto",
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        padding: "2px 7px",
+        borderRadius: 999,
+        color: core ? C.warn : C.good,
+        background: core ? C.warnSoft : C.goodSoft,
+      }}
+    >
+      {core ? "must include" : "your own"}
+    </span>
+  );
+}
+
 function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) {
   if (part.kind === "signpost") {
     return (
@@ -112,6 +135,7 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
         >
           {part.keyword}
         </span>
+        <MustBadge must={part.must} />
       </div>
       <p style={{ fontSize: 15, lineHeight: 1.85, margin: "7px 0 0" }}>
         {marked(part.text, part.underline)}
@@ -224,6 +248,13 @@ export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
         )}
         Underlined phrases are what to underline in the booklet: technical terms, named Acts,
         figures. Underlining everything is the same as underlining nothing.
+      </p>
+      <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.65 }}>
+        <strong style={{ color: C.warn }}>Must include</strong> marks what the demand cannot be
+        met without — leave it out and it costs marks.{" "}
+        <strong style={{ color: C.good }}>Your own</strong> marks where the idea has to appear
+        but the example and the wording should be yours. Replacing those is the difference
+        between using this answer and copying it.
       </p>
 
       {answer.offSyllabus && answer.offSyllabus.length > 0 && (

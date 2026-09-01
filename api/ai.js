@@ -345,17 +345,34 @@ DRAW ONE THING. Where a branch diagram would carry a group faster than prose,
 give it: a label and three to five items. Where prose is genuinely better,
 return an empty diagram rather than forcing one.
 
+PLAIN EXAM ENGLISH. Write the way a well-prepared candidate writes under time,
+not the way a journal article reads. Short sentences. Ordinary words for the
+joining and the explaining — "shows", "leads to", "breaks down", not
+"elucidates", "engenders", "problematises". Keep every technical term, every
+thinker and every concept: those are what earn the marks, and the sociological
+vocabulary is the content, not the decoration. Simplify the sentences around
+them, never the substance. Do not shorten anything to make it plainer — under
+pressure a candidate needs it graspable at first reading and complete.
+
+MARK WHAT IS COMPULSORY. Against each part say whether it is "core" — the
+demand is not met without it, and leaving it out costs marks — or "yours",
+meaning the idea must appear but the example, the phrasing and the illustration
+should be the candidate's own. Most examples are "yours". The definition, the
+distinction the question actually asks for, and the position taken at the close
+are "core". Be honest about which is which: marking everything core tells
+nobody anything.
+
 LENGTH. Forty marks, about thirty-five minutes of writing: aim at 900 to 1100
 words across all parts. This is roughly triple a UPSC 250-word answer; do not
 write a compressed one.
 
 Reply with JSON and nothing else, in exactly this shape:
 
-{"parts":[{"kind":"opening","keyword":"","text":"<the actual sentences>","underline":["<exact phrase from this text>"]},
-          {"kind":"signpost","keyword":"","text":"...","underline":[]},
-          {"kind":"block","keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<or empty>","specific":"<or empty>"},
-          {"kind":"pivot","keyword":"","text":"...","underline":[]},
-          {"kind":"close","keyword":"","text":"...","underline":["..."]}],
+{"parts":[{"kind":"opening","keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"must":"core"},
+          {"kind":"signpost","keyword":"","text":"...","underline":[],"must":"core"},
+          {"kind":"block","keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<or empty>","specific":"<or empty>","must":"core|yours"},
+          {"kind":"pivot","keyword":"","text":"...","underline":[],"must":"core"},
+          {"kind":"close","keyword":"","text":"...","underline":["..."],"must":"core"}],
  "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
  "usedTopics":["<syllabus topic id>"],
  "words":0}
@@ -442,6 +459,23 @@ limitations, positivists gave sociology its concrete shape as a discipline"),
 or forward-looking with a thinker, or an explicit answer to the demand. A
 question asking for criticism still wants a position at the end, not a verdict
 of total failure.
+
+PLAIN EXAM ENGLISH. Write the way a well-prepared candidate writes under time,
+not the way a journal article reads. Short sentences. Ordinary words for the
+joining and the explaining — "shows", "leads to", "breaks down", not
+"elucidates", "engenders", "problematises". Keep every technical term, every
+thinker and every concept: those are what earn the marks, and the sociological
+vocabulary is the content, not the decoration. Simplify the sentences around
+them, never the substance. Do not shorten anything to make it plainer — under
+pressure a candidate needs it graspable at first reading and complete.
+
+MARK WHAT IS COMPULSORY. Against each part say whether it is "core" — the
+demand is not met without it, and leaving it out costs marks — or "yours",
+meaning the idea must appear but the example, the phrasing and the illustration
+should be the candidate's own. Most examples are "yours". The definition, the
+distinction the question actually asks for, and the position taken at the close
+are "core". Be honest about which is which: marking everything core tells
+nobody anything.
 
 LENGTH. This is WBCS: 40 marks in about 35 minutes, so roughly one and a half
 to two times the 20-mark UPSC answer this shape comes from. That means six to
