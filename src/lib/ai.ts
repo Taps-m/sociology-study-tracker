@@ -14,7 +14,6 @@
 
 export type AiTask =
   | "critique"
-  | "guidance"
   | "evaluate"
   | "insight"
   | "doubt"

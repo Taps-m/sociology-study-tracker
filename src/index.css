@@ -501,3 +501,42 @@ input[type="range"]::-moz-range-thumb {
     padding-left: 22px;
   }
 }
+
+/*
+ * The answer, with the method beside it.
+ *
+ * Underneath, the checklist is something you read once at the end. Alongside,
+ * it is a legend you can hold against the answer while reading it — which is
+ * the point: the mapping between the seven steps and what a real answer does
+ * is the thing being memorised, and it cannot be memorised from a list that
+ * only appears after you have finished.
+ *
+ * It stacks below 900px. A phone has no room for two columns, and the checklist
+ * matters more than the side-by-side does.
+ */
+.answer-split {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.answer-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.answer-aside {
+  flex: 0 0 244px;
+  position: sticky;
+  top: 4px;
+}
+
+@media (max-width: 900px) {
+  .answer-split {
+    display: block;
+  }
+  .answer-aside {
+    position: static;
+    margin-top: 22px;
+  }
+}

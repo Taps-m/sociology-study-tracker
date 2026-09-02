@@ -80,7 +80,6 @@ syllabus topics, without inventing a citation to fill the hole.`;
 
 const TOKEN_BUDGET = {
   critique: 2048,
-  guidance: 2048,
   insight: 2048,
   doubt: 2048,
   evaluate: 3072, cheatsheet: 4096, drill: 1536,
@@ -290,19 +289,6 @@ ${json}
 Write at most 120 words. Say what the numbers show, name the single most
 useful change to make this week, and cite the figures you relied on. If the
 pace is adequate, say so plainly rather than manufacturing a concern.`;
-
-    case "guidance":
-      return `${SYSTEM}
-
-Topic:
-${json}
-
-Write study guidance for this one topic, at most 160 words, in four labelled
-parts:
-HOW IT IS ASKED - what the past-paper record suggests, using only the counts given.
-MUST CONTAIN - what a 40-mark answer has to include to score.
-THINKERS - who to cite by name, and for what.
-TRAP - the most common way candidates lose marks here.`;
 
     case "insight":
       return `${SYSTEM}

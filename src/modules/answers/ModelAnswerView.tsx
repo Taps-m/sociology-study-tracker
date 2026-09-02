@@ -387,8 +387,8 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
   return (
     <section
       style={{
-        marginTop: 26,
-        padding: "14px 16px",
+        marginTop: 0,
+        padding: "13px 14px",
         borderRadius: 11,
         background: C.panel,
         border: `1px solid ${C.line}`,
@@ -410,7 +410,7 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
         {method.map((m) => {
           const used = m.state === "used";
           return (
-            <li key={m.step} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+            <li key={m.step} style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
               <span
                 aria-hidden
                 style={{
@@ -423,19 +423,32 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
               >
                 {used ? "✓" : "–"}
               </span>
-              <span
-                style={{
-                  flex: "0 0 auto",
-                  minWidth: 118,
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: used ? C.text : C.muted,
-                }}
-              >
-                {STEP_NAMES[m.step] ?? m.step}
-              </span>
-              <span style={{ fontSize: 13.5, lineHeight: 1.55, color: C.muted, flex: 1 }}>
-                {m.where}
+              {/*
+                Stacked rather than in columns: this sits in a 244px rail, and a
+                fixed label column would leave three words a line for the part
+                that actually says where the step went.
+              */}
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: used ? C.text : C.muted,
+                  }}
+                >
+                  {STEP_NAMES[m.step] ?? m.step}
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 12.5,
+                    lineHeight: 1.5,
+                    color: C.muted,
+                    marginTop: 1,
+                  }}
+                >
+                  {m.where}
+                </span>
               </span>
             </li>
           );
@@ -453,7 +466,8 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
 export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
   let blockIndex = -1;
   return (
-    <div>
+    <div className="answer-split">
+      <div className="answer-main">
       <p
         style={{
           fontSize: 13,
@@ -498,8 +512,6 @@ export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
 
       <Diagram diagram={answer.diagram} />
 
-      {answer.method && <MethodAudit method={answer.method} />}
-
       <p style={{ fontSize: 12.5, color: C.muted, margin: "20px 0 0", lineHeight: 1.65 }}>
         {answer.words > 0 && (
           <>
@@ -535,6 +547,13 @@ export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
           ({answer.offSyllabus.join(", ")}). Treat those parts with suspicion — time spent on
           something WBCS cannot ask is time lost.
         </p>
+      )}
+      </div>
+
+      {answer.method && answer.method.length > 0 && (
+        <aside className="answer-aside">
+          <MethodAudit method={answer.method} />
+        </aside>
       )}
     </div>
   );

@@ -863,13 +863,9 @@ export const REWORK_COOLDOWN_DAYS = 7;
 
 export type AnswerVerdict = "none" | "unread" | "rework" | "shaky" | "solid";
 
-export function attemptsFor2(d: Derived, topicId: string) {
-  return d.attempts.filter((a) => a.topicId === topicId);
-}
-
 /** The most recent answer written on a topic, if any. */
 export function latestAttempt(d: Derived, topicId: string) {
-  const all = attemptsFor2(d, topicId);
+  const all = attemptsFor(d, topicId);
   return all.length === 0 ? null : all[all.length - 1]!;
 }
 
