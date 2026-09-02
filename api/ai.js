@@ -52,7 +52,7 @@ const TOKEN_BUDGET = {
   guidance: 2048,
   insight: 2048,
   doubt: 2048,
-  evaluate: 3072, cheatsheet: 4096,
+  evaluate: 3072, cheatsheet: 4096, drill: 1536,
   structure: 8192,
   // A full 900-1100 word answer, plus the model's thinking before it.
   model: 16384,
@@ -485,6 +485,39 @@ Reply with JSON and nothing else, in exactly this shape:
  "usedTopics":["<syllabus topic id>"]}
 
 No praise, no preamble, no prose outside the JSON.`;
+
+    case "drill":
+      return `${SYSTEM}
+
+Mark one five-minute exercise:
+${json}
+
+The context carries the question, the topic, the single thing being drilled, the
+exercise that was set, and what the candidate wrote. Mark ONLY the thing being
+drilled. If the writing is weak in some other way, that is not this exercise's
+business and saying so here teaches nothing — it just moves the goalposts.
+
+BE HONEST AND BE SHORT. Out of five. Three is a pass: it would earn its marks in
+a real answer. Below three, say in ONE sentence the specific thing that is
+missing — not "add more detail" but "no Act is named" or "the keyword is a
+heading rather than the point". Above three, say what made it work, equally
+briefly, because a candidate who does not know why it worked cannot repeat it.
+
+THEN SHOW IT DONE. Rewrite what they wrote, keeping their own idea and their own
+example wherever those are sound, changed only as far as the thing being drilled
+requires. Same length as theirs. This is the part they will actually learn from,
+so it must look like something they could have written, not like a different
+answer by a better candidate.
+
+Plain exam English. No praise, no encouragement, no "good effort". They can see
+the number.
+
+Reply with JSON and nothing else, in exactly this shape:
+
+{"score":0,
+ "pass":true,
+ "verdict":"<one sentence: what is missing, or what made it work>",
+ "better":"<their block, rewritten as far as this one thing requires>"}`;
 
     case "structure":
       return `${SYSTEM}

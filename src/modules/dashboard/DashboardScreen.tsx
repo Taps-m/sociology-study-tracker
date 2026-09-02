@@ -17,6 +17,7 @@ import { Card } from "../../app/Shell";
 import type { RouteId } from "../../app/routes";
 import { WeeklyReview } from "./WeeklyReview";
 import { TodaysFocus } from "./TodaysFocus";
+import { TonightsDrill } from "../drill/TonightsDrill";
 
 /** Share of the syllabus, by hours, that has a given check ticked. */
 function checkPercent(d: Derived, check: string) {
@@ -149,6 +150,8 @@ export function DashboardScreen({
           )}
         </p>
       </header>
+
+      <TonightsDrill d={d} />
 
       <TodaysFocus d={d} go={go} onToggle={onToggle} />
 
