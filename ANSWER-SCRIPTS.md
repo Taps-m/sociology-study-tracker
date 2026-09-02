@@ -76,6 +76,38 @@ position at the end.
 point — "(Diffusionism)" — signals command of the concept without spending a
 sentence on it.
 
+## The method, stated as rules the prompt actually carries
+
+A coaching method Tapan uses (Sandeep Jain's sequence, with Nishat Sir's
+principle that scholars and criticism should not be forced) was held against
+these prompts on 2 September 2026. Three things it names were missing, and the
+evidence for two of them was already in this file:
+
+**What, then why, then how.** It was in the first version of the blueprint,
+taken from the 176-in-Paper-I transcript, and was lost when the structure was
+rebuilt from the scripts. A block that only says what a thing is has stopped at
+the first of the three and reads like a definition.
+
+**A thinker only where he does work.** This file already recorded that thinkers
+are budgeted and that one 10-mark answer cites nobody at all. The prompt did not
+carry it, and worse, the model answer's schema gave every block a `thinker`
+field — a slot on every block is an invitation to fill every block, and no
+wording fixes a shape that asks for it. The field now describes itself as
+usually empty.
+
+**Criticism only where it is demanded.** Nothing had said so. "Critically
+examine", "evaluate" and "comment on" ask for it; "discuss", "examine",
+"describe" and "analyse" do not, and a limitations paragraph bolted onto them
+answers a question nobody set.
+
+Two more were weakly stated and are now explicit: subheadings restate the
+demand rather than naming the topic, and an example must prove the claim of the
+block it sits under rather than illustrate the topic in general — if it would
+sit equally well under any other block, it is decoration.
+
+These live in `METHOD_RULES` in `api/ai.js` and are carried by the structure,
+model and cheatsheet prompts alike.
+
 ## Still not observed
 
 **A 40-mark answer.** Every script read is 10 marks, 20 marks, or a 150-word

@@ -34,6 +34,37 @@
  */
 
 /** Output ceilings, per task. See the note where this is used. */
+const METHOD_RULES = `
+WHAT, THEN WHY, THEN HOW. Inside a block that carries argument, move through the
+three: what the thing is, why it happens or matters, how it works out in
+practice. Not as headings — as the movement of the three lines. A block that
+only says what something is has stopped at the first of the three and reads like
+a definition, which is where most answers lose their marks.
+
+SUBHEADINGS COME FROM THE DEMAND, NOT THE TOPIC. The signpost and any section
+headings restate what the question obliges. A heading naming the topic tells the
+examiner you know the topic; a heading naming the demand tells him you read the
+question.
+
+A THINKER ONLY WHERE HE DOES WORK. Most blocks have none, and that is correct —
+one real answer at ten marks cites nobody at all. Name a thinker only where the
+block cannot make its point without him, and where you can say in the same
+breath what he is for. A forced scholar is worse than no scholar: it costs a
+line, it shows the answer was assembled rather than argued, and every examiner
+has read a hundred of them. Never reach for a name to fill the field.
+
+CRITICISM ONLY WHERE IT IS DEMANDED. "Critically examine", "evaluate" and
+"comment on" ask for it. "Discuss", "examine", "describe" and "analyse" do not,
+and a limitations paragraph bolted onto them answers a question nobody set while
+spending the minutes the real demand needed. When the command word does ask,
+criticism is part of the argument, not an appendix at the end.
+
+AN EXAMPLE HAS TO PROVE THE POINT IT SITS UNDER. Not illustrate the topic —
+prove the claim of that particular block. If it would sit equally well under any
+other block, it is decoration and it earns nothing. A named Act, a figure, a
+case, a place, attached to the sentence it demonstrates.
+`;
+
 const SOURCES_RULE = `SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
 exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
 and Perspectives and Shankar Rao's Principles of Sociology that cover this
@@ -374,6 +405,7 @@ written, and if you do change it, change it because the answer moved — not to
 show a different idea. A model answer whose diagram contradicts the skeleton it
 came from teaches the candidate to trust neither.
 
+${METHOD_RULES}
 SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
 exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
 and Perspectives and Shankar Rao's Principles of Sociology that cover this
@@ -428,7 +460,7 @@ Reply with JSON and nothing else, in exactly this shape:
 
 {"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"must":"core"},
           {"kind":"signpost","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
-          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<or empty>","specific":"<or empty>","must":"core|yours"},
+          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours"},
           {"kind":"pivot","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
           {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"must":"core"}],
  "demands":[{"label":"<3-8 words>","minutes":0}],
@@ -472,6 +504,7 @@ ninety seconds: two to four words in the box, four words at most per branch,
 eight at most per note, three to five branches. If the idea cannot survive being
 cut to that it is not a diagram — return an empty one.
 
+${METHOD_RULES}
 ${SOURCES_RULE}
 
 Reply with JSON and nothing else, in exactly this shape:
@@ -618,6 +651,7 @@ or forward-looking with a thinker, or an explicit answer to the demand. A
 question asking for criticism still wants a position at the end, not a verdict
 of total failure.
 
+${METHOD_RULES}
 SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
 exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
 and Perspectives and Shankar Rao's Principles of Sociology that cover this
