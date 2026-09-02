@@ -91,14 +91,14 @@ const STEPS: Step[] = [
   {
     id: "notes",
     title: "5 · Notes in your own words",
-    lead: "Written where you study, searchable everywhere.",
+    lead: "Written where you study, kept with the topic.",
     shot: "08-notes",
     body: [
-      "Notes are added on the topic row — the “add a note” line under any topic. They collect on this screen, where you can search across all of them at once, which is the thing a topic row cannot do.",
+      "Notes are added on the topic row — the “add a note” line under any topic — and they stay with that topic, where you will be standing when you next need them.",
       "Plain text on purpose. What matters is your phrasing of a concept and an example you can actually deploy in an answer, not formatting.",
     ],
-    go: "notes",
-    goLabel: "Open my notes",
+    go: "chapters",
+    goLabel: "Open the chapters",
   },
   {
     id: "revision",

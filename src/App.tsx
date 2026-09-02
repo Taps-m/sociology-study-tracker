@@ -55,7 +55,6 @@ import { RecentActivity } from "./modules/activity/RecentActivity";
 import { TodayScreen } from "./modules/today/TodayScreen";
 import { AnswerPractice } from "./modules/answers/AnswerPractice";
 import { PyqExplorer } from "./modules/pyq/PyqExplorer";
-import { NotesScreen } from "./modules/notes/NotesScreen";
 import { GuideScreen } from "./modules/guide/GuideScreen";
 
 export default function App() {
@@ -138,8 +137,6 @@ export default function App() {
       {route === "pyq" && <PyqExplorer d={d} />}
 
       {route === "revision" && <RevisionDeck d={d} onRevise={onRevise} />}
-
-      {route === "notes" && <NotesScreen d={d} onSave={handlers.onNote} />}
 
       {route === "guide" && <GuideScreen go={go} />}
 
