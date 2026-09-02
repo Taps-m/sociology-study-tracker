@@ -396,6 +396,25 @@ export function cachedModelAnswer(question: string): ModelAnswer | null {
 }
 
 /**
+ * Throw a kept answer away so the next ask writes a fresh one.
+ *
+ * There was no way to do this, which meant a poor answer was permanent: the
+ * cache is what stops the same question being paid for twice, and it was also
+ * what stopped anyone ever getting a second opinion. It is the same reason an
+ * answer written before a prompt change can never show what the change does —
+ * the old one is served forever.
+ */
+export function forgetModelAnswer(question: string) {
+  try {
+    const all = modelCache();
+    delete all[questionKey(question)];
+    localStorage.setItem(MODEL_KEY, JSON.stringify(all));
+  } catch {
+    // Blocked storage: the answer stays. Nothing else breaks.
+  }
+}
+
+/**
  * One POST to the answer service, for the calls that take a minute.
  *
  * Three things the plain `fetch` did not do. It asks the server to stream a

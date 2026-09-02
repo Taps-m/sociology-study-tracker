@@ -3,6 +3,7 @@ import {
   answerStructure,
   cachedStructure,
   cachedModelAnswer,
+  forgetModelAnswer,
   modelAnswer,
   typicalAnswerSeconds,
   type AnswerStructure,
@@ -111,8 +112,11 @@ export function AnswerBlueprint({
    */
   const books = standardReadingsFor(topicId).map(stdLine);
 
-  async function buildAnswer() {
-    if (answer) {
+  async function buildAnswer(fresh = false) {
+    if (fresh) {
+      forgetModelAnswer(question);
+      setAnswer(null);
+    } else if (answer) {
       setView("model");
       return;
     }
@@ -280,6 +284,27 @@ export function AnswerBlueprint({
                   <p style={{ fontSize: 13.5, color: C.warn, margin: "10px 0 0", lineHeight: 1.6 }}>
                     {answerError}
                   </p>
+                )}
+
+                {answer && !answerBusy && (
+                  <button
+                    onClick={() => void buildAnswer(true)}
+                    style={{
+                      display: "block",
+                      margin: "10px auto 0",
+                      padding: 0,
+                      border: "none",
+                      background: "transparent",
+                      color: C.muted,
+                      font: "inherit",
+                      fontSize: 12.5,
+                      textDecoration: "underline",
+                      textUnderlineOffset: 3,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Write a different one
+                  </button>
                 )}
 
                 {/*
