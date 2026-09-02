@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 import type { Diagram as DiagramData, ModelAnswer, ModelAnswerPart } from "../../lib/ai";
 import { C } from "../../lib/theme";
 
@@ -279,6 +280,80 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
   );
 }
 
+/**
+ * One thing the question asks, with everything answering it.
+ *
+ * Open by default, deliberately. Collapsing the later parts would hide the one
+ * thing a model answer exists to teach — the proportions of a whole answer, and
+ * the fact that part one is a third of the page and not two thirds. Over-writing
+ * the first part and rushing the last is the commonest way to lose marks on a
+ * question like this, so the minutes are in the header where they can be seen
+ * rather than worked out.
+ *
+ * The fold is for the second reading, when the wall of text is the problem
+ * rather than the lesson.
+ */
+function Section({
+  demand,
+  index,
+  total,
+  children,
+}: {
+  demand: { label: string; minutes: number };
+  index: number;
+  total: number;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <section style={{ marginTop: index === 0 ? 18 : 22 }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          width: "100%",
+          padding: "9px 12px",
+          borderRadius: 9,
+          border: "none",
+          background: C.accentSoft,
+          color: C.text,
+          font: "inherit",
+          textAlign: "left",
+          cursor: "pointer",
+        }}
+      >
+        <span
+          className="num"
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: C.accent,
+            letterSpacing: "0.08em",
+            flexShrink: 0,
+          }}
+        >
+          {index + 1}/{total}
+        </span>
+        <span style={{ flex: 1, minWidth: 0, fontSize: 14.5, fontWeight: 600 }}>
+          {demand.label}
+        </span>
+        {demand.minutes > 0 && (
+          <span className="num" style={{ fontSize: 12.5, color: C.muted, flexShrink: 0 }}>
+            {demand.minutes} min
+          </span>
+        )}
+        <span aria-hidden style={{ color: C.muted, flexShrink: 0 }}>
+          {open ? "−" : "+"}
+        </span>
+      </button>
+      {open && <div>{children}</div>}
+    </section>
+  );
+}
+
 export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
   let blockIndex = -1;
   return (
@@ -300,8 +375,8 @@ export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
         examples through it.
       </p>
 
-      <div style={{ marginTop: 18 }}>
-        {answer.parts.map((part, i) => {
+      {(() => {
+        const rendered = answer.parts.map((part, i) => {
           if (part.kind === "block") blockIndex += 1;
           return (
             <Part
@@ -310,8 +385,20 @@ export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
               index={part.kind === "block" ? blockIndex : null}
             />
           );
-        })}
-      </div>
+        });
+
+        // One demand, or none, is the common case — most questions ask one
+        // thing, and an answer to one thing is not improved by being put in a
+        // box with a heading on it.
+        const demands = answer.demands ?? [];
+        if (demands.length < 2) return <div style={{ marginTop: 18 }}>{rendered}</div>;
+
+        return demands.map((demand, di) => (
+          <Section key={demand.label} demand={demand} index={di} total={demands.length}>
+            {rendered.filter((_, i) => (answer.parts[i]?.serves ?? 0) === di)}
+          </Section>
+        ));
+      })()}
 
       <Diagram diagram={answer.diagram} />
 

@@ -408,13 +408,31 @@ LENGTH. Forty marks, about thirty-five minutes of writing: aim at 900 to 1100
 words across all parts. This is roughly triple a UPSC 250-word answer; do not
 write a compressed one.
 
+ONE SECTION PER THING THE QUESTION ASKS. List in "demands" each separate thing
+the question obliges — "the nature of it", "why it happened", "what should be
+done" — three to eight words each, in the order they should be answered, with
+the minutes each deserves out of the thirty-five. A question that asks one thing
+gets one demand, and that is the common case; do not manufacture parts that are
+not there.
+
+Then tag every part with "serves": the index of the demand it answers. The
+opening and the close serve the whole answer and take 0. A pivot takes the index
+of the demand it turns TOWARD.
+
+Say in "independent" whether the demands can be read separately or whether the
+answer genuinely runs through them as one argument. Be honest: three facets of
+one thing — nature, causes, remedies — are not independent, and saying they are
+lets the reader carve up an argument that was meant to flow.
+
 Reply with JSON and nothing else, in exactly this shape:
 
-{"parts":[{"kind":"opening","keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"must":"core"},
-          {"kind":"signpost","keyword":"","text":"...","underline":[],"must":"core"},
-          {"kind":"block","keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<or empty>","specific":"<or empty>","must":"core|yours"},
-          {"kind":"pivot","keyword":"","text":"...","underline":[],"must":"core"},
-          {"kind":"close","keyword":"","text":"...","underline":["..."],"must":"core"}],
+{"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"must":"core"},
+          {"kind":"signpost","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
+          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<or empty>","specific":"<or empty>","must":"core|yours"},
+          {"kind":"pivot","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
+          {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"must":"core"}],
+ "demands":[{"label":"<3-8 words>","minutes":0}],
+ "independent":true,
  "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
  "usedTopics":["<syllabus topic id>"],
  "words":0}

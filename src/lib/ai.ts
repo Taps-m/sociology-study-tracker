@@ -243,6 +243,8 @@ export interface AnswerStructure {
  * syllabus teaches a candidate something that cannot be asked.
  */
 export interface ModelAnswerPart {
+  /** Index into ModelAnswer.demands. Absent on answers written before sections. */
+  serves?: number;
   kind: "opening" | "signpost" | "block" | "pivot" | "close";
   keyword: string;
   text: string;
@@ -254,6 +256,13 @@ export interface ModelAnswerPart {
 
 export interface ModelAnswer {
   parts: ModelAnswerPart[];
+  /**
+   * The separate things the question obliges, in the order to answer them.
+   * One entry, or none, is the common case — most questions ask one thing.
+   */
+  demands?: { label: string; minutes: number }[];
+  /** Whether those demands can be read apart, or run as one argument. */
+  independent?: boolean;
   diagram: Diagram;
   usedTopics: string[];
   words: number;
@@ -563,6 +572,18 @@ export async function modelAnswer(
     const allowed = new Set(syllabusIds);
     parsed.offSyllabus = (parsed.usedTopics ?? []).filter((id) => !allowed.has(id));
     parsed.diagram = parsed.diagram ?? { label: "", items: [] };
+
+    // Sections are optional and must stay optional. An answer cached before
+    // this existed has no demands and no serves, and renders flat — which is
+    // also what a single-demand question should do, so the two cases collapse
+    // into one and there is no cache to bump.
+    if (!Array.isArray(parsed.demands)) parsed.demands = [];
+    parsed.demands = parsed.demands.filter((x) => x && typeof x.label === "string" && x.label);
+    const last = parsed.demands.length - 1;
+    for (const part of parsed.parts) {
+      const n = typeof part.serves === "number" ? Math.round(part.serves) : 0;
+      part.serves = Math.min(Math.max(0, n), Math.max(0, last));
+    }
 
     if (payload.ms) recordTiming(payload.ms);
 
