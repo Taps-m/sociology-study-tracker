@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
-import type { Diagram as DiagramData, ModelAnswer, ModelAnswerPart } from "../../lib/ai";
+import type {
+  Diagram as DiagramData,
+  MethodStep,
+  ModelAnswer,
+  ModelAnswerPart,
+} from "../../lib/ai";
 import { C } from "../../lib/theme";
 
 /**
@@ -354,6 +359,97 @@ function Section({
   );
 }
 
+const STEP_NAMES: Record<MethodStep, string> = {
+  demand: "Demand",
+  structure: "Structure",
+  flow: "What → why → how",
+  example: "Example",
+  thinker: "Thinker",
+  criticism: "Criticism",
+  conclusion: "Conclusion",
+};
+
+/**
+ * The method, shown landing in this particular answer.
+ *
+ * A legend rather than a scorecard. Reading the seven steps once teaches
+ * nobody; seeing where each of them went, on every answer, is how it becomes
+ * the thing you do without thinking. So each line says where that step
+ * happened, and holding your own answer against it is the exercise.
+ *
+ * "Not needed here" is set in the same grey as the rest and is never a cross.
+ * Two of the seven — the thinker and the criticism — are more often rightly
+ * absent than present, and a checklist that scolds an answer for leaving out a
+ * scholar it did not need is the thing that makes people force one in.
+ */
+function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> }) {
+  if (method.length === 0) return null;
+  return (
+    <section
+      style={{
+        marginTop: 26,
+        padding: "14px 16px",
+        borderRadius: 11,
+        background: C.panel,
+        border: `1px solid ${C.line}`,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: C.mono,
+          fontSize: 11,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: C.muted,
+          marginBottom: 10,
+        }}
+      >
+        The method, in this answer
+      </div>
+      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 8 }}>
+        {method.map((m) => {
+          const used = m.state === "used";
+          return (
+            <li key={m.step} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+              <span
+                aria-hidden
+                style={{
+                  flex: "0 0 auto",
+                  width: 17,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: used ? C.good : C.muted,
+                }}
+              >
+                {used ? "✓" : "–"}
+              </span>
+              <span
+                style={{
+                  flex: "0 0 auto",
+                  minWidth: 118,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: used ? C.text : C.muted,
+                }}
+              >
+                {STEP_NAMES[m.step] ?? m.step}
+              </span>
+              <span style={{ fontSize: 13.5, lineHeight: 1.55, color: C.muted, flex: 1 }}>
+                {m.where}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
+        A dash is not a miss. A thinker this question did not need, or a criticism it never asked
+        for, is correctly absent — forcing either in is what the examiner notices. Hold your own
+        answer against this list; that is the whole exercise.
+      </p>
+    </section>
+  );
+}
+
 export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
   let blockIndex = -1;
   return (
@@ -401,6 +497,8 @@ export function ModelAnswerView({ answer }: { answer: ModelAnswer }) {
       })()}
 
       <Diagram diagram={answer.diagram} />
+
+      {answer.method && <MethodAudit method={answer.method} />}
 
       <p style={{ fontSize: 12.5, color: C.muted, margin: "20px 0 0", lineHeight: 1.65 }}>
         {answer.words > 0 && (

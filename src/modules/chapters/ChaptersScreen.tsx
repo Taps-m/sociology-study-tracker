@@ -244,6 +244,7 @@ function UnitBriefPanel({ paper, unit }: { paper: number; unit: string }) {
     <div style={{ padding: "10px 0 4px" }}>
       <button
         onClick={() => setOpen(!open)}
+          title="Show or hide the topics in this unit."
         aria-expanded={open}
         style={{
           minHeight: 40,

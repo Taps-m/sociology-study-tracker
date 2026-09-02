@@ -159,6 +159,7 @@ export function TopicRow({
           )}
           <button
             onClick={() => setAsking(null)}
+            title="Leave this unanswered for now. Nothing is recorded and the question comes back next time."
             style={{ ...chip, border: "none", color: C.muted }}
           >
             skip

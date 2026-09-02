@@ -70,6 +70,7 @@ export function WeeklyReview({ d }: { d: Derived }) {
       action={
         <button
           onClick={run}
+          title="Read your last week back — what moved, what stalled, and what to do next."
           disabled={busy}
           style={{
             minHeight: 36,

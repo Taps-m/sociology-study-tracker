@@ -68,6 +68,7 @@ export function TopicCheatSheet({ topic }: { topic: Topic }) {
     <div style={{ marginTop: 10 }}>
       <button
         onClick={() => void build()}
+          title="The whole topic on one screen: the terms you cannot skip, the thinkers worth naming, the specifics, and where people lose marks. For an evening with no chapter in you."
         disabled={busy}
         style={{
           minHeight: 34,

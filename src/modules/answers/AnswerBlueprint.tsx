@@ -187,6 +187,7 @@ export function AnswerBlueprint({
         </p>
         <button
           onClick={() => void show()}
+          title="The skeleton this question was asking for: what it demands, how to open, and where each point goes. Not an answer to copy."
           disabled={busy}
           style={{
             minHeight: 44,
@@ -289,6 +290,7 @@ export function AnswerBlueprint({
                 {answer && !answerBusy && (
                   <button
                     onClick={() => void buildAnswer(true)}
+          title="Throw this answer away and write a new one. Use it if the answer is poor, or to see a change in the method."
                     style={{
                       display: "block",
                       margin: "10px auto 0",

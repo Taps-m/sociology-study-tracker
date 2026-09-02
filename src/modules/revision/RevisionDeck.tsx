@@ -193,6 +193,7 @@ export function RevisionDeck({
       <div style={{ display: "flex", gap: 9, flexWrap: "wrap" }}>
         <button
           onClick={() => setFlipped(!flipped)}
+          title="Show the other side. Try to recall it first — the effort of recalling is what fixes it, not the reading."
           style={{
             flex: "1 1 160px",
             minHeight: 46,

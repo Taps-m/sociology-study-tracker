@@ -242,6 +242,15 @@ export interface AnswerStructure {
  * topics it drew on — it is checked, because an answer that wanders outside the
  * syllabus teaches a candidate something that cannot be asked.
  */
+export type MethodStep =
+  | "demand"
+  | "structure"
+  | "flow"
+  | "example"
+  | "thinker"
+  | "criticism"
+  | "conclusion";
+
 export interface ModelAnswerPart {
   /** Index into ModelAnswer.demands. Absent on answers written before sections. */
   serves?: number;
@@ -256,6 +265,15 @@ export interface ModelAnswerPart {
 
 export interface ModelAnswer {
   parts: ModelAnswerPart[];
+  /**
+   * Where each step of the method landed in this answer.
+   *
+   * A legend, not a scorecard. Its job is not to grade the model answer — the
+   * model answer is supposed to be right — but to show a candidate what to
+   * check in their own, which is the only way a seven-step method becomes a
+   * habit rather than a page read once.
+   */
+  method?: { step: MethodStep; state: "used" | "notNeeded"; where: string }[];
   /**
    * The separate things the question obliges, in the order to answer them.
    * One entry, or none, is the common case — most questions ask one thing.
@@ -596,6 +614,7 @@ export async function modelAnswer(
     // this existed has no demands and no serves, and renders flat — which is
     // also what a single-demand question should do, so the two cases collapse
     // into one and there is no cache to bump.
+    if (!Array.isArray(parsed.method)) parsed.method = [];
     if (!Array.isArray(parsed.demands)) parsed.demands = [];
     parsed.demands = parsed.demands.filter((x) => x && typeof x.label === "string" && x.label);
     const last = parsed.demands.length - 1;

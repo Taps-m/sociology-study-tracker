@@ -128,6 +128,7 @@ export function TonightsDrill({ d }: { d: Derived }) {
           />
           <button
             onClick={() => void send()}
+          title="Marked on one thing only — whatever your last few answers kept dropping. Five minutes, then you are done for the day."
             disabled={busy || text.trim().length < 20}
             style={{
               marginTop: 10,

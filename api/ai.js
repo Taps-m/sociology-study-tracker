@@ -456,6 +456,20 @@ answer genuinely runs through them as one argument. Be honest: three facets of
 one thing — nature, causes, remedies — are not independent, and saying they are
 lets the reader carve up an argument that was meant to flow.
 
+SHOW WHERE THE METHOD LANDED. Fill "method" with all seven steps, in order:
+demand, structure, flow, example, thinker, criticism, conclusion. For each, say
+where it happened in the answer you just wrote — "the demand is unpacked in the
+opening", "block c moves what to why to how" — in at most twelve words.
+
+Two states only, and the second is not a failure. "used" means it is in the
+answer. "notNeeded" means this question did not call for it, and then "where"
+says why in the same breath: "no thinker — this is a policy question, not a
+theoretical one", "not a critical command word, so no limitations section".
+Thinker and criticism are the two that are most often rightly absent. Never mark
+a step "used" that is not actually there — the point of this list is that a
+candidate can hold their own answer against it, and a list that lies teaches
+them to tick boxes rather than to check.
+
 Reply with JSON and nothing else, in exactly this shape:
 
 {"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"must":"core"},
@@ -463,6 +477,7 @@ Reply with JSON and nothing else, in exactly this shape:
           {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours"},
           {"kind":"pivot","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
           {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"must":"core"}],
+ "method":[{"step":"demand|structure|flow|example|thinker|criticism|conclusion","state":"used|notNeeded","where":"<at most 12 words>"}],
  "demands":[{"label":"<3-8 words>","minutes":0}],
  "independent":true,
  "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
@@ -642,14 +657,21 @@ EXAMPLES ARE FLAGGED AND ATTACHED. They write "(e.g.)" against the point it
 belongs to, never as a free-floating sentence. An example must sit inside a
 block and demonstrate that block's claim.
 
-THE CLOSE — one or two lines, never a summary of what was just written.
-Either two-sided ("while the labour codes intend to minimise class divisions,
-poor implementation can widen inequality"), or concessive, which is the move
-for a question about limitations or criticism ("thus, despite these
-limitations, positivists gave sociology its concrete shape as a discipline"),
-or forward-looking with a thinker, or an explicit answer to the demand. A
-question asking for criticism still wants a position at the end, not a verdict
-of total failure.
+THE CLOSE — one or two lines, never a summary of what was just written, and in
+sociology it looks FORWARD. The discipline studies societies that are changing,
+so a conclusion that only settles the past has stopped a step short: say where
+this is heading, what it implies for policy or for the direction of the change,
+or what would have to be true for the other outcome. That is the default and it
+holds even for a criticism question — concessive is a shape, not an ending, and
+"thus, despite these limitations, positivists gave sociology its concrete shape"
+becomes an answer when it goes on to say what the discipline does with that now.
+
+Take a position first, then face it forward. Two-sided ("while the labour codes
+intend to minimise class divisions, poor implementation can widen inequality"),
+concessive, or an explicit answer to the demand — any of those, then the step
+ahead. A question asking for criticism still wants a position, not a verdict of
+total failure, and never a prediction dressed as certainty: a direction with a
+condition attached is sociology, a forecast is not.
 
 ${METHOD_RULES}
 SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
