@@ -42,6 +42,7 @@ import { fileToAvatar } from "./lib/avatar";
 import { useSync } from "./lib/useSync";
 import { MIN_PASSPHRASE } from "./lib/sync";
 import { clearAdvice } from "./lib/ai";
+import { Logo } from "./app/Logo";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
 import { Shell as AppShell } from "./app/Shell";
@@ -1358,6 +1359,16 @@ function LockScreen({
   return (
     <Shell>
       <div style={{ maxWidth: 420, width: "100%", fontFamily: C.sans, textAlign: "center" }}>
+        {/*
+          The mark, on the screen a new user meets first. Three individuals, the
+          ties between them and the circle they are inside — the subject itself
+          rather than a book or a mortarboard, which would say "study app" and
+          nothing about sociology.
+        */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+          <Logo size={64} />
+        </div>
+
         <div
           style={{
             fontFamily: C.mono,

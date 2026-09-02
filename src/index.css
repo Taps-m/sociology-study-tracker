@@ -236,11 +236,24 @@ input[type="range"]::-moz-range-thumb {
   z-index: 10;
 }
 
+/*
+ * The narrow-screen navigation, and only that.
+ *
+ * From 900px the rail on the left carries every section, and this carried them
+ * a second time across the top of the same screen — ten links twice over, with
+ * the last one cut off mid-word for want of room. Below 900px there is no rail,
+ * so this is the whole of it.
+ */
 .tabstrip {
   display: flex;
   gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
+}
+@media (min-width: 900px) {
+  .tabstrip {
+    display: none;
+  }
 }
 .tabstrip::-webkit-scrollbar {
   display: none;

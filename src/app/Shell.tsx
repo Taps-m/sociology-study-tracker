@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { Logo } from "./Logo";
 import { ROUTES, type RouteId } from "./routes";
 import { applyTheme, C, loadTheme, type ThemeName } from "../lib/theme";
 
@@ -34,17 +35,24 @@ export function Shell({
   children: ReactNode;
 }) {
   const [theme, setTheme] = useState<ThemeName>(loadTheme);
+  const [more, setMore] = useState(false);
+
+  // A menu that survives the navigation it caused is a menu left hanging open.
+  useEffect(() => setMore(false), [route]);
   useEffect(() => applyTheme(theme), [theme]);
 
   return (
     <div className="shell">
       <nav className="rail" aria-label="Sections">
-        <div style={{ padding: "6px 12px 18px" }}>
-          <div style={{ color: "var(--rail-text)", fontSize: 16, fontWeight: 700 }}>
-            WBCS Sociology
-          </div>
-          <div style={{ color: "var(--rail-muted)", fontSize: 13, marginTop: 3 }}>
-            Understand society. Write better.
+        <div style={{ display: "flex", gap: 11, alignItems: "center", padding: "6px 12px 18px" }}>
+          <Logo size={30} tone="var(--rail-text)" />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ color: "var(--rail-text)", fontSize: 16, fontWeight: 700 }}>
+              WBCS Sociology
+            </div>
+            <div style={{ color: "var(--rail-muted)", fontSize: 13, marginTop: 3 }}>
+              Understand society. Write better.
+            </div>
           </div>
         </div>
 
@@ -92,8 +100,14 @@ export function Shell({
             </button>
           )}
 
+          {/*
+            Only the daily loop across the top, with the rest behind "More".
+            Ten equally weighted links is not a menu, it is a list — and on a
+            phone it was a list you had to scroll sideways through to find the
+            one thing you open every day.
+          */}
           <div className="tabstrip" style={{ flex: 1 }}>
-            {ROUTES.map((r) => (
+            {ROUTES.filter((r) => r.primary).map((r) => (
               <button
                 key={r.id}
                 aria-current={route === r.id ? "page" : undefined}
@@ -102,6 +116,68 @@ export function Shell({
                 {r.label}
               </button>
             ))}
+            <div style={{ position: "relative", flex: "0 0 auto" }}>
+              <button
+                aria-expanded={more}
+                aria-haspopup="true"
+                aria-current={
+                  ROUTES.some((r) => !r.primary && r.id === route) ? "page" : undefined
+                }
+                onClick={() => setMore((v) => !v)}
+                title="The screens you visit now and then"
+              >
+                More {more ? "▴" : "▾"}
+              </button>
+              {more && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 6px)",
+                    right: 0,
+                    zIndex: 40,
+                    minWidth: 186,
+                    padding: 6,
+                    borderRadius: 10,
+                    background: "var(--rail)",
+                    border: "1px solid var(--rail-line)",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
+                    display: "grid",
+                    gap: 2,
+                  }}
+                >
+                  {ROUTES.filter((r) => !r.primary).map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => {
+                        setMore(false);
+                        go(r.id);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 9,
+                        width: "100%",
+                        minHeight: 38,
+                        padding: "0 10px",
+                        borderRadius: 8,
+                        border: "none",
+                        background: route === r.id ? "var(--rail-2)" : "transparent",
+                        color: route === r.id ? "var(--rail-text)" : "var(--rail-muted)",
+                        font: "inherit",
+                        fontSize: 13.5,
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <span aria-hidden style={{ width: 15, textAlign: "center" }}>
+                        {r.icon}
+                      </span>
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <button
