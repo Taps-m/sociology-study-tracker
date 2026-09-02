@@ -9,6 +9,7 @@ import { briefFor } from "../../data/briefs";
 import { MindMap, Takeaways } from "../plan/MindMap";
 import { unitEmphasis, unitShare, unitShareLabel } from "../../data/weightage";
 import { UnitMix } from "./UnitMix";
+import { PrepareCards } from "../topics/PrepareCards";
 
 type Handlers = {
   onToggle: (id: string, c: CheckId) => void;
@@ -120,6 +121,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
             </h2>
 
             <UnitMix paper={paper} />
+            {paper === 1 && <PrepareCards />}
 
             {units.map(({ unit, topics, all }) => {
               const key = `${paper}|${unit}`;

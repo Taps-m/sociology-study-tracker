@@ -670,6 +670,27 @@ export function cachedCheatSheet(topicId: string): CheatSheet | null {
   return cheatCache()[topicId] ?? null;
 }
 
+/** Every topic that already has a card. */
+export function cheatSheetIds(): string[] {
+  return Object.keys(cheatCache());
+}
+
+/**
+ * Throw a card away so the next ask writes a fresh one.
+ *
+ * The same gap the model answers had: a card written under an older set of
+ * method rules is served for ever, and a poor one can never be replaced.
+ */
+export function forgetCheatSheet(topicId: string) {
+  try {
+    const all = cheatCache();
+    delete all[topicId];
+    localStorage.setItem(CHEAT_KEY, JSON.stringify(all));
+  } catch {
+    // Blocked storage: the card stays. Nothing else breaks.
+  }
+}
+
 export async function cheatSheet(
   topicId: string,
   context: unknown,

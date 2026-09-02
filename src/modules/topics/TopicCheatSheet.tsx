@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { cachedCheatSheet, cheatSheet, type CheatSheet as Card } from "../../lib/ai";
+import {
+  cachedCheatSheet,
+  cheatSheet,
+  forgetCheatSheet,
+  type CheatSheet as Card,
+} from "../../lib/ai";
 import { TOPICS, type Topic } from "../../data/syllabus";
 import { standardReadingsFor, stdLine } from "../../data/standardBooks";
 import { Diagram } from "../answers/ModelAnswerView";
@@ -29,8 +34,11 @@ export function TopicCheatSheet({ topic }: { topic: Topic }) {
 
   const paperTopics = TOPICS.filter((t) => t.paper === topic.paper);
 
-  async function build() {
-    if (card) {
+  async function build(fresh = false) {
+    if (fresh) {
+      forgetCheatSheet(topic.id);
+      setCard(null);
+    } else if (card) {
       setOpen((v) => !v);
       return;
     }
@@ -205,6 +213,26 @@ export function TopicCheatSheet({ topic }: { topic: Topic }) {
               </ul>
             </>
           )}
+
+          <button
+            onClick={() => void build(true)}
+            title="Throw this card away and write a new one, using the current method rules."
+            style={{
+              display: "block",
+              margin: "14px auto 0",
+              padding: 0,
+              border: "none",
+              background: "transparent",
+              color: C.muted,
+              font: "inherit",
+              fontSize: 12.5,
+              textDecoration: "underline",
+              textUnderlineOffset: 3,
+              cursor: "pointer",
+            }}
+          >
+            Write a different card
+          </button>
 
           {card.offSyllabus && card.offSyllabus.length > 0 && (
             <p style={{ fontSize: 12.5, color: C.warn, margin: "13px 0 0", lineHeight: 1.55 }}>
