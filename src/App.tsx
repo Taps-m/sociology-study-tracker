@@ -42,7 +42,6 @@ import { fileToAvatar } from "./lib/avatar";
 import { useSync } from "./lib/useSync";
 import { MIN_PASSPHRASE } from "./lib/sync";
 import { clearAdvice } from "./lib/ai";
-import { Logo } from "./app/Logo";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
 import { Shell as AppShell } from "./app/Shell";
@@ -1360,14 +1359,19 @@ function LockScreen({
     <Shell>
       <div style={{ maxWidth: 420, width: "100%", fontFamily: C.sans, textAlign: "center" }}>
         {/*
-          The mark, on the screen a new user meets first. Three individuals, the
-          ties between them and the circle they are inside — the subject itself
-          rather than a book or a mortarboard, which would say "study app" and
-          nothing about sociology.
+          The full emblem, on the screen a new user meets first.
+          Masked to its disc so the corners are transparent — the original was a
+          circle on a white square, which on the dark theme is a white box with
+          a picture in it. The drawn mark still does the small sizes, where 512
+          pixels of tree, globe and colonnade turn to mush.
         */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
-          <Logo size={64} />
-        </div>
+        <img
+          src="/logo.png"
+          alt="WBCS Sociology — understand society, write better"
+          width={168}
+          height={168}
+          style={{ display: "block", margin: "0 auto 16px", maxWidth: "62%", height: "auto" }}
+        />
 
         <div
           style={{
@@ -1382,7 +1386,16 @@ function LockScreen({
         </div>
 
         <h1 style={{ fontSize: 23, fontWeight: 600, margin: "14px 0 8px", letterSpacing: "-0.01em" }}>
-          {started ? `Welcome back${name ? `, ${name}` : ""}.` : "Understand society. Write better."}
+          {/*
+            The emblem above already carries a motto. A second, different one
+            directly beneath it reads as two products sharing a screen, so this
+            says what the thing is instead of competing with it. The rail keeps
+            "Understand society. Write better." — there is no emblem there to
+            argue with.
+          */}
+          {started
+            ? `Welcome back${name ? `, ${name}` : ""}.`
+            : "Your WBCS Sociology optional, tracked properly."}
         </h1>
 
         <p style={{ fontSize: 14.5, color: C.muted, margin: "0 0 22px", lineHeight: 1.65 }}>
