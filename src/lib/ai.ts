@@ -575,6 +575,98 @@ export async function modelAnswer(
   }
 }
 
+/**
+ * A one-glance revision card for a topic.
+ *
+ * Deliberately the smallest thing that still lets someone write a passable
+ * answer. On a tired evening the choice is not between this and the chapter,
+ * it is between this and nothing — and for a candidate who already knows the
+ * basics it is the main surface rather than the fallback, because what they
+ * need is the answer kit, not the exposition.
+ *
+ * One per topic, so there are eighty-five of these in the world. Generated once
+ * and kept, unlike a model answer, which is per question.
+ */
+export interface CheatSheet {
+  must: { term: string; line: string }[];
+  thinkers: { name: string; for: string }[];
+  specifics: string[];
+  diagram?: Diagram;
+  trap: string;
+  askedAs: string[];
+  usedTopics?: string[];
+  offSyllabus?: string[];
+}
+
+const CHEAT_KEY = "wbcs.cheats.v1";
+
+function cheatCache(): Record<string, CheatSheet> {
+  try {
+    return JSON.parse(localStorage.getItem(CHEAT_KEY) ?? "{}") as Record<string, CheatSheet>;
+  } catch {
+    return {};
+  }
+}
+
+export function cachedCheatSheet(topicId: string): CheatSheet | null {
+  return cheatCache()[topicId] ?? null;
+}
+
+export async function cheatSheet(
+  topicId: string,
+  context: unknown,
+  syllabusIds: string[],
+): Promise<{ result: CheatSheet | null; error: string | null }> {
+  const hit = cheatCache()[topicId];
+  if (hit) return { result: hit, error: null };
+
+  const { status, payload, error: reachError } = await askService(
+    { task: "cheatsheet", context, deviceId: deviceId() },
+    90_000,
+  );
+  if (reachError) return { result: null, error: reachError };
+  if (status < 200 || status >= 300) {
+    return {
+      result: null,
+      error: [payload.error ?? `request failed (${status})`, payload.detail]
+        .filter(Boolean)
+        .join(" — "),
+    };
+  }
+
+  const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
+  let parsed: CheatSheet;
+  try {
+    parsed = JSON.parse(text) as CheatSheet;
+  } catch {
+    return {
+      result: null,
+      error: payload.truncated
+        ? "The card came back cut off. Try again."
+        : `The reply was not the JSON this expects. It began: ${text.slice(0, 120) || "(nothing)"}`,
+    };
+  }
+  if (!Array.isArray(parsed?.must) || parsed.must.length === 0) {
+    return { result: null, error: "The reply parsed but carried no card." };
+  }
+
+  const d = parsed.diagram as unknown;
+  parsed.diagram =
+    d && typeof d === "object" && Array.isArray((d as Diagram).items)
+      ? (d as Diagram)
+      : { label: "", items: [] };
+
+  const allowed = new Set(syllabusIds);
+  parsed.offSyllabus = (parsed.usedTopics ?? []).filter((id) => !allowed.has(id));
+
+  try {
+    localStorage.setItem(CHEAT_KEY, JSON.stringify({ ...cheatCache(), [topicId]: parsed }));
+  } catch {
+    // Full or blocked; it will be fetched again next time.
+  }
+  return { result: parsed, error: null };
+}
+
 export async function evaluate(
   context: unknown,
   files: Upload[],

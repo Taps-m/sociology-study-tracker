@@ -34,12 +34,25 @@
  */
 
 /** Output ceilings, per task. See the note where this is used. */
+const SOURCES_RULE = `SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
+exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
+and Perspectives and Shankar Rao's Principles of Sociology that cover this
+topic. Those three are the candidate's entire shelf. Take the sociology from
+what is in them — their thinkers, concepts, classifications and debates. Do not
+import a school, a framework or a named study from outside them, and do not
+cite a book, paper, report or website the candidate does not have: a reference
+they cannot open is one they cannot check, and an unverifiable one is worse
+than none. Indian facts, Acts, schemes, Census and survey figures are the
+exception — those are the exam's own general-studies ground and are expected.
+If "books" is empty, say so in one line and build the answer only from the
+syllabus topics, without inventing a citation to fill the hole.`;
+
 const TOKEN_BUDGET = {
   critique: 2048,
   guidance: 2048,
   insight: 2048,
   doubt: 2048,
-  evaluate: 3072,
+  evaluate: 3072, cheatsheet: 4096,
   structure: 8192,
   // A full 900-1100 word answer, plus the model's thinking before it.
   model: 16384,
@@ -405,6 +418,53 @@ Reply with JSON and nothing else, in exactly this shape:
  "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
  "usedTopics":["<syllabus topic id>"],
  "words":0}
+
+No praise, no preamble, no prose outside the JSON.`;
+
+    case "cheatsheet":
+      return `${SYSTEM}
+
+Build a one-glance revision card for this topic:
+${json}
+
+WHAT THIS IS FOR. A candidate with an hour a day cannot read every chapter to
+depth, and on a tired evening the choice is not between this card and the
+chapter — it is between this card and nothing. So it must be the smallest thing
+that still lets someone write a passable answer: the concepts they cannot skip,
+the thinkers doing real work, the specifics that separate an answer from an
+essay, and the one mistake everybody makes. Not a summary of the chapter. The
+kit for an answer.
+
+SEVERELY LIMITED. Four to six core terms, no more. Two to four thinkers. Two to
+four specifics. If everything is on the card nothing is, and a card that takes
+fifteen minutes to read has failed at the only job it has.
+
+EVERY LINE IS SHORT ENOUGH TO BE READ AT A GLANCE. A term is one to four words
+and its line is at most fifteen. A thinker's line says what he is FOR in this
+topic — "the alienation argument", "the functional necessity case" — not a
+biography. A specific is a named Act, a figure, a case, a place: something that
+could be written into an answer as it stands.
+
+THE TRAP. One line on what candidates get wrong here — the wrong definition, the
+thinker applied to the wrong half of the question, the example that does not
+actually demonstrate the point. This is the highest-value line on the card.
+
+IT HAS TO BE DRAWABLE. The diagram is copied onto paper with a pen in about
+ninety seconds: two to four words in the box, four words at most per branch,
+eight at most per note, three to five branches. If the idea cannot survive being
+cut to that it is not a diagram — return an empty one.
+
+${SOURCES_RULE}
+
+Reply with JSON and nothing else, in exactly this shape:
+
+{"must":[{"term":"<1-4 words>","line":"<what it means, at most 15 words>"}],
+ "thinkers":[{"name":"...","for":"<what he is for here, at most 10 words>"}],
+ "specifics":["<a named Act, figure, case or place>"],
+ "diagram":{"label":"<2-4 words, or empty>","items":[{"name":"...","note":"..."}]},
+ "trap":"<one line>",
+ "askedAs":["<how this topic is typically worded in a question>"],
+ "usedTopics":["<syllabus topic id>"]}
 
 No praise, no preamble, no prose outside the JSON.`;
 
