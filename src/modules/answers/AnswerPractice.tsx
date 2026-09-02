@@ -42,6 +42,17 @@ function mmss(seconds: number) {
  * camera bridges the gap — the page is photographed and read, so the structured
  * record survives without the shortcut.
  */
+const arrow = (off: boolean): React.CSSProperties => ({
+  border: "none",
+  background: "transparent",
+  color: off ? C.line : C.muted,
+  font: "inherit",
+  fontSize: 13,
+  lineHeight: 1,
+  padding: "2px 4px",
+  cursor: off ? "default" : "pointer",
+});
+
 export function AnswerPractice({
   d,
   onAttempt,
@@ -77,6 +88,7 @@ export function AnswerPractice({
   const [saved, setSaved] = useState(false);
   // The pages of one answer, in the order they were written.
   const [pages, setPages] = useState<File[]>([]);
+  const [thumbs, setThumbs] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -102,6 +114,34 @@ export function AnswerPractice({
   const stats = attemptStats(d);
   const averages = rubricAverages(d);
   const gap = selfMarkGap(d);
+
+  /**
+   * A picture of each page, so you can see what you actually picked.
+   *
+   * It used to list file names. "IMG_2043.jpg" tells you nothing about which
+   * side of the answer it is, whether it is the right photograph, or whether it
+   * is even the right answer — and the pages are read in order as one
+   * continuous piece, so picking them up in the wrong order quietly changes
+   * what the marker sees.
+   *
+   * Revoked when the list changes: an object URL is held by the browser until
+   * it is let go, and this screen can churn through a lot of them.
+   */
+  useEffect(() => {
+    const urls = pages.map((f) => (f.type === "application/pdf" ? "" : URL.createObjectURL(f)));
+    setThumbs(urls);
+    return () => urls.forEach((u) => u && URL.revokeObjectURL(u));
+  }, [pages]);
+
+  function movePage(from: number, to: number) {
+    setPages((prev) => {
+      if (to < 0 || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved!);
+      return next;
+    });
+  }
 
   function addPages(chosen: File[]) {
     setError(null);
@@ -450,8 +490,39 @@ export function AnswerPractice({
             // Cleared so the same page can be picked again after a removal.
             e.target.value = "";
           }}
-          style={{ fontSize: 14 }}
+          style={{ display: "none" }}
         />
+        {/*
+          The browser's own file input said "No file chosen" and gave no hint
+          that more than one could be picked at a time — which is the whole
+          shape of this task, since an answer is three or four sides.
+        */}
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={pages.length >= MAX_PAGES}
+          title="Pick the photographs of your answer. Select several at once — hold Ctrl or Cmd, or drag a box around them."
+          style={{
+            minHeight: 42,
+            padding: "0 17px",
+            borderRadius: 9,
+            border: "none",
+            background: pages.length >= MAX_PAGES ? C.raised : C.accent,
+            color: pages.length >= MAX_PAGES ? C.muted : C.accentInk,
+            font: "inherit",
+            fontSize: 14.5,
+            fontWeight: 600,
+            cursor: pages.length >= MAX_PAGES ? "default" : "pointer",
+          }}
+        >
+          {pages.length === 0
+            ? "Choose the pages"
+            : pages.length >= MAX_PAGES
+              ? `${MAX_PAGES} pages — that is the limit`
+              : "Add more pages"}
+        </button>
+        <span style={{ fontSize: 12.5, color: C.muted, marginLeft: 10 }}>
+          you can pick several at once
+        </span>
         <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0", lineHeight: 1.6 }}>
           Photograph every side you wrote — a 40-mark answer usually runs to three or four,
           and they are read as one continuous piece in the order below. Up to {MAX_PAGES}.
@@ -460,55 +531,128 @@ export function AnswerPractice({
         </p>
 
         {pages.length > 0 && (
-          <ul style={{ margin: "12px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 6 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(112px, 1fr))",
+              gap: 10,
+              marginTop: 14,
+            }}
+          >
             {pages.map((f, i) => (
-              <li
+              <figure
                 key={`${f.name}-${i}`}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "8px 11px",
-                  borderRadius: 8,
-                  background: C.raised,
+                  margin: 0,
+                  borderRadius: 9,
+                  overflow: "hidden",
                   border: `1px solid ${C.line}`,
-                  fontSize: 13.5,
+                  background: C.raised,
                 }}
               >
-                <span className="num" style={{ color: C.muted, flex: "0 0 auto" }}>
-                  Page {i + 1}
-                </span>
-                <span
+                <div
                   style={{
-                    flex: 1,
-                    minWidth: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    position: "relative",
+                    height: 132,
+                    display: "grid",
+                    placeItems: "center",
+                    background: C.panel,
+                  }}
+                >
+                  {thumbs[i] ? (
+                    <img
+                      src={thumbs[i]}
+                      alt={`Page ${i + 1}`}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: 12.5, color: C.muted }}>PDF</span>
+                  )}
+                  <span
+                    className="num"
+                    style={{
+                      position: "absolute",
+                      top: 6,
+                      left: 6,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      padding: "1px 7px",
+                      borderRadius: 999,
+                      background: C.accent,
+                      color: C.accentInk,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <button
+                    onClick={() => setPages((prev) => prev.filter((_, j) => j !== i))}
+                    aria-label={`Remove page ${i + 1}`}
+                    title="Take this page out"
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 999,
+                      border: "none",
+                      background: C.page,
+                      color: C.text,
+                      font: "inherit",
+                      fontSize: 14,
+                      lineHeight: 1,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    padding: "5px 6px",
+                    fontSize: 11.5,
                     color: C.muted,
                   }}
                 >
-                  {f.name}
-                </span>
-                <button
-                  onClick={() => setPages((prev) => prev.filter((_, j) => j !== i))}
-                  aria-label={`Remove page ${i + 1}`}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    color: C.muted,
-                    font: "inherit",
-                    fontSize: 16,
-                    lineHeight: 1,
-                    cursor: "pointer",
-                    padding: "2px 4px",
-                  }}
-                >
-                  ×
-                </button>
-              </li>
+                  {/* Order matters: the pages are read as one continuous piece. */}
+                  <button
+                    onClick={() => movePage(i, i - 1)}
+                    disabled={i === 0}
+                    aria-label={`Move page ${i + 1} earlier`}
+                    title="Move this page earlier"
+                    style={arrow(i === 0)}
+                  >
+                    ←
+                  </button>
+                  <button
+                    onClick={() => movePage(i, i + 1)}
+                    disabled={i === pages.length - 1}
+                    aria-label={`Move page ${i + 1} later`}
+                    title="Move this page later"
+                    style={arrow(i === pages.length - 1)}
+                  >
+                    →
+                  </button>
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      textAlign: "right",
+                    }}
+                    title={f.name}
+                  >
+                    {f.name}
+                  </span>
+                </figcaption>
+              </figure>
             ))}
-          </ul>
+          </div>
         )}
 
         {pages.length > 0 && (
