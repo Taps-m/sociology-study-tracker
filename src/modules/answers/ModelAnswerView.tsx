@@ -74,16 +74,29 @@ function MustBadge({ must }: { must?: "core" | "yours" }) {
   );
 }
 
+/**
+ * One part of the answer, dressed so the shape is visible before it is read.
+ *
+ * It was all one column of grey paragraphs, which is exactly what an answer
+ * must not be — the whole point of the form is that an examiner can see the
+ * structure at a glance. Each kind of part now has its own surface: blocks sit
+ * in cards so they read as blocks and not prose, the signpost is a heading, the
+ * pivot is tinted because it is the hinge of the answer, and the close is the
+ * one green thing on the page because it is the only part that takes a
+ * position. Colour carries the same information the layout does, never
+ * information of its own.
+ */
 function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) {
   if (part.kind === "signpost") {
     return (
       <p
         style={{
-          fontSize: 15,
-          fontWeight: 600,
-          margin: "22px 0 0",
-          textDecoration: "underline",
-          textUnderlineOffset: 4,
+          fontSize: 15.5,
+          fontWeight: 700,
+          margin: "26px 0 0",
+          paddingBottom: 6,
+          borderBottom: `2px solid ${C.accent}`,
+          color: C.accent,
         }}
       >
         {part.text}
@@ -92,31 +105,71 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
   }
 
   if (part.kind === "pivot" || part.kind === "close") {
+    const close = part.kind === "close";
     return (
-      <p
+      <div
         style={{
-          fontSize: 15,
-          lineHeight: 1.85,
-          margin: "18px 0 0",
-          paddingLeft: 12,
-          borderLeft: `2px solid ${part.kind === "close" ? C.good : C.accent}`,
+          margin: "20px 0 0",
+          padding: "13px 15px",
+          borderRadius: 10,
+          background: close ? C.goodSoft : C.accentSoft,
+          borderLeft: `3px solid ${close ? C.good : C.accent}`,
         }}
       >
-        {marked(part.text, part.underline)}
-      </p>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}
+        >
+          <span
+            style={{
+              fontFamily: C.mono,
+              fontSize: 10,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: close ? C.good : C.accent,
+              fontWeight: 700,
+            }}
+          >
+            {close ? "Take a position" : "Turn the answer"}
+          </span>
+          <MustBadge must={part.must} />
+        </div>
+        <p style={{ fontSize: 15, lineHeight: 1.85, margin: 0 }}>
+          {marked(part.text, part.underline)}
+        </p>
+      </div>
     );
   }
 
   if (part.kind === "opening") {
     return (
-      <p style={{ fontSize: 15, lineHeight: 1.85, margin: "14px 0 0" }}>
-        {marked(part.text, part.underline)}
-      </p>
+      <div style={{ margin: "14px 0 0" }}>
+        <MustBadge must={part.must} />
+          <p
+          style={{
+            fontSize: 15.5,
+            lineHeight: 1.85,
+            margin: "6px 0 0",
+            paddingLeft: 13,
+            borderLeft: `3px solid ${C.line}`,
+            color: C.text,
+          }}
+        >
+          {marked(part.text, part.underline)}
+        </p>
+      </div>
     );
   }
 
   return (
-    <div style={{ margin: "16px 0 0" }}>
+    <div
+      style={{
+        margin: "12px 0 0",
+        padding: "12px 14px",
+        borderRadius: 10,
+        background: C.raised,
+        border: `1px solid ${C.hair}`,
+      }}
+    >
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
         {index !== null && (
           <span className="num" style={{ fontSize: 13, color: C.muted }}>
@@ -127,25 +180,50 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
           style={{
             fontSize: 15,
             fontWeight: 700,
-            padding: "1px 8px",
-            borderRadius: 5,
-            border: `1.5px solid ${C.accent}`,
-            color: C.accent,
+            padding: "2px 9px",
+            borderRadius: 6,
+            background: C.accent,
+            color: C.accentInk,
           }}
         >
           {part.keyword}
         </span>
         <MustBadge must={part.must} />
       </div>
-      <p style={{ fontSize: 15, lineHeight: 1.85, margin: "7px 0 0" }}>
+      <p style={{ fontSize: 15, lineHeight: 1.8, margin: "8px 0 0" }}>
         {marked(part.text, part.underline)}
       </p>
       {(part.thinker || part.specific) && (
-        <p style={{ fontSize: 12.5, color: C.muted, margin: "5px 0 0" }}>
-          {part.thinker && <>Thinker: {part.thinker}</>}
-          {part.thinker && part.specific && " · "}
-          {part.specific && <>Specific: {part.specific}</>}
-        </p>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+          {part.thinker && (
+            <span
+              style={{
+                fontSize: 12,
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: C.panel,
+                border: `1px solid ${C.line}`,
+                color: C.muted,
+              }}
+            >
+              {part.thinker}
+            </span>
+          )}
+          {part.specific && (
+            <span
+              style={{
+                fontSize: 12,
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: C.warnSoft,
+                border: `1px solid ${C.warn}`,
+                color: C.text,
+              }}
+            >
+              {part.specific}
+            </span>
+          )}
+        </div>
       )}
     </div>
   );

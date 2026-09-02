@@ -20,6 +20,7 @@ import {
   stdLine,
 } from "../data/standardBooks";
 import { chapterBadge, TOTAL_QUESTIONS } from "../data/weightage";
+import { TopicCheatSheet } from "../modules/topics/TopicCheatSheet";
 import { NoteEditor } from "./NoteEditor";
 
 const chip = {
@@ -85,6 +86,8 @@ export function TopicRow({
       </div>
 
       <WhereToRead topicId={topic.id} />
+
+      <TopicCheatSheet topic={topic} />
 
       {onNote && <NoteEditor topicId={topic.id} d={d} onSave={onNote} />}
 
