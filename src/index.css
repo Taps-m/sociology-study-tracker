@@ -10,22 +10,36 @@
  */
 
 :root {
-  --page: #f4f6fb;
-  --surface: #ffffff;
-  --panel: #ffffff;
-  --raised: #f8fafc;
-  --line: #e3e8f2;
-  --hair: #eef1f7;
-  --text: #16203a;
-  --muted: #6b7690;
-  --accent: #2563eb;
-  --accent-soft: #eff4ff;
-  --accent-ink: #ffffff;
-  --warn: #d97706;
-  --warn-soft: #fef3c7;
-  --good: #16a34a;
-  --good-soft: #dcfce7;
-  --shadow: 0 1px 2px rgba(16, 27, 61, 0.06), 0 4px 12px rgba(16, 27, 61, 0.04);
+  /*
+   * Light, taken from the emblem rather than from a default.
+   *
+   * The app was cold blue-grey with a blue accent and the emblem is parchment,
+   * deep olive and warm tan — two products sharing a screen. These are the
+   * emblem's own colours, sampled from it: the cream field it sits on, the
+   * olive of the foliage, the warm brown-grey of the buildings. A study app for
+   * a humanities paper ought to look like paper, and now it does.
+   *
+   * Green is the accent, so "good" has to be a brighter, cleaner green than the
+   * olive or the two collide wherever a tick sits next to a button. Warn takes
+   * the emblem's own amber.
+   */
+  --page: #f6f2e9;
+  --surface: #fffdf8;
+  --panel: #fffdf8;
+  --raised: #f2ece0;
+  --line: #e0d7c6;
+  --hair: #ebe4d6;
+  --text: #241f18;
+  --muted: #7b7263;
+  --accent: #4c6b2f;
+  --accent-soft: #eaf0df;
+  --accent-ink: #fffdf8;
+  --warn: #9a6317;
+  --warn-soft: #f7ead4;
+  --good: #2c7d52;
+  --good-soft: #e0efe4;
+  /* Warm and layered, so a card sits on the page instead of being drawn on it. */
+  --shadow: 0 1px 2px rgba(60, 48, 28, 0.05), 0 6px 18px rgba(60, 48, 28, 0.055);
 
   /* Mind-map stage tints. Same four hues in both themes, restated for dark. */
   --tint-0: #fdf6e7;
@@ -55,29 +69,38 @@
   --slice-5: #9aa4b8;
 
   /* The rail and header stay dark in both themes, as in the design. */
-  --rail: #101b3d;
-  --rail-2: #16234a;
-  --rail-text: #e8ecf7;
-  --rail-muted: #8f9ab8;
-  --rail-line: #23315c;
+  --rail: #232519;
+  --rail-2: #2f3221;
+  --rail-text: #f2eee2;
+  --rail-muted: #a49b86;
+  --rail-line: #3c4029;
 }
 
+/*
+ * Dark, warmed to match.
+ *
+ * The light theme now comes from the emblem — parchment, olive, warm tan — and
+ * a cold blue-black dark theme beside it reads as a different application seen
+ * at night. Same move, darker: warm near-black surfaces, and an accent lifted
+ * from the emblem's olive far enough to carry on a dark ground, since a deep
+ * forest green on near-black is a shape, not a colour.
+ */
 [data-theme="dark"] {
-  --page: #0a0e12;
-  --surface: #0a0e12;
-  --panel: #11171d;
-  --raised: #161d24;
-  --line: #1e2831;
-  --hair: #161d24;
-  --text: #e6edf3;
-  --muted: #7d8b99;
-  --accent: #5fd3f3;
-  --accent-soft: rgba(95, 211, 243, 0.12);
-  --accent-ink: #0a0e12;
-  --warn: #f2a93b;
-  --warn-soft: rgba(242, 169, 59, 0.14);
-  --good: #4ade80;
-  --good-soft: rgba(74, 222, 128, 0.14);
+  --page: #14130f;
+  --surface: #14130f;
+  --panel: #1c1b15;
+  --raised: #23211a;
+  --line: #322f24;
+  --hair: #23211a;
+  --text: #f0ece0;
+  --muted: #9a9280;
+  --accent: #a8c46a;
+  --accent-soft: rgba(168, 196, 106, 0.13);
+  --accent-ink: #14130f;
+  --warn: #e0a44e;
+  --warn-soft: rgba(224, 164, 78, 0.14);
+  --good: #6fc78d;
+  --good-soft: rgba(111, 199, 141, 0.14);
   --shadow: none;
 
   --tint-0: rgba(242, 169, 59, 0.10);
@@ -117,7 +140,19 @@ body,
   background: var(--page);
 }
 
+/*
+ * The page itself, very slightly lit from the top.
+ *
+ * A single flat fill behind everything is what made this read as a wireframe.
+ * This is one soft warm wash, fixed so it does not slide as the page scrolls —
+ * enough to sit a card on, not enough to notice.
+ */
 body {
+  background-color: var(--page);
+  background-image:
+    radial-gradient(1100px 520px at 50% -12%, rgba(76, 107, 47, 0.07), transparent 70%),
+    radial-gradient(760px 420px at 100% 0%, rgba(154, 99, 23, 0.05), transparent 65%);
+  background-attachment: fixed;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -551,5 +586,35 @@ input[type="range"]::-moz-range-thumb {
   .answer-aside {
     position: static;
     margin-top: 22px;
+  }
+}
+
+/*
+ * Setup, using the screen it is given.
+ *
+ * It was a 560px column centred on a 1900px monitor: a phone layout stretched
+ * onto a desktop, with two-thirds of the window empty and every question
+ * crammed into the middle third. On a wide screen the emblem and the heading
+ * take a column of their own and stay put while the questions scroll beside
+ * them, which is what the space was there for.
+ *
+ * One column below 900px, where there is no space to give.
+ */
+.setup-split {
+  display: grid;
+  gap: 30px;
+  width: 100%;
+  max-width: 1040px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .setup-split {
+    grid-template-columns: 330px minmax(0, 1fr);
+    gap: 52px;
+  }
+  .setup-intro {
+    position: sticky;
+    top: 26px;
   }
 }

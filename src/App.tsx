@@ -752,8 +752,15 @@ function Setup({
 
   return (
     <Shell align="flex-start">
-      <div style={{ maxWidth: 560, width: "100%", fontFamily: C.sans }}>
-        <header style={{ marginBottom: 24 }}>
+      <div className="setup-split" style={{ fontFamily: C.sans }}>
+        <header className="setup-intro">
+          <img
+            src="/logo.png"
+            alt="WBCS Sociology"
+            width={132}
+            height={132}
+            style={{ display: "block", marginBottom: 20, maxWidth: "48%", height: "auto" }}
+          />
           <div
             style={{
               fontFamily: C.mono,
@@ -765,14 +772,22 @@ function Setup({
           >
             sociology · wbcs
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 600, margin: "10px 0 6px", letterSpacing: "-0.01em" }}>
+          <h1 style={{ fontSize: 28, fontWeight: 600, margin: "10px 0 8px", letterSpacing: "-0.015em" }}>
             Before we start
           </h1>
-          <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.6 }}>
-            Four questions. All of it can be changed later.
+          <p style={{ fontSize: 15, color: C.muted, margin: 0, lineHeight: 1.65 }}>
+            Four questions, then the plan builds itself. All of it can be changed later, and
+            nothing here is a commitment.
           </p>
         </header>
 
+        {/*
+          The questions, and the buttons that finish them, in one column.
+          Without this wrapper the two-column grid puts the header in the
+          first cell, the questions in the second, and then drops Start back
+          into the first — under the emblem, in a column of its own.
+        */}
+        <div>
         <div style={{ display: "grid", gap: 12 }}>
           <section style={panelStyle}>
             <label
@@ -1088,6 +1103,7 @@ function Setup({
         </button>
 
         <Byline />
+        </div>
       </div>
     </Shell>
   );
