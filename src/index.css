@@ -624,6 +624,10 @@ input[type="range"]::-moz-range-thumb {
  *
  * One column below 900px, where there is no space to give.
  */
+.setup-by {
+  margin-top: 26px;
+}
+
 .setup-split {
   display: grid;
   gap: 30px;
@@ -637,9 +641,27 @@ input[type="range"]::-moz-range-thumb {
     grid-template-columns: 380px minmax(0, 1fr);
     gap: 60px;
   }
+  /*
+   * The column runs the height of the screen, and the byline sits at the foot
+   * of it.
+   *
+   * Attribution belongs at the bottom of a page, the way it does in print. Left
+   * directly under the heading it read as a third line of the title — the first
+   * thing after "Let's create your personalised study plan" was a copyright
+   * notice, which is a strange thing to tell someone who has not started yet.
+   * `margin-top: auto` in a full-height flex column puts it where a footer goes
+   * without a fixed height anywhere.
+   */
   .setup-intro {
     position: sticky;
     top: 26px;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 52px);
+  }
+  .setup-by {
+    margin-top: auto;
+    padding-top: 26px;
   }
 }
 

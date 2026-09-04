@@ -825,7 +825,7 @@ function Setup({
             Whose this is. It was on the lock screen and nowhere else, and this
             is the screen a new user actually spends time on.
           */}
-          <div style={{ marginTop: 26, fontSize: 12.5, color: C.muted, lineHeight: 1.6 }}>
+          <div className="setup-by" style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.6 }}>
             <div>
               Designed and built by <strong style={{ color: C.text }}>Tapomoy</strong>
             </div>
