@@ -18,6 +18,7 @@ import type { RouteId } from "../../app/routes";
 import { WeeklyReview } from "./WeeklyReview";
 import { TodaysFocus } from "./TodaysFocus";
 import { TonightsDrill } from "../drill/TonightsDrill";
+import { StudiedToday } from "./StudiedToday";
 
 /** Share of the syllabus, by hours, that has a given check ticked. */
 function checkPercent(d: Derived, check: string) {
@@ -151,11 +152,39 @@ export function DashboardScreen({
         </p>
       </header>
 
-      <TonightsDrill d={d} />
+      {/*
+        Two columns, both of which carry something.
 
-      <TodaysFocus d={d} go={go} onToggle={onToggle} />
+        The dashboard was one tall column of four cards beside a single short
+        one, so most of a wide screen sat permanently blank below "Today's
+        focus" while everything else was squeezed into half the width for no
+        reason.
+
+        Split by what the card asks of you rather than by what it is about. The
+        left column is where you write something — tonight's block, and what you
+        studied today. The right is where you read and tick: the checklist, the
+        weekly reading, the wheel. That keeps a cursor on one side of the screen
+        and keeps both columns roughly the same height, which is the only reason
+        the old layout looked broken.
+      */}
+      <div className="grid" style={{ gap: 13, minWidth: 0 }}>
+        <TonightsDrill d={d} />
+
+        <StudiedToday d={d} onToggle={onToggle} />
+
+        <section className="card" style={{ padding: 14, borderLeft: `3px solid ${C.accent}` }}>
+          <blockquote style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, fontStyle: "italic" }}>
+            “{quote.text}”
+          </blockquote>
+          <div style={{ fontFamily: C.mono, fontSize: 12, color: C.muted, marginTop: 8 }}>
+            {quote.who} · {quote.where}
+          </div>
+        </section>
+      </div>
 
       <div className="grid" style={{ gap: 13, minWidth: 0 }}>
+        <TodaysFocus d={d} go={go} onToggle={onToggle} />
+
         <WeeklyReview d={d} />
 
         <Card
@@ -196,14 +225,6 @@ export function DashboardScreen({
         </div>
         </Card>
 
-        <section className="card" style={{ padding: 14, borderLeft: `3px solid ${C.accent}` }}>
-          <blockquote style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, fontStyle: "italic" }}>
-            “{quote.text}”
-          </blockquote>
-          <div style={{ fontFamily: C.mono, fontSize: 12, color: C.muted, marginTop: 8 }}>
-            {quote.who} · {quote.where}
-          </div>
-        </section>
       </div>
     </div>
   );
