@@ -663,6 +663,7 @@ input[type="range"]::-moz-range-thumb {
  * tints rotate so neighbours never share.
  */
 .q-card {
+  position: relative;
   display: flex;
   gap: 15px;
   align-items: flex-start;
@@ -671,6 +672,77 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 14px;
   padding: 17px 19px;
   box-shadow: var(--shadow);
+}
+
+/*
+ * Required and optional, told apart before either is read.
+ *
+ * Six cards that look identical make a six-question form out of a four-question
+ * promise. The four that are asked for are tinted and outlined in the accent;
+ * the two that are not sit flat and quiet, and nothing about them suggests the
+ * page is unfinished until they are filled.
+ */
+.q-card.req {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.q-card.opt {
+  background: var(--raised);
+  border-color: var(--line);
+  box-shadow: none;
+  padding: 13px 19px;
+}
+
+.q-card.opt .q-badge {
+  background: var(--hair);
+  color: var(--muted);
+}
+
+/* The number, sitting on the card's own edge. */
+.q-step {
+  position: absolute;
+  top: -11px;
+  left: -11px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 2px solid var(--page);
+}
+
+.q-card.opt .q-step {
+  background: var(--raised);
+  color: var(--muted);
+  border-color: var(--page);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* What the form insists on, said once, where it applies. */
+.q-req {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* Room for the numbers to sit outside the cards without being clipped. */
+.q-list {
+  display: grid;
+  gap: 12px;
+  padding-left: 13px;
+  padding-top: 11px;
 }
 
 .q-badge {

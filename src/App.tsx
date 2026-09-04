@@ -778,8 +778,8 @@ function Setup({
           <h1 style={{ fontSize: 44, fontWeight: 700, margin: "12px 0 6px", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
             Before we start
           </h1>
-          <p style={{ fontSize: 19, color: C.text, margin: "0 0 12px", lineHeight: 1.35, fontWeight: 500 }}>
-            Let's build your study plan.
+          <p style={{ fontSize: 19, color: C.text, margin: "0 0 4px", lineHeight: 1.35, fontWeight: 500 }}>
+            Let&rsquo;s create your personalised study plan.
           </p>
           {/*
             The promise, then the reassurance — and they are not the same thing.
@@ -788,11 +788,6 @@ function Setup({
             nothing is permanent. The claim gets the size and the colour; the
             caveat gets small and quiet, which is what a caveat is for.
           */}
-          <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.7 }}>
-            Just four questions, and{" "}
-            <span style={{ color: C.accent, fontWeight: 700 }}>the plan builds itself</span>. You
-            can change any of it later — nothing here is a commitment.
-          </p>
 
           {/*
             What it is for, before it is used.
@@ -802,10 +797,10 @@ function Setup({
           */}
           <div className="sell">
             {[
-              ["target", "Built around you", "Your level, your hours, your target"],
-              ["bars", "Weighted by the papers", "Ten years of real questions, counted"],
-              ["book", "Changes when you do", "Nothing is locked in on day one"],
-              ["trophy", "Turns reading into marks", "Answers written, marked and revisited"],
+              ["target", "Focused preparation", "Aligns with your goals and current level"],
+              ["bars", "Smarter recommendations", "Prioritises the high-yield topics"],
+              ["book", "Flexible and adjustable", "You can change any of it, anytime"],
+              ["trophy", "Stay consistent", "Turns preparation into progress"],
             ].map(([icon, title, sub], i) => (
               <div className="sell-row" key={title}>
                 <Badge name={icon!} tint={i} />
@@ -849,9 +844,10 @@ function Setup({
           into the first — under the emblem, in a column of its own.
         */}
         <div>
-        <div style={{ display: "grid", gap: 12 }}>
-          <section className="q-card">
+        <div className="q-list">
+          <section className="q-card req">
             <Badge name="person" tint={0} />
+            <span className="q-step" aria-hidden>1</span>
             <div className="q-body">
             <label
               htmlFor="setup-name"
@@ -892,8 +888,9 @@ function Setup({
             Collapsed it states the answer, which is the only part still worth
             reading after it has been given.
           */}
-          <section className="q-card">
+          <section className="q-card req">
             <Badge name="pin" tint={1} />
+            <span className="q-step" aria-hidden>2</span>
             <div className="q-body">
             <button
               onClick={() => setLevelOpen((v) => !v)}
@@ -1020,6 +1017,7 @@ function Setup({
           <Field
             icon="clock"
             tint={2}
+            step={3}
             label="Hours a week for sociology"
             help="How much time can you realistically give it?"
             value={hours}
@@ -1041,6 +1039,7 @@ function Setup({
           <Field
             icon="bars"
             tint={3}
+            step={4}
             label="How much of the syllabus are you aiming to cover?"
             help="The target this plan is built to reach."
             value={target}
@@ -1061,8 +1060,10 @@ function Setup({
           </Field>
           </div>
 
-          <section className="q-card">
+          <section className="q-card opt">
             <Badge name="book" tint={2} />
+            <span className="q-step" aria-hidden>5</span>
+            <span className="q-req" style={{ position: "absolute", top: 14, right: 16 }}>Optional</span>
             <div className="q-body">
             <button
               onClick={() => setShowKnown(!showKnown)}
@@ -1164,8 +1165,10 @@ function Setup({
             </div>
           </section>
 
-          <section className="q-card">
+          <section className="q-card opt">
             <Badge name="compass" tint={3} />
+            <span className="q-step" aria-hidden>6</span>
+            <span className="q-req" style={{ position: "absolute", top: 14, right: 16 }}>Optional</span>
             <div className="q-body">
             <label
               htmlFor="setup-start"
@@ -1262,7 +1265,8 @@ function Setup({
             cursor: "pointer",
           }}
         >
-          Start
+          Start my plan
+          <span aria-hidden style={{ marginLeft: 9 }}>→</span>
         </button>
 
         <button
@@ -1686,6 +1690,7 @@ function Field({
   sub,
   icon,
   tint,
+  step,
   ticks,
   children,
 }: {
@@ -1697,12 +1702,17 @@ function Field({
   sub?: string;
   icon: string;
   tint: number;
+  /** Which of the four this is. */
+  step: number;
   /** The scale under the track: its ends and a few marks between. */
   ticks?: string[];
   children: ReactNode;
 }) {
   return (
-    <section className="q-card">
+    <section className="q-card req">
+      <span className="q-step" aria-hidden>
+        {step}
+      </span>
       <Badge name={icon} tint={tint} />
       <div className="q-body">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
