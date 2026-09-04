@@ -12,6 +12,7 @@ import {
   questionsForUnit,
   attemptsOnQuestion,
   attemptTrend,
+  lastAnswer,
   RUBRIC_OUT_OF,
 } from "../../lib/planner";
 import { evaluate, prepareUploads, MAX_PAGES, type Evaluation } from "../../lib/ai";
@@ -72,6 +73,9 @@ export function AnswerPractice({
       legible?: boolean;
       scores?: Evaluation["scores"];
       rubricOutOf?: number;
+      weakest?: string;
+      rewrite?: string;
+      working?: string;
       readBack?: string;
     },
   ) => void;
@@ -204,6 +208,11 @@ export function AnswerPractice({
     onAttempt(topic.id, marks, OUT_OF, minutes, {
       selfMark: selfMark === "" ? undefined : Number(selfMark),
       rubricOutOf: RUBRIC_OUT_OF,
+      // Kept, not just displayed. The advice is worth something at the moment
+      // the topic is written again, and that is days after this screen closes.
+      weakest: result?.weakest,
+      rewrite: result?.rewrite,
+      working: result?.working,
       questionText: questionText || undefined,
       // Recorded for the first time here. Group B is answered two-from-three
       // and is where candidates quietly lose marks, and the blind-spot report
@@ -229,6 +238,7 @@ export function AnswerPractice({
   // after: a mark you are trying to beat is a target, the same mark discovered
   // afterwards is only a verdict.
   const trend = attemptTrend(d, topicId);
+  const last = lastAnswer(d, topicId);
 
   return (
     <div className="grid" style={{ gap: 13, maxWidth: 820 }}>
@@ -253,7 +263,72 @@ export function AnswerPractice({
               <span style={{ color: C.muted, fontSize: 15 }}> / {OUT_OF}</span>
             </span>
           </p>
-          <p style={{ fontSize: 13.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.6 }}>
+          {/*
+            Where the marks actually went last time.
+
+            "22/40" says the answer was weak; "you dropped 6 on thinkers and 5
+            on examples" says what to do on Tuesday — and it is the same data,
+            stored per criterion all along and shown only as a total. Ordered by
+            marks lost rather than by score, so the top row is always the one
+            worth an hour, and the criteria that cost nothing are not listed at
+            all: a clean sheet is not feedback.
+          */}
+          {last && last.totalLost > 0 && (
+            <div style={{ marginTop: 14 }}>
+              <p style={{ fontSize: 12.5, color: C.muted, margin: "0 0 7px" }}>
+                Where the {last.totalLost} marks went, {last.at.slice(0, 10)}
+              </p>
+              <div style={{ display: "grid", gap: 5 }}>
+                {last.lost
+                  .filter((l) => l.lost > 0)
+                  .map((l) => (
+                    <div
+                      key={l.key}
+                      style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13.5 }}
+                    >
+                      <span style={{ flex: "0 0 128px", color: C.text }}>
+                        {CRITERION_LABEL[l.key] ?? l.key}
+                      </span>
+                      <span
+                        style={{
+                          flex: 1,
+                          height: 8,
+                          borderRadius: 4,
+                          background: "var(--line)",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "block",
+                            width: `${(l.lost / last.outOfEach) * 100}%`,
+                            height: "100%",
+                            background: C.warn,
+                          }}
+                        />
+                      </span>
+                      <span
+                        className="num"
+                        style={{ flex: "0 0 62px", textAlign: "right", color: C.warn }}
+                      >
+                        −{l.lost} mark{l.lost === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+              {last.rewrite && (
+                <p style={{ fontSize: 13.5, lineHeight: 1.7, margin: "11px 0 0" }}>
+                  <strong>
+                    Told last time
+                    {last.weakest ? ` about ${(CRITERION_LABEL[last.weakest] ?? last.weakest).toLowerCase()}` : ""}:
+                  </strong>{" "}
+                  {last.rewrite}
+                </p>
+              )}
+            </div>
+          )}
+
+          <p style={{ fontSize: 13.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
             {trend.count === 1
               ? `Beat ${trend.first} today and the practice is working.`
               : trend.change > 0
@@ -427,6 +502,7 @@ export function AnswerPractice({
           weak={Boolean(
             result && Object.values(result.scores).reduce((a, b) => a + b, 0) / OUT_OF < 0.5,
           )}
+          missed={last ? { lost: last.lost, advice: last.rewrite } : undefined}
         />
       )}
 

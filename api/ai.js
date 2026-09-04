@@ -35,6 +35,18 @@
 
 /** Output ceilings, per task. See the note where this is used. */
 const METHOD_RULES = `
+LAST TIME'S GAP IS THIS TIME'S BRIEF. Where the context carries "lostLastTime",
+this candidate has already written this question or this topic and been marked,
+and those are the criteria that cost them the most marks — with "adviceLastTime"
+being what they were told to do about it. This is not background. Whatever you
+produce must visibly supply the thing that was missing: if they lost marks on
+thinkers, the thinkers are named here and given a job; if on examples, the Act,
+the figure, the place are written out rather than left as "give an example". Put
+those parts first among equals and make them the fullest, and do not let a
+second general point crowd out the specific one they have already proved they
+will not think of unaided. Say nothing about their past marks — they can see
+those; just make sure the gap is filled.
+
 WHAT, THEN WHY, THEN HOW. Inside a block that carries argument, move through the
 three: what the thing is, why it happens or matters, how it works out in
 practice. Not as headings — as the movement of the three lines. A block that

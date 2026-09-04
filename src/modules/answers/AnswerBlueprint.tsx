@@ -13,6 +13,7 @@ import { TOPICS } from "../../data/syllabus";
 import { standardReadingsFor, stdLine } from "../../data/standardBooks";
 import { BOOK_SCAN, scanPagesRead, scanPagesTotal, scanPending } from "../../data/bookScan";
 import { Diagram, ModelAnswerView } from "./ModelAnswerView";
+import { DRILL, type Dimension } from "../../lib/drill";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
@@ -38,6 +39,7 @@ export function AnswerBlueprint({
   unit,
   paper,
   weak,
+  missed,
 }: {
   question: string;
   /** Which chapters the candidate can actually open. */
@@ -47,6 +49,15 @@ export function AnswerBlueprint({
   paper: 1 | 2;
   /** Offers itself louder when the last answer was poor. */
   weak: boolean;
+  /**
+   * What the last marked answer on this topic dropped marks on, worst first,
+   * and what the marker said about it.
+   *
+   * Sent to the model, not just shown: a skeleton that omits the one thing this
+   * candidate has already proved they forget is a skeleton that will produce
+   * the same mark again.
+   */
+  missed?: { lost: { key: string; lost: number }[]; advice?: string };
 }) {
   const [structure, setStructure] = useState<AnswerStructure | null>(() =>
     cachedStructure(question),
@@ -112,6 +123,20 @@ export function AnswerBlueprint({
    */
   const books = standardReadingsFor(topicId).map(stdLine);
 
+  // Only the criteria that actually cost marks, worst first. A criterion that
+  // lost nothing is not a gap, and listing it would dilute the brief.
+  const gaps = (missed?.lost ?? []).filter((l) => l.lost > 0).slice(0, 3);
+  const gapContext =
+    gaps.length > 0
+      ? {
+          lostLastTime: gaps.map((l) => ({
+            criterion: DRILL[l.key as Dimension]?.name ?? l.key,
+            marksLost: l.lost,
+          })),
+          adviceLastTime: missed?.advice,
+        }
+      : {};
+
   async function buildAnswer(fresh = false) {
     if (fresh) {
       forgetModelAnswer(question);
@@ -131,6 +156,7 @@ export function AnswerBlueprint({
         paper: paper === 1 ? "I" : "II",
         marks: 40,
         minutes: 35,
+        ...gapContext,
         syllabusTopics: paperTopics.map((t) => ({ id: t.id, unit: t.unit, name: t.name })),
         books,
         // The skeleton has already told the candidate what to draw. Send it, so
@@ -163,6 +189,7 @@ export function AnswerBlueprint({
       paper: paper === 1 ? "I" : "II",
       marks: 40,
       minutes: 35,
+      ...gapContext,
       books,
     });
     setBusy(false);
@@ -185,6 +212,40 @@ export function AnswerBlueprint({
               ? "Built already. Open it and hold your answer against it."
               : "See the skeleton this question was asking for, and hold your answer against it."}
         </p>
+        {/*
+          The standing instruction, carried forward.
+
+          The candidate has already been marked on this topic and already been
+          told what went wrong, and by the time they open this screen again that
+          advice is days old and out of mind. It is on the model's brief either
+          way; saying it here as well is what makes the skeleton legible as an
+          answer to their own last attempt rather than a generic one.
+        */}
+        {gaps.length > 0 && (
+          <p
+            style={{
+              fontSize: 13.5,
+              lineHeight: 1.7,
+              margin: "0 0 12px",
+              padding: "10px 13px",
+              borderRadius: 9,
+              background: C.warnSoft,
+              color: C.text,
+              border: `1px solid ${C.warn}`,
+            }}
+          >
+            <strong>Do not miss this time:</strong>{" "}
+            {gaps
+              .map(
+                (l) =>
+                  `${(DRILL[l.key as Dimension]?.name ?? l.key).toLowerCase()} (−${l.lost})`,
+              )
+              .join(", ")}
+            . That is where your last answer on this topic lost the most, and
+            the skeleton below is built to supply it.
+          </p>
+        )}
+
         <button
           onClick={() => void show()}
           title="The skeleton this question was asking for: what it demands, how to open, and where each point goes. Not an answer to copy."

@@ -455,6 +455,54 @@ export function attemptTrend(d: Derived, topicId: string): AttemptTrend | null {
   };
 }
 
+export interface LastAnswer {
+  at: string;
+  marks: number;
+  outOf: number;
+  /** Every criterion, most marks dropped first. */
+  lost: { key: string; scored: number; lost: number }[];
+  totalLost: number;
+  /** What the marker said at the time, where the attempt is new enough to have kept it. */
+  weakest?: string;
+  rewrite?: string;
+  working?: string;
+  outOfEach: number;
+}
+
+/**
+ * The last answer on a topic, broken down by where the marks actually went.
+ *
+ * "You scored 22/40" tells a candidate they did badly. "You dropped 6 of the 18
+ * on thinkers and 5 on examples" tells them what to do on Tuesday, and it is
+ * the same data — the app has been storing the per-criterion scores all along
+ * and showing only their total. Sorted by marks lost rather than by score, so
+ * the row at the top is always the one worth an hour.
+ */
+export function lastAnswer(d: Derived, topicId: string): LastAnswer | null {
+  const scored = attemptsFor(d, topicId)
+    .filter((a) => a.scores)
+    .sort((a, b) => a.at.localeCompare(b.at));
+  const a = scored[scored.length - 1];
+  if (!a || !a.scores) return null;
+
+  const outOfEach = a.rubricOutOf ?? 10;
+  const lost = (["structure", "content", "thinkers", "examples", "demand"] as const)
+    .map((k) => ({ key: k, scored: a.scores![k], lost: outOfEach - a.scores![k] }))
+    .sort((x, y) => y.lost - x.lost);
+
+  return {
+    at: a.at,
+    marks: a.marks,
+    outOf: a.outOf,
+    lost,
+    totalLost: lost.reduce((s, l) => s + l.lost, 0),
+    weakest: a.weakest,
+    rewrite: a.rewrite,
+    working: a.working,
+    outOfEach,
+  };
+}
+
 /** Every topic written more than once, the ones that moved most first. */
 export function attemptTrends(d: Derived): AttemptTrend[] {
   return TOPICS.map((t) => attemptTrend(d, t.id))

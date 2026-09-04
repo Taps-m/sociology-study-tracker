@@ -165,6 +165,17 @@ export interface AttemptDetail {
   /** What each criterion was marked out of. Absent on attempts from before the
    * rubric moved to eights; those were tens. */
   rubricOutOf?: number;
+  /**
+   * What the marker said, kept.
+   *
+   * These were shown once, on the screen that produced them, and then dropped —
+   * so the one piece of writing advice a candidate had actually earned was gone
+   * by the time they sat down to write the topic again, which is the only
+   * moment it was any use. Absent on attempts recorded before this.
+   */
+  weakest?: string;
+  rewrite?: string;
+  working?: string;
   /** The opening of what the model read back, so a misreading is visible. */
   readBack?: string;
   /**
@@ -261,6 +272,9 @@ export function project(events: StudyEvent[]): Derived {
           group: e.group,
           scores: e.scores,
           rubricOutOf: e.rubricOutOf,
+          weakest: e.weakest,
+          rewrite: e.rewrite,
+          working: e.working,
           readBack: e.readBack,
           legible: e.legible,
         });

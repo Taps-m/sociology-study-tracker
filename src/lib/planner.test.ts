@@ -57,6 +57,7 @@ import {
   isComplete,
   attemptTrend,
   attemptTrends,
+  lastAnswer,
 } from "./planner";
 import { PYQS, PYQ_YEARS } from "../data/pyq";
 
@@ -452,6 +453,34 @@ describe("answers feed back into the plan", () => {
     expect(t.best).toBe(24);
     // A topic written once has no trend to report.
     expect(attemptTrends(build([on.attempt(highYield.id, 12, 40, 35)]))).toEqual([]);
+  });
+
+  it("breaks the last answer down by where the marks were lost", () => {
+    const d = build([
+      on.attempt(highYield.id, 30, 40, 35, {
+        rubricOutOf: 8,
+        scores: { structure: 8, content: 6, thinkers: 8, examples: 4, demand: 4 },
+      }),
+      // The one that counts: the most recent, not the best or the average.
+      on.attempt(highYield.id, 22, 40, 35, {
+        rubricOutOf: 8,
+        scores: { structure: 6, content: 5, thinkers: 2, examples: 5, demand: 4 },
+        weakest: "thinkers",
+        rewrite: "Name Bourdieu and give him a job.",
+      }),
+    ]);
+    const l = lastAnswer(d, highYield.id)!;
+    expect(l.marks).toBe(22);
+    expect(l.totalLost).toBe(18);
+    // Worst first, so the top row is the one worth an hour.
+    expect(l.lost[0]!.key).toBe("thinkers");
+    expect(l.lost[0]!.lost).toBe(6);
+    expect(l.rewrite).toBe("Name Bourdieu and give him a job.");
+  });
+
+  it("has no breakdown for a topic whose attempts were never scored", () => {
+    // A mark logged by hand carries no rubric, so there is nothing to break up.
+    expect(lastAnswer(build([on.attempt(highYield.id, 22, 40, 35)]), highYield.id)).toBeNull();
   });
 
   it("rescales attempts marked before the rubric moved to eights", () => {
