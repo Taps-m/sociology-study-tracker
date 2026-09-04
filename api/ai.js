@@ -322,9 +322,10 @@ piece of writing before marking, and never treat a page as a separate answer.
 The question, and anything else known about the attempt:
 ${json}
 
-Read the page. Then mark it against these five criteria, each out of 10. The
-five sum to 50 and the app converts that to the paper's 40 for the record, so
-mark the criteria honestly and leave the arithmetic alone.
+Read the page. Then mark it against these five criteria, each out of 8. Five
+eights are the forty this paper is marked out of, so the five scores you give
+ARE the mark — there is no conversion afterwards and nothing is scaled. A
+criterion the answer handles fully is 8; one it does not touch at all is 0.
 
 structure  - an introduction that frames rather than repeats, body paragraphs
              that follow one another, a conclusion that answers
@@ -340,6 +341,7 @@ Reply with JSON and nothing else, in exactly this shape:
 {"readBack":"<the first 200 characters of the answer as you read it>",
  "legible":true,
  "scores":{"structure":0,"content":0,"thinkers":0,"examples":0,"demand":0},
+ "outOf":8,
  "working":"<the one thing this answer already does, at most 25 words>",
  "weakest":"<which criterion>",
  "rewrite":"<one concrete rewrite of the weakest part, at most 60 words>"}

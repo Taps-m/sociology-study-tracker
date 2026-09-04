@@ -926,16 +926,27 @@ export function needsRework(d: Derived, topicId: string, today = new Date()): bo
   return due !== null && due <= dayKey(today);
 }
 
-/** Every criterion averaged across scored attempts, for the trend. */
+/**
+ * Every criterion averaged across scored attempts, for the trend.
+ *
+ * Attempts written before the rubric moved to eights are stored out of ten, so
+ * each score is rescaled before it joins the average. Without this an old 7/10
+ * and a new 7/8 would be added together as though they meant the same thing,
+ * and the trend the whole card exists to show would be a trend in the marking
+ * scheme rather than in the candidate.
+ */
+export const RUBRIC_OUT_OF = 8;
+
 export function rubricAverages(d: Derived) {
   const keys = ["structure", "content", "thinkers", "examples", "demand"] as const;
   const sums: Record<string, { n: number; total: number }> = {};
   for (const a of d.attempts) {
     if (!a.scores) continue;
+    const wasOutOf = a.rubricOutOf ?? 10;
     for (const k of keys) {
       sums[k] = sums[k] ?? { n: 0, total: 0 };
       sums[k].n++;
-      sums[k].total += a.scores[k];
+      sums[k].total += (a.scores[k] * RUBRIC_OUT_OF) / wasOutOf;
     }
   }
   return keys.map((k) => ({

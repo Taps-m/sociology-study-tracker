@@ -397,6 +397,7 @@ describe("answers feed back into the plan", () => {
   it("averages each criterion only over the answers that were scored", () => {
     const d = build([
       on.attempt(highYield.id, 30, 40, 35, {
+        rubricOutOf: 8,
         scores: { structure: 8, content: 6, thinkers: 4, examples: 7, demand: 5 },
       }),
       on.attempt(highYield.id, 20, 40, 35),
@@ -404,6 +405,24 @@ describe("answers feed back into the plan", () => {
     const byKey = Object.fromEntries(rubricAverages(d).map((r) => [r.key, r]));
     expect(byKey.thinkers!.average).toBe(4);
     expect(byKey.thinkers!.scored).toBe(1);
+  });
+
+  it("rescales attempts marked before the rubric moved to eights", () => {
+    // No rubricOutOf means it was marked out of ten. 5/10 and 4/8 are the same
+    // answer; averaged raw they would read as 4.5, which is a trend in the
+    // marking scheme rather than in the candidate.
+    const d = build([
+      on.attempt(highYield.id, 20, 40, 35, {
+        scores: { structure: 5, content: 5, thinkers: 5, examples: 5, demand: 5 },
+      }),
+      on.attempt(highYield.id, 20, 40, 35, {
+        rubricOutOf: 8,
+        scores: { structure: 4, content: 4, thinkers: 4, examples: 4, demand: 4 },
+      }),
+    ]);
+    const byKey = Object.fromEntries(rubricAverages(d).map((r) => [r.key, r]));
+    expect(byKey.thinkers!.average).toBe(4);
+    expect(byKey.thinkers!.scored).toBe(2);
   });
 
   it("measures how far the self-mark misses, and ignores unscored attempts", () => {

@@ -128,7 +128,15 @@ export interface TimeRecord {
   minutes: number;
 }
 
-/** The five criteria, each out of 10. Fixed wording, so scores stay comparable. */
+/**
+ * The five criteria. Fixed wording, so scores stay comparable.
+ *
+ * Marked out of 8 each, because five eights are the forty the paper is marked
+ * out of and a rubric that quietly adds up to a different number than the exam
+ * is a rubric nobody can read. Attempts recorded before that change carry no
+ * rubricOutOf and were marked out of 10; anything averaging across the two
+ * normalises first.
+ */
 export interface RubricScores {
   structure: number;
   content: number;
@@ -144,6 +152,9 @@ export interface AttemptDetail {
   questionText?: string;
   group?: "A" | "B";
   scores?: RubricScores;
+  /** What each criterion was marked out of. Absent on attempts from before the
+   * rubric moved to eights; those were tens. */
+  rubricOutOf?: number;
   /** The opening of what the model read back, so a misreading is visible. */
   readBack?: string;
   /**
@@ -239,6 +250,7 @@ export function project(events: StudyEvent[]): Derived {
           questionText: e.questionText,
           group: e.group,
           scores: e.scores,
+          rubricOutOf: e.rubricOutOf,
           readBack: e.readBack,
           legible: e.legible,
         });

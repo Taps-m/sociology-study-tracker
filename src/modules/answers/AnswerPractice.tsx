@@ -11,6 +11,7 @@ import {
   questionsForTopic,
   questionsForUnit,
   attemptsOnQuestion,
+  RUBRIC_OUT_OF,
 } from "../../lib/planner";
 import { evaluate, prepareUploads, MAX_PAGES, type Evaluation } from "../../lib/ai";
 import { AnswerBlueprint } from "./AnswerBlueprint";
@@ -69,6 +70,7 @@ export function AnswerPractice({
       group?: "A" | "B";
       legible?: boolean;
       scores?: Evaluation["scores"];
+      rubricOutOf?: number;
       readBack?: string;
     },
   ) => void;
@@ -193,12 +195,14 @@ export function AnswerPractice({
     const scored = result
       ? Object.values(result.scores).reduce((s, n) => s + n, 0)
       : undefined;
-    // Five criteria out of ten is a mark out of fifty; the paper is out of forty.
-    const marks = scored !== undefined ? Math.round((scored / 50) * OUT_OF) : Number(selfMark);
+    // Five criteria out of eight is the forty the paper is marked out of. The
+    // scores are the mark; there is nothing to convert.
+    const marks = scored !== undefined ? Math.round(scored) : Number(selfMark);
     if (!Number.isFinite(marks)) return;
 
     onAttempt(topic.id, marks, OUT_OF, minutes, {
       selfMark: selfMark === "" ? undefined : Number(selfMark),
+      rubricOutOf: RUBRIC_OUT_OF,
       questionText: questionText || undefined,
       // Recorded for the first time here. Group B is answered two-from-three
       // and is where candidates quietly lose marks, and the blind-spot report
@@ -382,7 +386,7 @@ export function AnswerPractice({
           unit={topic.unit}
           paper={topic.paper}
           weak={Boolean(
-            result && Object.values(result.scores).reduce((a, b) => a + b, 0) / 50 < 0.5,
+            result && Object.values(result.scores).reduce((a, b) => a + b, 0) / OUT_OF < 0.5,
           )}
         />
       )}
@@ -708,20 +712,19 @@ export function AnswerPractice({
             </p>
 
             {/*
-              The mark, on the scale the paper is actually marked on.
+              The mark, on the one scale this app uses.
 
-              Five criteria out of ten is a mark out of fifty, and that is what
-              the screen showed — while WBCS marks this answer out of forty and
-              the app has been storing the converted figure all along. A
-              candidate reading 33 here and 26 in their history had no way to
-              reconcile the two. The forty is the headline now; the five stay
-              underneath as what they are, a rubric rather than a mark sheet.
+              The rubric used to be five criteria out of ten, which adds to
+              fifty, next to a paper marked out of forty — so the screen said
+              33, the history said 26, and nothing on the page connected them.
+              Relabelling did not fix it, because the numbers still did not add
+              up to the number that mattered. Eight marks a criterion does:
+              five eights are forty, the five scores ARE the mark, and there is
+              no conversion left anywhere to be out of step with.
             */}
             <p style={{ fontSize: 15, margin: "12px 0 0", lineHeight: 1.5 }}>
               <span className="num" style={{ fontSize: 30, fontWeight: 700, color: C.accent }}>
-                {Math.round(
-                  (Object.values(result.scores).reduce((x, y) => x + y, 0) / 50) * OUT_OF,
-                )}
+                {Math.round(Object.values(result.scores).reduce((x, y) => x + y, 0))}
               </span>
               <span style={{ fontSize: 17, color: C.muted }}> / {OUT_OF}</span>
             </p>
@@ -734,7 +737,7 @@ export function AnswerPractice({
             )}
 
             <p style={{ fontSize: 12.5, color: C.muted, margin: "16px 0 0" }}>
-              How that mark was reached — five criteria, each out of 10
+              How that mark was reached — five criteria, {RUBRIC_OUT_OF} marks each
             </p>
 
             <div style={{ marginTop: 6 }}>
@@ -751,7 +754,7 @@ export function AnswerPractice({
                   >
                     <span>{CRITERION_LABEL[k] ?? k}</span>
                     <span className="num" style={{ color: C.text }}>
-                      {v}/10
+                      {v}/{RUBRIC_OUT_OF}
                     </span>
                   </div>
                   <div
@@ -764,9 +767,14 @@ export function AnswerPractice({
                   >
                     <div
                       style={{
-                        width: `${(v / 10) * 100}%`,
+                        width: `${(v / RUBRIC_OUT_OF) * 100}%`,
                         height: "100%",
-                        background: v >= 7 ? "var(--good)" : v >= 5 ? "var(--warn)" : "#dc2626",
+                        background:
+                          v / RUBRIC_OUT_OF >= 0.7
+                            ? "var(--good)"
+                            : v / RUBRIC_OUT_OF >= 0.5
+                              ? "var(--warn)"
+                              : "#dc2626",
                       }}
                     />
                   </div>
@@ -839,7 +847,7 @@ export function AnswerPractice({
                 >
                   <span>{CRITERION_LABEL[a.key]}</span>
                   <span className="num" style={{ color: C.text }}>
-                    {a.average === null ? "—" : `${a.average}/10`}
+                    {a.average === null ? "—" : `${a.average}/${RUBRIC_OUT_OF}`}
                   </span>
                 </div>
               ))}
