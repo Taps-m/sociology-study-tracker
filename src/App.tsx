@@ -892,10 +892,21 @@ function Setup({
 
             {levelOpen && (
             <>
-            <p style={{ fontSize: 13, color: C.muted, margin: "8px 0 12px", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 9px", lineHeight: 1.5 }}>
               This sets how long the run is and how deep to go on the topics WBCS rarely asks.
             </p>
-            <div style={{ display: "grid", gap: 8 }}>
+            {/*
+              Three tight rows, not three cards.
+
+              This is one tap, taken once, and it was reading as the centre of
+              the page: full-width cards, a heading line, a blurb line, and a
+              third line on the chosen one for the end date. Title and duration
+              now share a line, the blurb sits under it in small, and the date
+              has moved out of the option to a single line beneath the group —
+              it belongs to the choice, not to the button, and inside the button
+              it made the selected row taller than the other two.
+            */}
+            <div style={{ display: "grid", gap: 5 }}>
               {LEVELS.map((l) => {
                 const on = level === l.id;
                 return (
@@ -907,8 +918,8 @@ function Setup({
                       display: "block",
                       width: "100%",
                       textAlign: "left",
-                      padding: "12px 14px",
-                      borderRadius: 9,
+                      padding: "8px 11px",
+                      borderRadius: 8,
                       cursor: "pointer",
                       fontFamily: C.sans,
                       background: on ? C.accentSoft : C.surface,
@@ -918,29 +929,30 @@ function Setup({
                     <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
+                        alignItems: "baseline",
                         justifyContent: "space-between",
                         gap: 10,
                       }}
                     >
-                      <span style={{ fontSize: 15, fontWeight: on ? 600 : 500, color: C.text }}>
+                      <span style={{ fontSize: 14, fontWeight: on ? 650 : 500, color: C.text }}>
                         {l.label}
                       </span>
-                      <span style={{ fontSize: 12.5, color: on ? C.accent : C.muted }}>
-                        {l.months} months
+                      <span
+                        className="num"
+                        style={{ fontSize: 12, color: on ? C.accent : C.muted, flexShrink: 0 }}
+                      >
+                        {l.months} mo
                       </span>
                     </div>
-                    <div style={{ fontSize: 13, color: C.muted, marginTop: 4, lineHeight: 1.55 }}>
+                    <div style={{ fontSize: 12.5, color: C.muted, marginTop: 1, lineHeight: 1.45 }}>
                       {l.blurb}
                     </div>
-                    {on && (
-                      <div style={{ fontSize: 12.5, color: C.accent, marginTop: 6 }}>
-                        Ends {readable}
-                      </div>
-                    )}
                   </button>
                 );
               })}
+            </div>
+            <div style={{ fontSize: 12, color: C.muted, marginTop: 7 }}>
+              Ends <span style={{ color: C.accent }}>{readable}</span>
             </div>
             </>
             )}
