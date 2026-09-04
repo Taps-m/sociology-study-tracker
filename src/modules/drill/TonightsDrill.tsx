@@ -4,6 +4,7 @@ import { DRILL, drillDoneToday, markDrillDone, tonightsDrill } from "../../lib/d
 import type { Derived } from "../../lib/events";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
+import { Icon } from "../../app/Icon";
 
 /**
  * Tonight, in fifteen minutes.
@@ -59,7 +60,10 @@ export function TonightsDrill({ d }: { d: Derived }) {
   };
 
   return (
-    <Card title={done && !mark ? "Tonight's fifteen minutes · done" : "Tonight's fifteen minutes"}>
+    <Card
+      icon="clock"
+      title={done && !mark ? "Tonight's fifteen minutes · done" : "Tonight's fifteen minutes"}
+    >
       {/*
         Why this exercise and not another. A drill that cannot say why it was
         chosen is a random exercise, and a random exercise is homework.
@@ -142,8 +146,12 @@ export function TonightsDrill({ d }: { d: Derived }) {
               fontSize: 14.5,
               fontWeight: 700,
               cursor: busy || text.trim().length < 20 ? "default" : "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
+            <Icon name="tick" size={16} />
             {busy ? "Marking…" : "Mark this"}
           </button>
           {error && <p style={{ fontSize: 13, color: C.warn, margin: "9px 0 0" }}>{error}</p>}

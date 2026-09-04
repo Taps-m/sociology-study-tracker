@@ -252,8 +252,25 @@ input[type="range"]::-moz-range-thumb {
 }
 @media (min-width: 900px) {
   .rail {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
+}
+
+/*
+ * The rail is a column with a bottom to it.
+ *
+ * Ten links and then nothing read as a list that had been cut off. The
+ * attribution takes the space, and margin-top:auto puts it where a footer goes
+ * without a fixed height anywhere.
+ */
+.rail-foot {
+  margin-top: auto;
+  padding: 18px 12px 4px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--rail-muted);
 }
 
 .rail-item {
@@ -280,12 +297,21 @@ input[type="range"]::-moz-range-thumb {
   background: var(--accent);
   color: var(--accent-ink);
   font-weight: 600;
+  border-radius: 10px;
 }
 
+/*
+ * The bar above the page, in the page's own colours.
+ *
+ * It was painted in the rail's near-black, so a light screen carried a dark
+ * band across the top that belonged to neither the rail beside it nor the page
+ * under it — two products sharing a screen. The rail stays dark because it is a
+ * different surface; the bar sits on the page and should look like it.
+ */
 .topbar {
-  background: var(--rail);
-  border-bottom: 1px solid var(--rail-line);
-  color: var(--rail-text);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 12px;

@@ -2,6 +2,7 @@ import type { CheckId, Derived } from "../../lib/events";
 import { todaysBoard } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
+import { Icon } from "../../app/Icon";
 import type { RouteId } from "../../app/routes";
 
 /**
@@ -31,6 +32,7 @@ export function TodaysFocus({
   return (
     <Card
       title="Today's focus"
+      icon="target"
       action={
         <span className="num" style={{ fontSize: 13, color: allDone ? C.good : C.muted }}>
           {board.done} of {board.total} done
@@ -145,8 +147,13 @@ export function TodaysFocus({
           fontSize: 14.5,
           fontWeight: 600,
           cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 9,
         }}
       >
+        <Icon name={allDone ? "tick" : "play"} size={17} />
         {allDone ? "Review today's work" : board.done > 0 ? "Carry on" : "Start today's study"}
       </button>
     </Card>

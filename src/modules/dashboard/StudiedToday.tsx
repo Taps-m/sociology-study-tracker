@@ -54,7 +54,7 @@ export function StudiedToday({
   }
 
   return (
-    <Card title="What did you study today?">
+    <Card icon="search" title="What did you study today?">
       <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 10px", lineHeight: 1.6 }}>
         Type two words. The plan rebuilds itself around whatever you tell it.
       </p>

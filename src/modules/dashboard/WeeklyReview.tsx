@@ -67,6 +67,7 @@ export function WeeklyReview({ d }: { d: Derived }) {
   return (
     <Card
       title="This week's review"
+      icon="bars"
       action={
         <button
           onClick={run}

@@ -14,6 +14,7 @@ import {
 } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
+import { Icon } from "../../app/Icon";
 import type { RouteId } from "../../app/routes";
 import { WeeklyReview } from "./WeeklyReview";
 import { TodaysFocus } from "./TodaysFocus";
@@ -129,9 +130,24 @@ export function DashboardScreen({
 
   return (
     <div className="dash">
-      <header className="dash-full" style={{ padding: "2px 2px 0" }}>
+      <header
+        className="dash-full"
+        style={{ padding: "2px 2px 0", display: "flex", alignItems: "flex-start", gap: 12 }}
+      >
+        {/*
+          The one place the name is worth having.
+
+          It is collected in setup, described there as "only used to greet you",
+          and then was not used to greet anyone — the heading read "Good
+          afternoon." to a field the app had asked for and ignored.
+        */}
+        <span style={{ color: "var(--accent)", marginTop: 4, flex: "0 0 auto" }}>
+          <Icon name="sprout" size={26} />
+        </span>
+        <div style={{ minWidth: 0 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, letterSpacing: "-0.01em" }}>
-          {greeting}.
+          {greeting}
+          {settings.name ? `, ${settings.name}` : ""}.
         </h1>
         <p style={{ fontSize: 14, color: C.muted, margin: "6px 0 0" }}>
           {days === null ? (
@@ -150,6 +166,7 @@ export function DashboardScreen({
             "no streak yet"
           )}
         </p>
+        </div>
       </header>
 
       {/*
@@ -160,37 +177,31 @@ export function DashboardScreen({
         focus" while everything else was squeezed into half the width for no
         reason.
 
-        Split by what the card asks of you rather than by what it is about. The
-        left column is where you write something — tonight's block, and what you
-        studied today. The right is where you read and tick: the checklist, the
-        weekly reading, the wheel. That keeps a cursor on one side of the screen
-        and keeps both columns roughly the same height, which is the only reason
-        the old layout looked broken.
+        Left is the long view: the block you write tonight, and the wheel that
+        says how far the whole thing has got. Right is today — what is on the list, what
+        you have just finished, how the week reads, and a line worth carrying
+        out of the app. Two columns of roughly equal height, which is the only
+        reason the old one looked broken.
       */}
       <div className="grid" style={{ gap: 13, minWidth: 0 }}>
         <TonightsDrill d={d} />
 
-        <StudiedToday d={d} onToggle={onToggle} />
-
-        <section className="card" style={{ padding: 14, borderLeft: `3px solid ${C.accent}` }}>
-          <blockquote style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, fontStyle: "italic" }}>
-            “{quote.text}”
-          </blockquote>
-          <div style={{ fontFamily: C.mono, fontSize: 12, color: C.muted, marginTop: 8 }}>
-            {quote.who} · {quote.where}
-          </div>
-        </section>
-      </div>
-
-      <div className="grid" style={{ gap: 13, minWidth: 0 }}>
-        <TodaysFocus d={d} go={go} onToggle={onToggle} />
-
-        <WeeklyReview d={d} />
-
         <Card
-        title="Overall progress"
+          title="Overall progress"
+          icon="trend"
         action={
-          <span style={{ fontSize: 13, color: STANDING_COLOUR[standing], fontWeight: 600 }}>
+          <span
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: STANDING_COLOUR[standing],
+              background: "var(--raised)",
+              border: `1px solid ${STANDING_COLOUR[standing]}`,
+              borderRadius: 999,
+              padding: "3px 10px",
+              whiteSpace: "nowrap",
+            }}
+          >
             {STANDING_WORD[standing]}
           </span>
         }
@@ -225,6 +236,33 @@ export function DashboardScreen({
         </div>
         </Card>
 
+      </div>
+
+      <div className="grid" style={{ gap: 13, minWidth: 0 }}>
+        <TodaysFocus d={d} go={go} onToggle={onToggle} />
+
+        <StudiedToday d={d} onToggle={onToggle} />
+
+        <WeeklyReview d={d} />
+
+        <section
+          className="card"
+          style={{ padding: 16, display: "flex", gap: 12, alignItems: "flex-start" }}
+        >
+          <span style={{ color: C.accent, opacity: 0.55, flex: "0 0 auto", marginTop: 1 }}>
+            <Icon name="quote" size={22} />
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <blockquote
+              style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, fontStyle: "italic" }}
+            >
+              “{quote.text}”
+            </blockquote>
+            <div style={{ fontSize: 12.5, color: C.muted, marginTop: 8 }}>
+              — {quote.who} · {quote.where}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

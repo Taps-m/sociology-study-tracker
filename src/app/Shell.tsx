@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Logo } from "./Logo";
+import { Icon } from "./Icon";
 import { ROUTES, type RouteId } from "./routes";
 import { applyTheme, C, loadTheme, type ThemeName } from "../lib/theme";
 
@@ -63,12 +64,27 @@ export function Shell({
             aria-current={route === r.id ? "page" : undefined}
             onClick={() => go(r.id)}
           >
-            <span aria-hidden style={{ width: 16, textAlign: "center", opacity: 0.9 }}>
-              {r.icon}
+            <span style={{ flex: "0 0 auto", display: "grid", placeItems: "center" }}>
+              <Icon name={r.icon} size={18} />
             </span>
             <span style={{ flex: 1 }}>{r.label}</span>
           </button>
         ))}
+
+        {/*
+          Attribution at the foot of the rail rather than under the last screen.
+
+          It is on every page this way without being on any page twice, and the
+          rail has a bottom that needs holding down — ten links and then nothing
+          reads as a list that got cut off.
+        */}
+        <div className="rail-foot">
+          <div>Designed and built by Tapomoy</div>
+          <div>for WBCS Sociology aspirants</div>
+          <div style={{ marginTop: 6, opacity: 0.75 }}>
+            Copyright © {new Date().getFullYear()} Tapomoy. All rights reserved.
+          </div>
+        </div>
       </nav>
 
       <div style={{ minWidth: 0 }}>
@@ -290,11 +306,19 @@ export function Shell({
 /** A titled card. Every module builds out of these. */
 export function Card({
   title,
+  icon,
   action,
   children,
   pad = 16,
 }: {
   title?: string;
+  /**
+   * A mark beside the heading. Optional, and worth using on a screen where
+   * several cards stack: a column of headings set in the same size and weight
+   * is a wall of text, and the mark is what the eye finds a card by before it
+   * has read anything.
+   */
+  icon?: string;
   action?: ReactNode;
   children: ReactNode;
   pad?: number;
@@ -311,7 +335,24 @@ export function Card({
             marginBottom: 12,
           }}
         >
-          <h2 style={{ fontSize: 15.5, fontWeight: 600, margin: 0 }}>{title}</h2>
+          <h2
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              fontSize: 15.5,
+              fontWeight: 600,
+              margin: 0,
+              minWidth: 0,
+            }}
+          >
+            {icon && (
+              <span style={{ color: "var(--accent)", flex: "0 0 auto" }}>
+                <Icon name={icon} size={19} />
+              </span>
+            )}
+            <span style={{ minWidth: 0 }}>{title}</span>
+          </h2>
           {action}
         </div>
       )}

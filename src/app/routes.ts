@@ -17,16 +17,16 @@ import { useEffect, useState } from "react";
  * four that matter and truncated the last one mid-word.
  */
 export const ROUTES = [
-  { id: "dashboard", label: "Dashboard", icon: "◎", primary: true },
-  { id: "chapters", label: "Chapters", icon: "▤", primary: true },
-  { id: "answers", label: "Answer Practice", icon: "✎", primary: true },
-  { id: "revision", label: "Quick Revision", icon: "↻", primary: true },
-  { id: "plan", label: "Study Plan", icon: "◫", primary: false },
-  { id: "today", label: "Today's Study", icon: "◐", primary: false },
-  { id: "pyq", label: "PYQ Explorer", icon: "◈", primary: false },
-  { id: "progress", label: "Progress", icon: "▲", primary: false },
-  { id: "guide", label: "How this works", icon: "?", primary: false },
-  { id: "settings", label: "Settings", icon: "⚙", primary: false },
+  { id: "dashboard", label: "Dashboard", icon: "home", primary: true },
+  { id: "chapters", label: "Chapters", icon: "layers", primary: true },
+  { id: "answers", label: "Answer Practice", icon: "pencil", primary: true },
+  { id: "revision", label: "Quick Revision", icon: "refresh", primary: true },
+  { id: "plan", label: "Study Plan", icon: "calendar", primary: false },
+  { id: "today", label: "Today's Study", icon: "clock", primary: false },
+  { id: "pyq", label: "PYQ Explorer", icon: "diamond", primary: false },
+  { id: "progress", label: "Progress", icon: "trend", primary: false },
+  { id: "guide", label: "How this works", icon: "question", primary: false },
+  { id: "settings", label: "Settings", icon: "gear", primary: false },
 ] as const;
 
 export type RouteId = (typeof ROUTES)[number]["id"];
