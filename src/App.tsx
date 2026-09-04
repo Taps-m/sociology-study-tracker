@@ -161,6 +161,7 @@ export default function App() {
 
       {route === "settings" && (
         <div className="grid" style={{ gap: 14 }}>
+          <BuildStamp />
           <Greeting d={d} onName={(name) => add(on.settings({ name }))} />
           <AvatarControl
             avatar={avatar}
@@ -1817,6 +1818,31 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h2 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 12px" }}>{title}</h2>
       {children}
     </section>
+  );
+}
+
+/**
+ * Which build this is, and when it was made.
+ *
+ * A service worker plus content-hashed assets makes "I rebuilt and nothing
+ * changed" ambiguous: the code may be wrong, or the page in front of you may
+ * simply be one the browser kept. That cost an afternoon of looking at
+ * screenshots and arguing about CSS that had already shipped. Now the app says
+ * so itself — compare the short hash against `git log -1` and the question is
+ * answered in two seconds.
+ */
+function BuildStamp() {
+  return (
+    <Card title="This build" icon="tick">
+      <p style={{ fontSize: 14, margin: 0, lineHeight: 1.7 }}>
+        <span className="num">{__BUILD_COMMIT__}</span>
+        <span style={{ color: C.muted }}> · built {__BUILD_AT__} UTC</span>
+      </p>
+      <p style={{ fontSize: 13, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+        If this does not match <span className="num">git log -1</span> after a rebuild, the
+        page is cached rather than stale code — reload with Ctrl+Shift+R.
+      </p>
+    </Card>
   );
 }
 

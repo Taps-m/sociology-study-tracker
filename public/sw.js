@@ -13,7 +13,7 @@
  *
  * Bump CACHE to force every client onto a new generation.
  */
-const CACHE = "wbcs-v2";
+const CACHE = "wbcs-v3";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
