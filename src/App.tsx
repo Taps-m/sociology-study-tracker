@@ -824,8 +824,15 @@ function Setup({
           <section style={panelStyle}>
             <label
               htmlFor="setup-name"
-              style={{ display: "block", fontSize: 14.5, color: C.text, marginBottom: 10 }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                fontSize: 14.5,
+                color: C.text,
+                marginBottom: 10,
+              }}
             >
+              <Step n={1} />
               What should I call you?
             </label>
             <input
@@ -864,8 +871,8 @@ function Setup({
               title="Change how long the run is and how deep to go on the rarely-asked topics"
               style={{
                 display: "flex",
-                alignItems: "baseline",
-                gap: 10,
+                alignItems: "center",
+                gap: 0,
                 width: "100%",
                 padding: 0,
                 border: "none",
@@ -876,6 +883,7 @@ function Setup({
                 color: C.text,
               }}
             >
+              <Step n={2} />
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ fontSize: 14.5 }}>Where are you starting from?</span>
                 {!levelOpen && (
@@ -968,7 +976,7 @@ function Setup({
             )}
           </section>
 
-          <Field label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
+          <Field step={3} label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
             <input
               type="range"
               min={1}
@@ -979,7 +987,7 @@ function Setup({
             />
           </Field>
 
-          <Field label="How much of the syllabus are you aiming to cover?" value={target} unit="%" sub="the rest stays visible as optional">
+          <Field step={4} label="How much of the syllabus are you aiming to cover?" value={target} unit="%" sub="the rest stays visible as optional">
             <input
               type="range"
               min={50}
@@ -1560,23 +1568,62 @@ const panelStyle = {
   padding: "16px 18px",
 } as const;
 
+/**
+ * The number on one of the four.
+ *
+ * "Four questions, then the plan builds itself" is the promise, and until now
+ * nothing on the page showed which four — the required questions and the two
+ * optional sections all looked alike, so the claim had to be taken on trust.
+ * Numbered, they read as a set you can see the end of, and the optional ones
+ * stay deliberately plain because they are not part of the count.
+ */
+function Step({ n }: { n: number }) {
+  return (
+    <span
+      aria-hidden
+      className="num"
+      style={{
+        display: "grid",
+        placeItems: "center",
+        flex: "0 0 auto",
+        width: 21,
+        height: 21,
+        borderRadius: 999,
+        background: C.accent,
+        color: C.accentInk,
+        fontSize: 11.5,
+        fontWeight: 700,
+        marginRight: 9,
+      }}
+    >
+      {n}
+    </span>
+  );
+}
+
 function Field({
   label,
   value,
   unit,
   sub,
+  step,
   children,
 }: {
   label: string;
   value: number;
   unit: string;
   sub?: string;
+  /** Which of the four this is. Omitted on anything that is not one of them. */
+  step?: number;
   children: ReactNode;
 }) {
   return (
     <section style={panelStyle}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-        <span style={{ fontSize: 14.5, color: C.text, lineHeight: 1.4 }}>{label}</span>
+        <span style={{ fontSize: 14.5, color: C.text, lineHeight: 1.4, display: "flex", alignItems: "center" }}>
+          {step !== undefined && <Step n={step} />}
+          {label}
+        </span>
         <span style={{ whiteSpace: "nowrap" }}>
           <span
             style={{
