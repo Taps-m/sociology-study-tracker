@@ -24,6 +24,7 @@ import {
   observedPace,
   options,
   progress,
+  attemptTrends,
   projection,
   requiredPace,
   windowEnd,
@@ -45,7 +46,7 @@ import { clearAdvice } from "./lib/ai";
 import { Badge } from "./app/Icon";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
-import { Shell as AppShell } from "./app/Shell";
+import { Shell as AppShell, Card } from "./app/Shell";
 import { useRoute } from "./app/routes";
 import { AskAI } from "./app/AskAI";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
@@ -153,6 +154,7 @@ export default function App() {
       {route === "progress" && (
         <div className="grid" style={{ gap: 14 }}>
           <Telemetry d={d} />
+          <WritingTrend d={d} />
           <RecentActivity events={events} add={add} />
         </div>
       )}
@@ -280,6 +282,66 @@ function Greeting({ d, onName }: { d: Derived; onName: (name: string) => void })
         </figcaption>
       </figure>
     </header>
+  );
+}
+
+/**
+ * Where writing a topic twice actually moved the mark.
+ *
+ * Percentage complete says how much of the syllabus has been touched, which is
+ * a measure of effort. This is the only place in the app that measures whether
+ * the effort worked: same topic, written again, higher or not. Topics written
+ * once are left out — one mark is a fact, not a trend — and the ones that went
+ * backwards are shown as plainly as the ones that went up, because a topic
+ * that got worse on the second attempt is the most useful row on the screen.
+ */
+function WritingTrend({ d }: { d: Derived }) {
+  const trends = attemptTrends(d);
+  if (trends.length === 0) return null;
+
+  return (
+    <Card title="Written more than once">
+      <div style={{ display: "grid", gap: 2 }}>
+        {trends.map((t) => {
+          const topic = TOPICS.find((x) => x.id === t.topicId);
+          if (!topic) return null;
+          const up = t.change > 0;
+          const flat = t.change === 0;
+          return (
+            <div
+              key={t.topicId}
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 10,
+                padding: "7px 0",
+                borderBottom: `1px solid ${C.hair}`,
+              }}
+            >
+              <span style={{ fontSize: 14, color: C.text, flex: 1, minWidth: 0 }}>
+                {topic.name}
+              </span>
+              <span className="num" style={{ fontSize: 13, color: C.muted, flexShrink: 0 }}>
+                {t.marks.join(" → ")} / 40
+              </span>
+              <span
+                className="num"
+                style={{
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  flexShrink: 0,
+                  minWidth: 34,
+                  textAlign: "right",
+                  color: up ? "var(--good)" : flat ? C.muted : C.warn,
+                }}
+              >
+                {flat ? "±0" : `${up ? "+" : ""}${t.change}`}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 

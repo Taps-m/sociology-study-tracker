@@ -119,6 +119,16 @@ export const on = {
 export interface CheckRecord {
   at: string;
   prior: boolean;
+  /**
+   * True when nothing was ticked — the check follows from work already in the
+   * log, and is not the candidate's claim about themselves.
+   *
+   * Writing a full answer on a topic is evidence of having read it, so asking
+   * for the tick as well is asking someone to confirm what the app watched
+   * them do. An implied check cannot be unticked, because there is nothing to
+   * untick: the attempt it rests on is a fact.
+   */
+  implied?: boolean;
 }
 
 export interface TimeRecord {

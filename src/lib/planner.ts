@@ -129,8 +129,42 @@ export function depthFor(d: Derived, topic: Topic): number {
 
 // ── completion ────────────────────────────────────────────────────────────
 
+/**
+ * What writing an answer proves on its own.
+ *
+ * You cannot write a 40-mark answer on social mobility without having read
+ * social mobility, and the PYQ check is the answer itself. Requiring the ticks
+ * as well meant the wheel showed 0% for a topic the candidate had just been
+ * marked on — the app disbelieving work it had done the marking for.
+ *
+ * Notes and revision are deliberately not on this list. Neither follows from
+ * having written once, and revision in particular is the thing that has to
+ * come back later; a topic that marks itself fully complete on first contact
+ * leaves the revision queue and is never seen again.
+ */
+export const IMPLIED_BY_ATTEMPT = ["read", "pyq"] as const satisfies readonly CheckId[];
+
 export function checksFor(d: Derived, topicId: string) {
-  return d.checks[topicId] ?? {};
+  const ticked = d.checks[topicId] ?? {};
+  let earliest: string | null = null;
+  for (const a of d.attempts) {
+    if (a.topicId !== topicId) continue;
+    if (earliest === null || a.at < earliest) earliest = a.at;
+  }
+  if (earliest === null) return ticked;
+
+  const out = { ...ticked };
+  for (const id of IMPLIED_BY_ATTEMPT) {
+    // An explicit tick wins: it may be older than the attempt, and the date is
+    // used for revision intervals.
+    if (!out[id]) out[id] = { at: earliest, prior: false, implied: true };
+  }
+  return out;
+}
+
+/** Whether this check is standing on an attempt rather than on a tick. */
+export function isImplied(d: Derived, topicId: string, check: CheckId): boolean {
+  return Boolean(checksFor(d, topicId)[check]?.implied);
 }
 
 export function isChecked(d: Derived, topicId: string, check: CheckId): boolean {
@@ -379,6 +413,53 @@ export function attemptStats(d: Derived, days = 21, today = new Date()) {
 
 export function attemptsFor(d: Derived, topicId: string) {
   return d.attempts.filter((a) => a.topicId === topicId);
+}
+
+export interface AttemptTrend {
+  topicId: string;
+  /** How many answers have been written on this topic. */
+  count: number;
+  /** Every mark, oldest first, on the paper's own 40. */
+  marks: number[];
+  first: number;
+  last: number;
+  best: number;
+  /** Last minus first. Zero on a single attempt. */
+  change: number;
+}
+
+/**
+ * One topic's answers, in the order they were written.
+ *
+ * The single number a candidate most wants and this app was not showing: not
+ * what they scored, but whether writing the same topic again moved it. A mark
+ * on its own says the answer was weak; 12 then 19 then 24 says the practice is
+ * working, which is the only thing that keeps someone writing the fourth one.
+ */
+export function attemptTrend(d: Derived, topicId: string): AttemptTrend | null {
+  const marks = attemptsFor(d, topicId)
+    .slice()
+    .sort((a, b) => a.at.localeCompare(b.at))
+    .map((a) => a.marks);
+  if (marks.length === 0) return null;
+  const first = marks[0]!;
+  const last = marks[marks.length - 1]!;
+  return {
+    topicId,
+    count: marks.length,
+    marks,
+    first,
+    last,
+    best: Math.max(...marks),
+    change: last - first,
+  };
+}
+
+/** Every topic written more than once, the ones that moved most first. */
+export function attemptTrends(d: Derived): AttemptTrend[] {
+  return TOPICS.map((t) => attemptTrend(d, t.id))
+    .filter((t): t is AttemptTrend => t !== null && t.count > 1)
+    .sort((a, b) => b.change - a.change);
 }
 
 // ── revision decay ────────────────────────────────────────────────────────

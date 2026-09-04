@@ -50,6 +50,13 @@ import {
   nextOnRamp,
   suggestedMonths,
   DEPTHS,
+  isChecked,
+  isPrior,
+  isImplied,
+  completionOf,
+  isComplete,
+  attemptTrend,
+  attemptTrends,
 } from "./planner";
 import { PYQS, PYQ_YEARS } from "../data/pyq";
 
@@ -405,6 +412,46 @@ describe("answers feed back into the plan", () => {
     const byKey = Object.fromEntries(rubricAverages(d).map((r) => [r.key, r]));
     expect(byKey.thinkers!.average).toBe(4);
     expect(byKey.thinkers!.scored).toBe(1);
+  });
+
+  it("counts an answer as evidence the material was read", () => {
+    // No checks ticked at all — just one answer written on the topic.
+    const d = build([on.attempt(highYield.id, 22, 40, 35)]);
+    expect(isChecked(d, highYield.id, "read")).toBe(true);
+    expect(isChecked(d, highYield.id, "pyq")).toBe(true);
+    expect(isImplied(d, highYield.id, "read")).toBe(true);
+    // read 0.4 + pyq 0.2. Notes and revision are not implied by writing once.
+    expect(completionOf(d, highYield.id)).toBeCloseTo(0.6, 5);
+    expect(isChecked(d, highYield.id, "notes")).toBe(false);
+    expect(isChecked(d, highYield.id, "revised")).toBe(false);
+    expect(isComplete(d, highYield.id)).toBe(false);
+  });
+
+  it("leaves a real tick alone rather than replacing it with an implied one", () => {
+    // The tick carries a date the revision intervals count from, and it is
+    // older than the attempt. Overwriting it would move a revision due date.
+    const d = build([
+      on.check(highYield.id, "read", { prior: true }),
+      on.attempt(highYield.id, 22, 40, 35),
+    ]);
+    expect(isImplied(d, highYield.id, "read")).toBe(false);
+    expect(isPrior(d, highYield.id, "read")).toBe(true);
+    expect(isImplied(d, highYield.id, "pyq")).toBe(true);
+  });
+
+  it("reads the attempts on a topic in the order they were written", () => {
+    const d = build([
+      on.attempt(highYield.id, 12, 40, 35),
+      on.attempt(highYield.id, 19, 40, 35),
+      on.attempt(highYield.id, 24, 40, 35),
+    ]);
+    const t = attemptTrend(d, highYield.id)!;
+    expect(t.count).toBe(3);
+    expect(t.marks).toEqual([12, 19, 24]);
+    expect(t.change).toBe(12);
+    expect(t.best).toBe(24);
+    // A topic written once has no trend to report.
+    expect(attemptTrends(build([on.attempt(highYield.id, 12, 40, 35)]))).toEqual([]);
   });
 
   it("rescales attempts marked before the rubric moved to eights", () => {

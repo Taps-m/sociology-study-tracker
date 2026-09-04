@@ -11,6 +11,7 @@ import {
   questionsForTopic,
   questionsForUnit,
   attemptsOnQuestion,
+  attemptTrend,
   RUBRIC_OUT_OF,
 } from "../../lib/planner";
 import { evaluate, prepareUploads, MAX_PAGES, type Evaluation } from "../../lib/ai";
@@ -224,8 +225,46 @@ export function AnswerPractice({
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  // What this topic has scored before, oldest first. Read before writing, not
+  // after: a mark you are trying to beat is a target, the same mark discovered
+  // afterwards is only a verdict.
+  const trend = attemptTrend(d, topicId);
+
   return (
     <div className="grid" style={{ gap: 13, maxWidth: 820 }}>
+      {trend && (
+        <Card title={`You have written this topic ${trend.count}×`}>
+          <p style={{ fontSize: 15, margin: 0, lineHeight: 1.6 }}>
+            <span className="num">
+              {trend.marks.map((m, i) => (
+                <span key={i}>
+                  {i > 0 && <span style={{ color: C.muted }}> → </span>}
+                  <span
+                    style={{
+                      fontSize: i === trend.marks.length - 1 ? 24 : 16,
+                      fontWeight: i === trend.marks.length - 1 ? 700 : 400,
+                      color: i === trend.marks.length - 1 ? C.text : C.muted,
+                    }}
+                  >
+                    {m}
+                  </span>
+                </span>
+              ))}
+              <span style={{ color: C.muted, fontSize: 15 }}> / {OUT_OF}</span>
+            </span>
+          </p>
+          <p style={{ fontSize: 13.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.6 }}>
+            {trend.count === 1
+              ? `Beat ${trend.first} today and the practice is working.`
+              : trend.change > 0
+                ? `Up ${trend.change} marks since the first. Your best is ${trend.best} — that is the one to beat.`
+                : trend.change < 0
+                  ? `Your best on this topic is ${trend.best}. The last one came in under it, which is worth a look before you write again.`
+                  : `Flat across ${trend.count} answers. Same mark twice usually means the same gap twice — the criterion below is where to spend this attempt.`}
+          </p>
+        </Card>
+      )}
+
       <Card title="Write one answer">
         <label style={{ display: "block", fontSize: 14, color: C.muted, marginBottom: 6 }}>
           Topic

@@ -3,7 +3,7 @@ import type { Topic } from "../data/syllabus";
 import type { CheckId, Derived } from "../lib/events";
 import {
   CHECKS,
-  attemptsFor,
+  attemptTrend,
   checksFor,
   completionOf,
   depthFor,
@@ -63,7 +63,7 @@ export function TopicRow({
   const pct = Math.round(completionOf(d, topic.id) * 100);
   const depth = depthFor(d, topic);
   const atDepth = isAtDepth(d, topic);
-  const attempts = attemptsFor(d, topic.id);
+  const trend = attemptTrend(d, topic.id);
 
   let acc = 0;
 
@@ -95,28 +95,37 @@ export function TopicRow({
         {CHECKS.map((c) => {
           const rec = done[c.id];
           const on_ = Boolean(rec);
+          // Standing on an answer rather than on a tick, so there is nothing
+          // here to switch off — the attempt underneath it is a fact.
+          const implied = Boolean(rec?.implied);
           acc += c.weight;
           const beyond = acc > depth + 0.001;
           return (
             <button
               key={c.id}
+              disabled={implied}
               onClick={() => {
+                if (implied) return;
                 onToggle(topic.id, c.id);
                 setAsking(on_ ? null : c.id);
               }}
               title={
-                on_
-                  ? rec?.prior
-                    ? "you already knew this"
-                    : `ticked ${rec?.at.slice(0, 10)}`
-                  : beyond
-                    ? "beyond the depth this topic needs"
-                    : "not done"
+                implied
+                  ? "from the answer you wrote on this topic"
+                  : on_
+                    ? rec?.prior
+                      ? "you already knew this"
+                      : `ticked ${rec?.at.slice(0, 10)}`
+                    : beyond
+                      ? "beyond the depth this topic needs"
+                      : "not done"
               }
               style={{
                 ...chip,
                 opacity: beyond && !on_ ? 0.4 : 1,
+                cursor: implied ? "default" : "pointer",
                 color: on_ ? C.accent : C.muted,
+                background: implied ? C.accentSoft : "transparent",
                 border: `1px ${beyond ? "dashed" : "solid"} ${on_ ? C.accent : C.line}`,
               }}
             >
@@ -169,15 +178,46 @@ export function TopicRow({
 
       {onAttempt && (
         <div style={{ marginTop: 9 }}>
-          {attempts.length > 0 && (
+          {/*
+            Every attempt, in the order written, rather than their average.
+
+            An average hides the only thing worth knowing: 12 then 24 and 18
+            then 18 have the same mean and are not the same candidate. Written
+            out, the arrow does the work — and on a single attempt there is no
+            arrow to draw, just the mark.
+          */}
+          {trend && (
             <span style={{ fontSize: 12.5, color: C.muted, marginRight: 10 }}>
-              {attempts.length} answer{attempts.length > 1 ? "s" : ""} written ·{" "}
-              {Math.round(
-                (attempts.reduce((s, a) => s + a.marks, 0) /
-                  attempts.reduce((s, a) => s + a.outOf, 0)) *
-                  100,
+              Attempted {trend.count}×{" "}
+              <span className="num">
+                {trend.marks.map((m, i) => (
+                  <span key={i}>
+                    {i > 0 && <span style={{ color: C.muted }}> → </span>}
+                    <span
+                      style={{
+                        color:
+                          i === trend.marks.length - 1 && trend.count > 1
+                            ? trend.change > 0
+                              ? "var(--good)"
+                              : trend.change < 0
+                                ? C.warn
+                                : C.text
+                            : C.text,
+                      }}
+                    >
+                      {m}
+                    </span>
+                  </span>
+                ))}
+                <span style={{ color: C.muted }}> / 40</span>
+              </span>
+              {trend.count > 1 && trend.change !== 0 && (
+                <span style={{ color: trend.change > 0 ? "var(--good)" : C.warn }}>
+                  {" "}
+                  ({trend.change > 0 ? "+" : ""}
+                  {trend.change})
+                </span>
               )}
-              %
             </span>
           )}
           {!logging ? (
@@ -185,7 +225,7 @@ export function TopicRow({
               onClick={() => setLogging(true)}
               style={{ ...chip, border: "none", color: C.muted, padding: "6px 0" }}
             >
-              + log an answer
+              {trend ? "+ log another answer" : "+ log an answer"}
             </button>
           ) : (
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
