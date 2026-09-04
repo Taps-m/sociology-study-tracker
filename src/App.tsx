@@ -1705,7 +1705,14 @@ function Shell({ children, align = "center" }: { children: ReactNode; align?: st
     <main
       style={{
         minHeight: "100vh",
-        background: C.surface,
+        /*
+         * The page, not the panel.
+         *
+         * Setup painted its whole background in --surface, the same white the
+         * cards are, so the cards had nothing to sit on and the warm page
+         * colour never appeared on the one screen that shows it off.
+         */
+        background: C.page,
         color: C.text,
         fontFamily: C.mono,
         display: "flex",
