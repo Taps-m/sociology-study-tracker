@@ -22,6 +22,36 @@ function focusOf(week: WeekPlan, d: Derived): string {
   return best || "Revision";
 }
 
+/**
+ * A topic's name, short enough for a 172px card.
+ *
+ * Syllabus names carry their own contents list — "Karl Marx — historical
+ * materialism, mode of production, alienation, class struggle" — which is right
+ * on the topic row and useless in a strip of week cards. Everything before the
+ * dash is the name; the rest is the syllabus being thorough.
+ */
+function shortName(name: string): string {
+  const head = name.split(" — ")[0]!.trim();
+  return head.length > 34 ? `${head.slice(0, 33).trimEnd()}…` : head;
+}
+
+/**
+ * What a week is, in the words the candidate would use for it.
+ *
+ * The card showed the dominant unit and nothing else, so six consecutive weeks
+ * of Paper I thinkers read as six identical cards saying "Pathfinders" — and a
+ * candidate who had spent the evening on Marx could not see that Marx was
+ * week 2. The unit is still there, small, because it is how the syllabus is
+ * organised; the topic is the line that tells you what you are being asked to
+ * do.
+ */
+function titleOf(week: WeekPlan): string {
+  const names = week.topics.map((t) => shortName(t.name));
+  if (names.length === 0) return week.revisions.length > 0 ? "Revision only" : "Nothing scheduled";
+  if (names.length === 1) return names[0]!;
+  return `${names[0]!} +${names.length - 1}`;
+}
+
 function WeekCard({
   week,
   d,
@@ -71,8 +101,13 @@ function WeekCard({
         )}
       </div>
 
-      <div style={{ fontSize: 13, color: C.muted, marginTop: 6, lineHeight: 1.45, minHeight: 34 }}>
-        {focusOf(week, d)}
+      <div style={{ marginTop: 6, minHeight: 40 }}>
+        <div style={{ fontSize: 11.5, color: C.muted, letterSpacing: "0.04em" }}>
+          {focusOf(week, d)}
+        </div>
+        <div style={{ fontSize: 13.5, color: C.text, lineHeight: 1.35, marginTop: 2 }}>
+          {titleOf(week)}
+        </div>
       </div>
 
       <div
