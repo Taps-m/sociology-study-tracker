@@ -822,41 +822,6 @@ function Setup({
             Let&rsquo;s create your personalised study plan.
           </p>
           {/*
-            The promise, then the reassurance — and they are not the same thing.
-            Both sat in one grey paragraph, which gave the sentence that explains
-            why this app exists exactly the weight of the sentence that says
-            nothing is permanent. The claim gets the size and the colour; the
-            caveat gets small and quiet, which is what a caveat is for.
-          */}
-
-          {/*
-            What it is for, before it is used.
-            The questions are what the page asks of someone; this is what they
-            get back, and without it the first screen states a cost and no
-            benefit.
-          */}
-          <div className="sell">
-            {[
-              ["target", "Focused preparation", "Aligns with your goals and current level"],
-              ["bars", "Smarter recommendations", "Prioritises the high-yield topics"],
-              ["book", "Flexible and adjustable", "You can change any of it, anytime"],
-              ["trophy", "Stay consistent", "Turns preparation into progress"],
-            ].map(([icon, title, sub], i) => (
-              <div className="sell-row" key={title}>
-                <Badge name={icon!} tint={i} />
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: "block", fontSize: 14.5, fontWeight: 650, color: C.text }}>
-                    {title}
-                  </span>
-                  <span style={{ display: "block", fontSize: 13, color: C.muted, marginTop: 1 }}>
-                    {sub}
-                  </span>
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/*
             Whose this is. It was on the lock screen and nowhere else, and this
             is the screen a new user actually spends time on.
           */}

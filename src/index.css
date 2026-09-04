@@ -790,20 +790,6 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 9px;
 }
 
-/* What the app promises, on the way in. */
-.sell {
-  display: grid;
-  gap: 15px;
-  margin-top: 26px;
-  text-align: left;
-}
-
-.sell-row {
-  display: flex;
-  gap: 13px;
-  align-items: center;
-}
-
 /*
  * Leaves in the corners.
  *
