@@ -777,9 +777,19 @@ function Setup({
           <h1 style={{ fontSize: 28, fontWeight: 600, margin: "10px 0 8px", letterSpacing: "-0.015em" }}>
             Before we start
           </h1>
-          <p style={{ fontSize: 15, color: C.muted, margin: 0, lineHeight: 1.65 }}>
-            Four questions, then the plan builds itself. All of it can be changed later, and
-            nothing here is a commitment.
+          {/*
+            The promise, then the reassurance — and they are not the same thing.
+            Both sat in one grey paragraph, which gave the sentence that explains
+            why this app exists exactly the weight of the sentence that says
+            nothing is permanent. The claim gets the size and the colour; the
+            caveat gets small and quiet, which is what a caveat is for.
+          */}
+          <p style={{ fontSize: 17, color: C.text, margin: "0 0 9px", lineHeight: 1.5, fontWeight: 500 }}>
+            Four questions, then{" "}
+            <span style={{ color: C.accent, fontWeight: 700 }}>the plan builds itself</span>.
+          </p>
+          <p style={{ fontSize: 13.5, color: C.muted, margin: 0, lineHeight: 1.6 }}>
+            All of it can be changed later, and nothing here is a commitment.
           </p>
 
           {/*
