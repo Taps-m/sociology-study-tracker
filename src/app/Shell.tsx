@@ -99,9 +99,9 @@ export function Shell({
                 minHeight: 42,
                 padding: "0 16px 0 12px",
                 borderRadius: 9,
-                border: "1px solid var(--rail-line)",
-                background: "var(--rail-2)",
-                color: "var(--rail-text)",
+                border: "1px solid var(--line)",
+                background: "var(--raised)",
+                color: "var(--text)",
                 font: "inherit",
                 fontSize: 15,
                 fontWeight: 600,
@@ -154,9 +154,9 @@ export function Shell({
                     minWidth: 186,
                     padding: 6,
                     borderRadius: 10,
-                    background: "var(--rail)",
-                    border: "1px solid var(--rail-line)",
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
+                    background: "var(--panel)",
+                    border: "1px solid var(--line)",
+                    boxShadow: "var(--shadow)",
                     display: "grid",
                     gap: 2,
                   }}
@@ -177,16 +177,16 @@ export function Shell({
                         padding: "0 10px",
                         borderRadius: 8,
                         border: "none",
-                        background: route === r.id ? "var(--rail-2)" : "transparent",
-                        color: route === r.id ? "var(--rail-text)" : "var(--rail-muted)",
+                        background: route === r.id ? "var(--accent-soft)" : "transparent",
+                        color: route === r.id ? "var(--accent)" : "var(--muted)",
                         font: "inherit",
                         fontSize: 13.5,
                         textAlign: "left",
                         cursor: "pointer",
                       }}
                     >
-                      <span aria-hidden style={{ width: 15, textAlign: "center" }}>
-                        {r.icon}
+                      <span style={{ flex: "0 0 auto", display: "grid", placeItems: "center" }}>
+                        <Icon name={r.icon} size={16} />
                       </span>
                       {r.label}
                     </button>
@@ -196,6 +196,17 @@ export function Shell({
             </div>
           </div>
 
+          {/*
+            Who you are, and how to leave — at the far end of the bar.
+
+            They sat hard against the left edge because the tab strip that used
+            to push them across is hidden from 900px up, so on every desktop
+            screen the three of them huddled in the corner the back button had
+            just left. marginLeft:auto does what the strip was doing by accident.
+
+            They also still wore the rail's near-black, which was invisible on a
+            dark bar and a hole punched in a light one.
+          */}
           <button
             onClick={() => go("settings")}
             title={name ? `${name} — open settings` : "Add your name"}
@@ -206,9 +217,10 @@ export function Shell({
               minHeight: 40,
               padding: "0 12px 0 6px",
               borderRadius: 999,
-              border: "1px solid var(--rail-line)",
-              background: "var(--rail-2)",
-              color: "var(--rail-text)",
+              border: "1px solid var(--line)",
+              background: "var(--raised)",
+              color: "var(--text)",
+              marginLeft: "auto",
               font: "inherit",
               fontSize: 14,
               cursor: "pointer",
@@ -253,9 +265,9 @@ export function Shell({
               minHeight: 36,
               padding: "0 12px",
               borderRadius: 8,
-              border: "1px solid var(--rail-line)",
-              background: "var(--rail-2)",
-              color: "var(--rail-text)",
+              border: "1px solid var(--line)",
+              background: "var(--raised)",
+              color: "var(--text)",
               font: "inherit",
               fontSize: 13.5,
               cursor: "pointer",
@@ -272,9 +284,9 @@ export function Shell({
               minHeight: 36,
               minWidth: 36,
               borderRadius: 8,
-              border: "1px solid var(--rail-line)",
-              background: "var(--rail-2)",
-              color: "var(--rail-text)",
+              border: "1px solid var(--line)",
+              background: "var(--raised)",
+              color: "var(--text)",
               cursor: "pointer",
               fontSize: 15.5,
             }}
