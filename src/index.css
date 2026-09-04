@@ -11,45 +11,51 @@
 
 :root {
   /*
-   * Light, taken from the emblem rather than from a default.
+   * Light, sampled from the approved design rather than eyeballed.
    *
-   * The app was cold blue-grey with a blue accent and the emblem is parchment,
-   * deep olive and warm tan — two products sharing a screen. These are the
-   * emblem's own colours, sampled from it: the cream field it sits on, the
-   * olive of the foliage, the warm brown-grey of the buildings. A study app for
-   * a humanities paper ought to look like paper, and now it does.
+   * Every hex below was read off the pixels of the setup mockup, so what ships
+   * is what was signed off. The page is warm near-white and the panels are
+   * plain white — the earlier parchment-on-parchment had cards and page within
+   * three points of each other, which is why nothing looked like it had an
+   * edge. Cards read as raised now because there is somewhere to be raised from.
    *
-   * Green is the accent, so "good" has to be a brighter, cleaner green than the
-   * olive or the two collide wherever a tick sits next to a button. Warn takes
-   * the emblem's own amber.
+   * The accent moved from the emblem's olive to a cleaner forest green: olive
+   * against a green tick read as two greens arguing, and the olive went muddy
+   * once the page stopped being beige. Text ink is near-black and the muted
+   * grey is faintly cool, which is what keeps the warm page from yellowing.
+   *
+   * --accent-line is the accent at outline strength. A required card wants to
+   * be noticed, not shouted at, and a full-accent border on four cards in a
+   * column was a fence.
    */
-  --page: #f6f2e9;
-  --surface: #fffdf8;
-  --panel: #fffdf8;
-  --raised: #f2ece0;
-  --line: #e0d7c6;
-  --hair: #ebe4d6;
-  --text: #241f18;
-  --muted: #7b7263;
-  --accent: #4c6b2f;
-  --accent-soft: #eaf0df;
-  --accent-ink: #fffdf8;
-  --warn: #9a6317;
-  --warn-soft: #f7ead4;
-  --good: #2c7d52;
-  --good-soft: #e0efe4;
+  --page: #fbf9f4;
+  --surface: #ffffff;
+  --panel: #ffffff;
+  --raised: #f6f7f9;
+  --line: #e4e6ec;
+  --hair: #eef0f4;
+  --text: #16191f;
+  --muted: #6a7186;
+  --accent: #217a3c;
+  --accent-soft: #f2faf5;
+  --accent-line: #a7ddbc;
+  --accent-ink: #ffffff;
+  --warn: #96601a;
+  --warn-soft: #fdecbf;
+  --good: #1f8b57;
+  --good-soft: #e2f4e9;
   /* Warm and layered, so a card sits on the page instead of being drawn on it. */
-  --shadow: 0 1px 2px rgba(60, 48, 28, 0.05), 0 6px 18px rgba(60, 48, 28, 0.055);
+  --shadow: 0 1px 2px rgba(22, 44, 30, 0.04), 0 6px 18px rgba(22, 44, 30, 0.05);
 
   /* Mind-map stage tints. Same four hues in both themes, restated for dark. */
-  --tint-0: #fdf6e7;
-  --tint-0-line: #edd9a8;
-  --tint-1: #eaf1fe;
-  --tint-1-line: #b9cdf5;
-  --tint-2: #fdeef2;
-  --tint-2-line: #f2c2ce;
-  --tint-3: #eafaf1;
-  --tint-3-line: #b3e3c8;
+  --tint-0: #fdecbf;
+  --tint-0-line: #f0d391;
+  --tint-1: #d3f0fe;
+  --tint-1-line: #a9dcf6;
+  --tint-2: #e4d1fb;
+  --tint-2-line: #c9adf0;
+  --tint-3: #def6e5;
+  --tint-3-line: #b7e8c8;
 
   /*
    * Slice colours, for the one chart in this app.
@@ -69,11 +75,11 @@
   --slice-5: #9aa4b8;
 
   /* The rail and header stay dark in both themes, as in the design. */
-  --rail: #232519;
-  --rail-2: #2f3221;
-  --rail-text: #f2eee2;
-  --rail-muted: #a49b86;
-  --rail-line: #3c4029;
+  --rail: #1d2a22;
+  --rail-2: #26362c;
+  --rail-text: #eef4ef;
+  --rail-muted: #93a89b;
+  --rail-line: #33463a;
 }
 
 /*
@@ -687,7 +693,7 @@ input[type="range"]::-moz-range-thumb {
  */
 .q-card.req {
   background: var(--accent-soft);
-  border-color: var(--accent);
+  border-color: var(--accent-line);
 }
 
 .q-card.opt {
@@ -820,7 +826,7 @@ input[type="range"]::-moz-range-thumb {
   opacity: 0.5;
   background-repeat: no-repeat;
   background-size: contain;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%234c6b2f' fill-opacity='0.16'%3E%3Cpath d='M30 8c34 6 58 32 58 66 0 18-8 34-22 44C48 108 30 78 30 44V8z'/%3E%3Cpath d='M104 30c30 14 44 46 34 76-6 16-19 28-35 33-14-24-8-58 12-84l-11-25z'/%3E%3Cpath d='M8 92c30-8 60 6 74 34 7 15 7 32 1 47-27-6-49-31-58-60L8 92z'/%3E%3C/g%3E%3Cg stroke='%234c6b2f' stroke-opacity='0.22' fill='none' stroke-width='2'%3E%3Cpath d='M30 8c22 30 34 68 34 110M104 30c-2 34 0 68 6 100M8 92c26 14 50 36 68 62'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%23217a3c' fill-opacity='0.16'%3E%3Cpath d='M30 8c34 6 58 32 58 66 0 18-8 34-22 44C48 108 30 78 30 44V8z'/%3E%3Cpath d='M104 30c30 14 44 46 34 76-6 16-19 28-35 33-14-24-8-58 12-84l-11-25z'/%3E%3Cpath d='M8 92c30-8 60 6 74 34 7 15 7 32 1 47-27-6-49-31-58-60L8 92z'/%3E%3C/g%3E%3Cg stroke='%23217a3c' stroke-opacity='0.22' fill='none' stroke-width='2'%3E%3Cpath d='M30 8c22 30 34 68 34 110M104 30c-2 34 0 68 6 100M8 92c26 14 50 36 68 62'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .leaves::before {

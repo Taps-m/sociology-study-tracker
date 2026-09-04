@@ -733,7 +733,6 @@ function Setup({
    */
   const [level, setLevel] = useState<Level | null>(null);
   const [hoursSet, setHoursSet] = useState(false);
-  const [levelOpen, setLevelOpen] = useState(true);
   /**
    * Not asked separately. Someone setting up has no way to know whether four
    * months is enough for them — that is the question they came here to have
@@ -858,26 +857,6 @@ function Setup({
           </div>
 
           {/*
-            The wordmark, in the dark the rail uses. It anchors the left column —
-            without it the emblem floats above three lines of text with nothing
-            holding the bottom of the page down.
-          */}
-          <div
-            style={{
-              marginTop: 22,
-              padding: "13px 15px",
-              borderRadius: 11,
-              background: "var(--rail)",
-              color: "var(--rail-text)",
-            }}
-          >
-            <div style={{ fontSize: 14.5, fontWeight: 700 }}>WBCS Sociology</div>
-            <div style={{ fontSize: 13, color: "var(--rail-muted)", marginTop: 3 }}>
-              Understand society. Write better.
-            </div>
-          </div>
-
-          {/*
             Whose this is. It was on the lock screen and nowhere else, and this
             is the screen a new user actually spends time on.
           */}
@@ -935,146 +914,58 @@ function Setup({
           </section>
 
           {/*
-            Folded once a choice exists.
+            One dropdown, not three cards.
 
-            Three options, each with a title, a blurb and a duration, is a lot of
-            page for a question answered in one tap and rarely revisited — and it
-            sat above everything else, pushing the rest of setup below the fold.
-            Collapsed it states the answer, which is the only part still worth
-            reading after it has been given.
+            The choice is made once, in a second, and then not looked at again —
+            but as three full-width option cards it took a third of the page
+            every time setup opened, and needed a fold to get out of the way. A
+            select states the same three options, keeps the answer readable
+            after it is given, and leaves this card the height of the one above.
           */}
           <section className="q-card req">
             <Badge name="pin" tint={1} />
             <span className="q-step" aria-hidden>2</span>
             <span className="q-req" style={{ position: "absolute", top: 14, right: 16 }}>Required</span>
             <div className="q-body">
-            <button
-              onClick={() => setLevelOpen((v) => !v)}
-              aria-expanded={levelOpen}
-              title="Change the length of the plan, and how deeply it covers the rarely-asked topics"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0,
-                width: "100%",
-                padding: 0,
-                border: "none",
-                background: "transparent",
-                font: "inherit",
-                textAlign: "left",
-                cursor: "pointer",
-                color: C.text,
-              }}
-            >
-              <Step n={2} />
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 15, fontWeight: 650 }}>Where are you starting from?</span>
-                {!levelOpen && (
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: 13,
-                      color: C.muted,
-                      marginTop: 3,
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    {level === null ? (
-                      <strong style={{ color: C.warn }}>Not chosen yet</strong>
-                    ) : (
-                      <>
-                        <strong style={{ color: C.accent }}>
-                          {LEVELS.find((l) => l.id === level)?.label}
-                        </strong>{" "}
-                        · {LEVELS.find((l) => l.id === level)?.months} months
-                      </>
-                    )}
-                  </span>
-                )}
-              </span>
-              <span
-                aria-hidden
+              <label
+                htmlFor="setup-level"
+                style={{ display: "block", fontSize: 15, fontWeight: 650, color: C.text }}
+              >
+                Where are you starting from?
+              </label>
+              <p style={{ fontSize: 13, color: C.muted, margin: "2px 0 11px", lineHeight: 1.5 }}>
+                This sets the length of the plan, and how deeply it covers the topics WBCS rarely asks.
+              </p>
+              <select
+                id="setup-level"
+                value={level ?? ""}
+                onChange={(e) => setLevel((e.target.value || null) as Level | null)}
+                title="Sets the length of the plan, and how deeply it covers the rarely-asked topics"
                 style={{
-                  color: C.muted,
-                  fontSize: 13,
-                  lineHeight: 1,
-                  transform: levelOpen ? "rotate(180deg)" : "none",
-                  transition: "transform .15s",
+                  width: "100%",
+                  minHeight: 42,
+                  padding: "0 12px",
+                  borderRadius: 8,
+                  background: C.surface,
+                  border: `1px solid ${C.line}`,
+                  color: level === null ? C.muted : C.text,
+                  fontFamily: C.sans,
+                  fontSize: 15.5,
                 }}
               >
-                ▾
-              </span>
-            </button>
-
-            {levelOpen && (
-            <>
-            <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 9px", lineHeight: 1.5 }}>
-              This sets the length of the plan, and how deeply it covers the topics WBCS rarely asks.
-            </p>
-            {/*
-              Three tight rows, not three cards.
-
-              This is one tap, taken once, and it was reading as the centre of
-              the page: full-width cards, a heading line, a blurb line, and a
-              third line on the chosen one for the end date. Title and duration
-              now share a line, the blurb sits under it in small, and the date
-              has moved out of the option to a single line beneath the group —
-              it belongs to the choice, not to the button, and inside the button
-              it made the selected row taller than the other two.
-            */}
-            <div style={{ display: "grid", gap: 5 }}>
-              {LEVELS.map((l) => {
-                const on = level === l.id;
-                return (
-                  <button
-                    key={l.id}
-                    onClick={() => {
-                      setLevel(l.id);
-                      setLevelOpen(false);
-                    }}
-                    aria-pressed={on}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      textAlign: "left",
-                      padding: "8px 11px",
-                      borderRadius: 8,
-                      cursor: "pointer",
-                      fontFamily: C.sans,
-                      background: on ? C.accentSoft : C.surface,
-                      border: `1px solid ${on ? C.accent : C.line}`,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "baseline",
-                        justifyContent: "space-between",
-                        gap: 10,
-                      }}
-                    >
-                      <span style={{ fontSize: 14, fontWeight: on ? 650 : 500, color: C.text }}>
-                        {l.label}
-                      </span>
-                      <span
-                        className="num"
-                        style={{ fontSize: 12, color: on ? C.accent : C.muted, flexShrink: 0 }}
-                      >
-                        {l.months} mo
-                      </span>
-                    </div>
-                    <div style={{ fontSize: 12.5, color: C.muted, marginTop: 1, lineHeight: 1.45 }}>
-                      {l.blurb}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <div style={{ fontSize: 12, color: C.muted, marginTop: 7 }}>
-              Ends <span style={{ color: C.accent }}>{readable}</span>
-            </div>
-            </>
-            )}
+                <option value="">Select your current stage</option>
+                {LEVELS.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.label} — {l.months} months
+                  </option>
+                ))}
+              </select>
+              {level !== null && (
+                <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.5 }}>
+                  {LEVELS.find((l) => l.id === level)?.blurb}{" "}
+                  Ends <span style={{ color: C.accent }}>{readable}</span>.
+                </p>
+              )}
             </div>
           </section>
 
@@ -1392,7 +1283,6 @@ function Setup({
           Not now — log out
         </button>
 
-        <Byline />
         </div>
       </div>
     </Shell>
@@ -1754,38 +1644,6 @@ const panelStyle = {
   padding: "16px 18px",
 } as const;
 
-/**
- * The number on one of the four.
- *
- * "Four questions, then the plan builds itself" is the promise, and until now
- * nothing on the page showed which four — the required questions and the two
- * optional sections all looked alike, so the claim had to be taken on trust.
- * Numbered, they read as a set you can see the end of, and the optional ones
- * stay deliberately plain because they are not part of the count.
- */
-function Step({ n }: { n: number }) {
-  return (
-    <span
-      aria-hidden
-      className="num"
-      style={{
-        display: "grid",
-        placeItems: "center",
-        flex: "0 0 auto",
-        width: 21,
-        height: 21,
-        borderRadius: 999,
-        background: C.accent,
-        color: C.accentInk,
-        fontSize: 11.5,
-        fontWeight: 700,
-        marginRight: 9,
-      }}
-    >
-      {n}
-    </span>
-  );
-}
 
 function Field({
   label,
