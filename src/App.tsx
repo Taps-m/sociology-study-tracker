@@ -717,6 +717,8 @@ function Setup({
   const [name, setName] = useState("");
   const [startUnit, setStartUnit] = useState("");
   const [level, setLevel] = useState<Level>("guided");
+  // Folded from the start: there is already an answer, and it is one tap to change.
+  const [levelOpen, setLevelOpen] = useState(false);
   /**
    * Not asked separately. Someone setting up has no way to know whether four
    * months is enough for them — that is the question they came here to have
@@ -779,6 +781,26 @@ function Setup({
             Four questions, then the plan builds itself. All of it can be changed later, and
             nothing here is a commitment.
           </p>
+
+          {/*
+            The wordmark, in the dark the rail uses. It anchors the left column —
+            without it the emblem floats above three lines of text with nothing
+            holding the bottom of the page down.
+          */}
+          <div
+            style={{
+              marginTop: 22,
+              padding: "13px 15px",
+              borderRadius: 11,
+              background: "var(--rail)",
+              color: "var(--rail-text)",
+            }}
+          >
+            <div style={{ fontSize: 14.5, fontWeight: 700 }}>WBCS Sociology</div>
+            <div style={{ fontSize: 13, color: "var(--rail-muted)", marginTop: 3 }}>
+              Understand society. Write better.
+            </div>
+          </div>
         </header>
 
         {/*
@@ -816,11 +838,61 @@ function Setup({
             />
           </section>
 
+          {/*
+            Folded once a choice exists.
+
+            Three options, each with a title, a blurb and a duration, is a lot of
+            page for a question answered in one tap and rarely revisited — and it
+            sat above everything else, pushing the rest of setup below the fold.
+            Collapsed it states the answer, which is the only part still worth
+            reading after it has been given.
+          */}
           <section style={panelStyle}>
-            <div style={{ fontSize: 14.5, color: C.text, marginBottom: 4 }}>
-              Where are you starting from?
-            </div>
-            <p style={{ fontSize: 13, color: C.muted, margin: "0 0 12px", lineHeight: 1.6 }}>
+            <button
+              onClick={() => setLevelOpen((v) => !v)}
+              aria-expanded={levelOpen}
+              title="Change how long the run is and how deep to go on the rarely-asked topics"
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 10,
+                width: "100%",
+                padding: 0,
+                border: "none",
+                background: "transparent",
+                font: "inherit",
+                textAlign: "left",
+                cursor: "pointer",
+                color: C.text,
+              }}
+            >
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: 14.5 }}>Where are you starting from?</span>
+                {!levelOpen && (
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: 13,
+                      color: C.muted,
+                      marginTop: 3,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <strong style={{ color: C.accent }}>
+                      {LEVELS.find((l) => l.id === level)?.label}
+                    </strong>{" "}
+                    · {LEVELS.find((l) => l.id === level)?.months} months
+                  </span>
+                )}
+              </span>
+              <span aria-hidden style={{ color: C.muted, fontSize: 18, lineHeight: 1 }}>
+                {levelOpen ? "−" : "+"}
+              </span>
+            </button>
+
+            {levelOpen && (
+            <>
+            <p style={{ fontSize: 13, color: C.muted, margin: "8px 0 12px", lineHeight: 1.6 }}>
               This sets how long the run is and how deep to go on the topics WBCS rarely asks.
             </p>
             <div style={{ display: "grid", gap: 8 }}>
@@ -870,6 +942,8 @@ function Setup({
                 );
               })}
             </div>
+            </>
+            )}
           </section>
 
           <Field label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
