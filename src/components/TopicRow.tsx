@@ -5,6 +5,8 @@ import {
   CHECKS,
   attemptTrend,
   checksFor,
+  partsDone,
+  partsOf,
   completionOf,
   depthFor,
   depthLabel,
@@ -47,7 +49,7 @@ export function TopicRow({
 }: {
   topic: Topic;
   d: Derived;
-  onToggle: (topicId: string, check: CheckId) => void;
+  onToggle: (topicId: string, check: CheckId, part?: string) => void;
   onLogTime?: (topicId: string, check: CheckId, minutes: number) => void;
   onMarkPrior?: (topicId: string, check: CheckId) => void;
   onAttempt?: (topicId: string, marks: number, outOf: number, minutes: number) => void;
@@ -64,6 +66,8 @@ export function TopicRow({
   const depth = depthFor(d, topic);
   const atDepth = isAtDepth(d, topic);
   const trend = attemptTrend(d, topic.id);
+  const parts = partsOf(topic);
+  const readDone = partsDone(d, topic.id, "read");
 
   let acc = 0;
 
@@ -131,6 +135,12 @@ export function TopicRow({
             >
               {on_ ? "✓ " : ""}
               {c.label}
+              {!on_ && parts.length > 0 && c.id === "read" && readDone.length > 0 && (
+                <span className="num" style={{ color: C.accent }}>
+                  {" "}
+                  {readDone.length}/{parts.length}
+                </span>
+              )}
             </button>
           );
         })}
@@ -138,6 +148,53 @@ export function TopicRow({
           {pct}%
         </span>
       </div>
+
+      {/*
+        The parts of a topic, where the syllabus named them.
+
+        Six hours of Marx was one tick, so an evening on class struggle alone
+        could not be recorded: tick it and the app believes all four parts are
+        read, leave it and the app believes none are — and the second is what
+        kept happening, a six-hour topic sitting at zero for a fortnight while
+        the plan went on recommending it.
+
+        Only against "Material read". Reading is what actually happens one part
+        at a time across several sittings; notes and revision are done for the
+        topic, and four rows of parts against four checks would be sixteen chips
+        on a row that has to stay glanceable. Ticking the whole check still wins
+        over any of them, because it is the larger claim.
+      */}
+      {parts.length > 0 && !done.read && (
+        <div style={{ marginTop: 7 }}>
+          <div style={{ fontSize: 12, color: C.muted, marginBottom: 5 }}>
+            Read part by part — {readDone.length} of {parts.length}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {parts.map((part) => {
+              const got = readDone.includes(part);
+              return (
+                <button
+                  key={part}
+                  onClick={() => onToggle(topic.id, "read", part)}
+                  title={got ? "recorded — tap to undo" : "record this part as read"}
+                  style={{
+                    ...chip,
+                    fontSize: 12,
+                    padding: "5px 9px",
+                    minHeight: 30,
+                    color: got ? C.accent : C.muted,
+                    background: got ? C.accentSoft : "transparent",
+                    border: `1px solid ${got ? C.accent : C.line}`,
+                  }}
+                >
+                  {got ? "✓ " : ""}
+                  {part}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {asking && onLogTime && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 9, flexWrap: "wrap" }}>

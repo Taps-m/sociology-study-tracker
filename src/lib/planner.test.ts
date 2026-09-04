@@ -58,6 +58,9 @@ import {
   attemptTrend,
   attemptTrends,
   lastAnswer,
+  partsOf,
+  partsDone,
+  checkProgress,
 } from "./planner";
 import { PYQS, PYQ_YEARS } from "../data/pyq";
 
@@ -71,6 +74,8 @@ const SETTINGS = {
 const settings = on.settings(SETTINGS);
 
 const highYield = TOPICS.find((t) => t.pyq >= 3)!;
+/** One idea, no parts — where an answer still implies the reading. */
+const singleIdea = TOPICS.find((t) => t.pyq >= 3 && !t.name.includes(" — "))!;
 /** Never asked, and in a unit that is also cold. */
 const coldTopic = TOPICS.find((t) => t.pyq === 0 && bandOf(t) === 1)!;
 /** Never asked itself, but sitting in a heavily examined unit. */
@@ -415,29 +420,80 @@ describe("answers feed back into the plan", () => {
     expect(byKey.thinkers!.scored).toBe(1);
   });
 
+  it("reads a topic's parts out of its own name", () => {
+    const marx = TOPICS.find((t) => t.name.startsWith("Karl Marx"))!;
+    expect(partsOf(marx)).toEqual([
+      "historical materialism",
+      "mode of production",
+      "alienation",
+      "class struggle",
+    ]);
+    // A topic that is one idea has no parts, which is every check's old
+    // behaviour and must stay that way for seventy-five of the eighty-five.
+    expect(partsOf(TOPICS.find((t) => !t.name.includes(" — "))!)).toEqual([]);
+  });
+
+  it("credits a part of a topic as a share of the check", () => {
+    const marx = TOPICS.find((t) => t.name.startsWith("Karl Marx"))!;
+    const d = build([on.check(marx.id, "read", { part: "class struggle" })]);
+    expect(partsDone(d, marx.id, "read")).toEqual(["class struggle"]);
+    expect(checkProgress(d, marx, "read")).toBeCloseTo(0.25, 5);
+    // read is worth 0.4 of a topic, so a quarter of it is 0.1.
+    expect(completionOf(d, marx.id)).toBeCloseTo(0.1, 5);
+    // And the check as a whole is not claimed.
+    expect(isChecked(d, marx.id, "read")).toBe(false);
+  });
+
+  it("lets the whole-topic tick outrank the parts", () => {
+    const marx = TOPICS.find((t) => t.name.startsWith("Karl Marx"))!;
+    const d = build([on.check(marx.id, "read", { part: "alienation" }), on.check(marx.id, "read")]);
+    expect(checkProgress(d, marx, "read")).toBe(1);
+  });
+
+  it("ignores a part that is not one of the topic's own", () => {
+    // Names come from the syllabus string, so a renamed topic could leave an
+    // event pointing at a part that no longer exists. It must not inflate the
+    // count above the parts there actually are.
+    const marx = TOPICS.find((t) => t.name.startsWith("Karl Marx"))!;
+    const d = build([on.check(marx.id, "read", { part: "surplus value" })]);
+    expect(checkProgress(d, marx, "read")).toBe(0);
+  });
+
+  it("does not let an answer claim the reading of a topic it only part-covers", () => {
+    // The correction. An answer on class struggle says nothing about whether
+    // alienation has been opened, so the attempt gives the PYQ check and no
+    // more — where before it credited all four parts off one paragraph.
+    const marx = TOPICS.find((t) => t.name.startsWith("Karl Marx"))!;
+    const d = build([on.attempt(marx.id, 22, 40, 35)]);
+    expect(isChecked(d, marx.id, "pyq")).toBe(true);
+    expect(isChecked(d, marx.id, "read")).toBe(false);
+    expect(completionOf(d, marx.id)).toBeCloseTo(0.2, 5);
+  });
+
   it("counts an answer as evidence the material was read", () => {
-    // No checks ticked at all — just one answer written on the topic.
-    const d = build([on.attempt(highYield.id, 22, 40, 35)]);
-    expect(isChecked(d, highYield.id, "read")).toBe(true);
-    expect(isChecked(d, highYield.id, "pyq")).toBe(true);
-    expect(isImplied(d, highYield.id, "read")).toBe(true);
+    // A topic that is one idea: writing forty marks on it does mean it was
+    // read. No checks ticked at all — just one answer written on the topic.
+    const d = build([on.attempt(singleIdea.id, 22, 40, 35)]);
+    expect(isChecked(d, singleIdea.id, "read")).toBe(true);
+    expect(isChecked(d, singleIdea.id, "pyq")).toBe(true);
+    expect(isImplied(d, singleIdea.id, "read")).toBe(true);
     // read 0.4 + pyq 0.2. Notes and revision are not implied by writing once.
-    expect(completionOf(d, highYield.id)).toBeCloseTo(0.6, 5);
-    expect(isChecked(d, highYield.id, "notes")).toBe(false);
-    expect(isChecked(d, highYield.id, "revised")).toBe(false);
-    expect(isComplete(d, highYield.id)).toBe(false);
+    expect(completionOf(d, singleIdea.id)).toBeCloseTo(0.6, 5);
+    expect(isChecked(d, singleIdea.id, "notes")).toBe(false);
+    expect(isChecked(d, singleIdea.id, "revised")).toBe(false);
+    expect(isComplete(d, singleIdea.id)).toBe(false);
   });
 
   it("leaves a real tick alone rather than replacing it with an implied one", () => {
     // The tick carries a date the revision intervals count from, and it is
     // older than the attempt. Overwriting it would move a revision due date.
     const d = build([
-      on.check(highYield.id, "read", { prior: true }),
-      on.attempt(highYield.id, 22, 40, 35),
+      on.check(singleIdea.id, "read", { prior: true }),
+      on.attempt(singleIdea.id, 22, 40, 35),
     ]);
-    expect(isImplied(d, highYield.id, "read")).toBe(false);
-    expect(isPrior(d, highYield.id, "read")).toBe(true);
-    expect(isImplied(d, highYield.id, "pyq")).toBe(true);
+    expect(isImplied(d, singleIdea.id, "read")).toBe(false);
+    expect(isPrior(d, singleIdea.id, "read")).toBe(true);
+    expect(isImplied(d, singleIdea.id, "pyq")).toBe(true);
   });
 
   it("reads the attempts on a topic in the order they were written", () => {

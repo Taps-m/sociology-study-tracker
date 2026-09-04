@@ -170,6 +170,20 @@ export function DashboardScreen({
       </header>
 
       {/*
+        What you did, before anything the app has to say about it.
+
+        Everything below this card is computed from the log: tonight's drill is
+        aimed at whatever the record says keeps going wrong, and today's list is
+        what the record says is left. An evening that was studied and not
+        recorded makes both of them answer the wrong question — so the app asks
+        before it advises, at the top, across the width, where it cannot be
+        mistaken for one more thing to read.
+      */}
+      <div className="dash-full">
+        <StudiedToday d={d} onToggle={onToggle} />
+      </div>
+
+      {/*
         Two columns, both of which carry something.
 
         The dashboard was one tall column of four cards beside a single short
@@ -240,8 +254,6 @@ export function DashboardScreen({
 
       <div className="grid" style={{ gap: 13, minWidth: 0 }}>
         <TodaysFocus d={d} go={go} onToggle={onToggle} />
-
-        <StudiedToday d={d} onToggle={onToggle} />
 
         <WeeklyReview d={d} />
 

@@ -132,16 +132,65 @@ export function depthFor(d: Derived, topic: Topic): number {
 /**
  * What writing an answer proves on its own.
  *
- * You cannot write a 40-mark answer on social mobility without having read
- * social mobility, and the PYQ check is the answer itself. Requiring the ticks
- * as well meant the wheel showed 0% for a topic the candidate had just been
- * marked on — the app disbelieving work it had done the marking for.
+ * The PYQ check is the answer itself, always. Reading is only implied on a
+ * topic that is one idea: you cannot write forty marks on social mobility
+ * without having read social mobility, and requiring the tick as well meant the
+ * wheel showed 0% for a topic the app had just finished marking.
  *
- * Notes and revision are deliberately not on this list. Neither follows from
- * having written once, and revision in particular is the thing that has to
- * come back later; a topic that marks itself fully complete on first contact
- * leaves the revision queue and is never seen again.
+ * On a topic with parts it implies nothing about reading, because an answer on
+ * class struggle says nothing about whether alienation has been opened. That is
+ * a correction: crediting the whole read check off one answer let the app claim
+ * six hours of Marx had been read on the strength of one paragraph about a
+ * quarter of him.
+ *
+ * Notes and revision are on neither list. Neither follows from having written
+ * once, and a topic that marks itself complete on first contact leaves the
+ * revision queue and is never seen again.
  */
+/**
+ * The parts of a topic, taken from its own name.
+ *
+ * "Karl Marx — historical materialism, mode of production, alienation, class
+ * struggle" already lists what it contains; the syllabus wrote it down and the
+ * app was throwing it away at the em dash. Ten topics carry two or more parts
+ * this way and they are exactly the expensive ones — every thinker, four to six
+ * hours each. The other seventy-five are a single idea and return one part,
+ * which is the behaviour everything had before.
+ *
+ * No new ids, so nothing in the question corpus, the weightage or the hours has
+ * to be re-pointed, and an evening on one part of Marx becomes recordable
+ * without splitting Marx into four topics that WBCS does not examine separately.
+ */
+export function partsOf(topic: Topic): string[] {
+  const tail = topic.name.split(" — ")[1];
+  if (!tail) return [];
+  const parts = tail
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+  return parts.length > 1 ? parts : [];
+}
+
+/** Which parts of a topic have this check against them. */
+export function partsDone(d: Derived, topicId: string, check: CheckId): string[] {
+  return Object.keys(d.parts[topicId]?.[check] ?? {});
+}
+
+/**
+ * How much of one check is done, between 0 and 1.
+ *
+ * A whole-topic tick is 1 whatever the parts say — it is the stronger claim and
+ * the older one. Otherwise it is the share of parts ticked, so three of Marx's
+ * four is 0.75 of the reading rather than the nothing it used to be.
+ */
+export function checkProgress(d: Derived, topic: Topic, check: CheckId): number {
+  if (checksFor(d, topic.id)[check]) return 1;
+  const parts = partsOf(topic);
+  if (parts.length === 0) return 0;
+  const done = partsDone(d, topic.id, check).filter((p) => parts.includes(p)).length;
+  return done / parts.length;
+}
+
 export const IMPLIED_BY_ATTEMPT = ["read", "pyq"] as const satisfies readonly CheckId[];
 
 export function checksFor(d: Derived, topicId: string) {
@@ -153,8 +202,12 @@ export function checksFor(d: Derived, topicId: string) {
   }
   if (earliest === null) return ticked;
 
+  const topic = TOPICS.find((t) => t.id === topicId);
+  const hasParts = topic ? partsOf(topic).length > 0 : false;
+
   const out = { ...ticked };
   for (const id of IMPLIED_BY_ATTEMPT) {
+    if (id === "read" && hasParts) continue;
     // An explicit tick wins: it may be older than the attempt, and the date is
     // used for revision intervals.
     if (!out[id]) out[id] = { at: earliest, prior: false, implied: true };
@@ -176,8 +229,11 @@ export function isPrior(d: Derived, topicId: string, check: CheckId): boolean {
 }
 
 export function completionOf(d: Derived, topicId: string): number {
-  const done = checksFor(d, topicId);
-  return CHECKS.reduce((sum, c) => sum + (done[c.id] ? c.weight : 0), 0);
+  const topic = TOPICS.find((t) => t.id === topicId);
+  if (!topic) return 0;
+  // Each check contributes its weight times how much of it is done, which is 1
+  // for a whole-topic tick and the share of parts otherwise.
+  return CHECKS.reduce((sum, c) => sum + checkProgress(d, topic, c.id) * c.weight, 0);
 }
 
 export function isComplete(d: Derived, topicId: string): boolean {

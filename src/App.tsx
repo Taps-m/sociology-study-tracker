@@ -105,8 +105,17 @@ export default function App() {
   }
 
   const handlers = {
-    onToggle: (topicId: string, check: CheckId) =>
-      add(d.checks[topicId]?.[check] ? on.uncheck(topicId, check) : on.check(topicId, check)),
+    onToggle: (topicId: string, check: CheckId, part?: string) => {
+      // A part of a topic, where the topic has parts. The whole-topic tick is
+      // still the stronger claim and is left alone by this.
+      if (part) {
+        const already = Boolean(d.parts[topicId]?.[check]?.[part]);
+        return add(
+          already ? on.uncheck(topicId, check, part) : on.check(topicId, check, { part }),
+        );
+      }
+      return add(d.checks[topicId]?.[check] ? on.uncheck(topicId, check) : on.check(topicId, check));
+    },
     onLogTime: (topicId: string, check: CheckId, minutes: number) =>
       add(on.check(topicId, check, { minutes })),
     onMarkPrior: (topicId: string, check: CheckId) =>

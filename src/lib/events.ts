@@ -59,12 +59,26 @@ export type StudyEvent =
       type: "check";
       topicId: string;
       check: CheckId;
+      /**
+       * Which part of the topic, where the topic has parts.
+       *
+       * "Karl Marx — historical materialism, mode of production, alienation,
+       * class struggle" is six hours and one tick, so an evening spent on class
+       * struggle alone could not be recorded at all: tick it and the app
+       * believes you have read all four, leave it and the app believes you have
+       * read none. Both are false, and the second is what actually happened —
+       * a six-hour topic sitting at zero for a fortnight.
+       *
+       * Absent means the whole topic, which is what every check was before this
+       * and what all seventy-five single-part topics still are.
+       */
+      part?: string;
       /** Time spent, if the student told us. */
       minutes?: number;
       /** Knowledge they already had; counts as done, not as work done now. */
       prior?: boolean;
     })
-  | (EventBase & { type: "uncheck"; topicId: string; check: CheckId })
+  | (EventBase & { type: "uncheck"; topicId: string; check: CheckId; part?: string })
   | (EventBase &
       AttemptDetail & {
         type: "attempt";
@@ -93,11 +107,15 @@ function base(): EventBase {
 }
 
 export const on = {
-  check(topicId: string, check: CheckId, opts: { minutes?: number; prior?: boolean } = {}): StudyEvent {
+  check(
+    topicId: string,
+    check: CheckId,
+    opts: { minutes?: number; prior?: boolean; part?: string } = {},
+  ): StudyEvent {
     return { ...base(), type: "check", topicId, check, ...opts };
   },
-  uncheck(topicId: string, check: CheckId): StudyEvent {
-    return { ...base(), type: "uncheck", topicId, check };
+  uncheck(topicId: string, check: CheckId, part?: string): StudyEvent {
+    return { ...base(), type: "uncheck", topicId, check, ...(part ? { part } : {}) };
   },
   attempt(
     topicId: string,
@@ -211,6 +229,16 @@ export interface Derived {
   settings: Settings | null;
   /** Latest state of each check on each topic. */
   checks: Record<string, Partial<Record<CheckId, CheckRecord>>>;
+  /**
+   * Parts of a topic, ticked one at a time: topic → check → part → when.
+   *
+   * Separate from `checks` rather than folded into it, because they answer
+   * different questions and only one of them is a claim about the whole topic.
+   * A topic with three of its four parts read has no entry in `checks` at all
+   * and is nonetheless three-quarters read, which is exactly the state the app
+   * could not previously hold.
+   */
+  parts: Record<string, Partial<Record<CheckId, Record<string, string>>>>;
   /** Every time a topic was revised, oldest first. Enables decay later. */
   revisions: Record<string, string[]>;
   time: TimeRecord[];
@@ -227,6 +255,7 @@ export interface NoteRecord {
 export const EMPTY_DERIVED: Derived = {
   settings: null,
   checks: {},
+  parts: {},
   revisions: {},
   time: [],
   attempts: [],
@@ -238,6 +267,7 @@ export function project(events: StudyEvent[]): Derived {
   const d: Derived = {
     settings: null,
     checks: {},
+    parts: {},
     revisions: {},
     time: [],
     attempts: [],
@@ -251,6 +281,19 @@ export function project(events: StudyEvent[]): Derived {
         break;
 
       case "check": {
+        if (e.part) {
+          // A part, not the topic. The whole-topic record is left alone; what
+          // fraction of the topic this adds up to is planner.ts's business.
+          const forTopic = d.parts[e.topicId] ?? {};
+          d.parts[e.topicId] = {
+            ...forTopic,
+            [e.check]: { ...(forTopic[e.check] ?? {}), [e.part]: e.at },
+          };
+          if (typeof e.minutes === "number") {
+            d.time.push({ at: e.at, topicId: e.topicId, check: e.check, minutes: e.minutes });
+          }
+          break;
+        }
         d.checks[e.topicId] = {
           ...(d.checks[e.topicId] ?? {}),
           [e.check]: { at: e.at, prior: Boolean(e.prior) },
@@ -265,9 +308,24 @@ export function project(events: StudyEvent[]): Derived {
       }
 
       case "uncheck": {
+        if (e.part) {
+          const forTopic = { ...(d.parts[e.topicId] ?? {}) };
+          const forCheck = { ...(forTopic[e.check] ?? {}) };
+          delete forCheck[e.part];
+          forTopic[e.check] = forCheck;
+          d.parts[e.topicId] = forTopic;
+          break;
+        }
         const current = { ...(d.checks[e.topicId] ?? {}) };
         delete current[e.check];
         d.checks[e.topicId] = current;
+        // Untick the whole topic and its parts go with it, or the topic reads
+        // as not-read while still showing three of four parts ticked.
+        if (d.parts[e.topicId]) {
+          const forTopic = { ...d.parts[e.topicId] };
+          delete forTopic[e.check];
+          d.parts[e.topicId] = forTopic;
+        }
         break;
       }
 

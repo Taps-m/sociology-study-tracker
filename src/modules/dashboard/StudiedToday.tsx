@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { TOPICS, type Topic } from "../../data/syllabus";
 import type { CheckId, Derived } from "../../lib/events";
-import { CHECKS, checksFor } from "../../lib/planner";
+import { CHECKS, checksFor, partsDone, partsOf } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
@@ -41,7 +41,7 @@ export function StudiedToday({
   onToggle,
 }: {
   d: Derived;
-  onToggle: (topicId: string, check: CheckId) => void;
+  onToggle: (topicId: string, check: CheckId, part?: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const [justLogged, setJustLogged] = useState<Topic | null>(null);
@@ -51,6 +51,18 @@ export function StudiedToday({
     if (!checksFor(d, topic.id)[check]) onToggle(topic.id, check);
     setJustLogged(topic);
     setQuery("");
+  }
+
+  /*
+   * A part stays on screen after it is ticked.
+   *
+   * The whole-topic buttons clear the search, because that evening's work is
+   * recorded and there is nothing more to say. Parts are the opposite: someone
+   * who read two of Marx's four wants to tick both without typing "marx" twice.
+   */
+  function logPart(topic: Topic, part: string) {
+    onToggle(topic.id, "read", part);
+    setJustLogged(topic);
   }
 
   return (
@@ -113,6 +125,39 @@ export function StudiedToday({
                   first of the four would make the other three feel like extra
                   admin — which is how a logger stops being used by Thursday.
                 */}
+                {/*
+                  Where the syllabus named the parts, offer them. An evening is
+                  usually one part of a thinker, not six hours of one.
+                */}
+                {partsOf(t).length > 0 && !done.read && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 7 }}>
+                    {partsOf(t).map((part) => {
+                      const got = partsDone(d, t.id, "read").includes(part);
+                      return (
+                        <button
+                          key={part}
+                          onClick={() => logPart(t, part)}
+                          title={got ? "recorded — tap to undo" : "record this part as read"}
+                          style={{
+                            font: "inherit",
+                            fontSize: 12,
+                            padding: "5px 9px",
+                            minHeight: 30,
+                            borderRadius: 7,
+                            cursor: "pointer",
+                            background: got ? C.accentSoft : "transparent",
+                            color: got ? C.accent : C.muted,
+                            border: `1px solid ${got ? C.accent : C.line}`,
+                          }}
+                        >
+                          {got ? "✓ " : ""}
+                          {part}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 7 }}>
                   {CHECKS.map((c) => {
                     const on_ = Boolean(done[c.id]);
