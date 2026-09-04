@@ -18,7 +18,7 @@
  * time, these three to write a 40-mark answer about it.
  */
 
-export type StdBookId = "sangwan" | "haralambos" | "rao";
+export type StdBookId = "sangwan" | "haralambos" | "rao" | "paper1notes";
 
 export interface StdChapter {
   /** Chapter number as printed. "A" is Rao's annexure to chapter 20. */
@@ -187,6 +187,38 @@ const RAO: StdChapter[] = [
   { n: "A", title: "Annexure to Ch. 20 – Equality, Inequality, Hierarchy, Exclusion, Poverty, Deprivation", from: 907, to: 913 },
 ];
 
+
+/**
+ * Sociology Optional Paper 1 notes — the one readable file on the shelf.
+ *
+ * Unlike the other three this is a digital PDF with a real text layer, so it
+ * needs no OCR at all: the pages below are the PDF's own page numbers, which is
+ * what opens when you jump to them. It is also not a textbook. Its preface says
+ * it is built on "FRAMEWORK and KEYWORDS for the Mains exam", which is closer to
+ * what a 40-mark answer needs than a chapter of exposition is.
+ *
+ * Chapter starts were found as standalone heading lines and are firm. Ends are
+ * the next chapter's start minus one, so a boundary can be a page or two out —
+ * which is why the thinkers inside chapter 4 are pinned separately. That chapter
+ * is 118 pages and Pathfinders is 28% of the paper; sending someone to all 118
+ * would be the same as sending them nowhere.
+ *
+ * Simmel has no section here, which is the third source to agree with the other
+ * two. He stays in UNCOVERED.
+ */
+const PAPER1_NOTES: StdChapter[] = [
+  { n: 1, title: "Sociology – The Discipline", from: 4, to: 29 },
+  { n: 2, title: "Sociology as Science", from: 30, to: 54 },
+  { n: 3, title: "Research Methods and Analysis", from: 55, to: 81 },
+  { n: 4, title: "Sociological Thinkers", from: 82, to: 199 },
+  { n: 5, title: "Stratification and Mobility", from: 200, to: 231 },
+  { n: 6, title: "Works and Economic Life", from: 232, to: 248 },
+  { n: 7, title: "Politics and Society", from: 249, to: 311 },
+  { n: 8, title: "Religion and Society", from: 312, to: 320 },
+  { n: 9, title: "Systems of Kinship", from: 321, to: 345 },
+  { n: 10, title: "Social Change in Modern Society", from: 346, to: 383 },
+];
+
 export const STD_BOOKS: StdBook[] = [
   {
     id: "sangwan",
@@ -205,6 +237,15 @@ export const STD_BOOKS: StdBook[] = [
     pdfOffset: null,
     note: "Depth on the western theory. The copy on the desk is a partial scan — four chapters are missing from it and three are cut short; see HARALAMBOS_PARTIAL.",
     chapters: HARALAMBOS,
+  },
+  {
+    id: "paper1notes",
+    short: "Paper I Notes",
+    title: "Sociology Optional Paper 1 — Frameworks and Keywords",
+    author: "coaching notes, PDF on the shelf",
+    pdfOffset: 0,
+    note: "The only file here with a text layer, so the page numbers are the PDF's own and it needs no scanning. Built around answer frameworks rather than exposition, which is what a 40-mark answer wants.",
+    chapters: PAPER1_NOTES,
   },
   {
     id: "rao",
@@ -260,6 +301,12 @@ const h_ = (chapter: number, from?: number, to?: number): StdReading => ({
 const hb = (chapter: number, from?: number, to?: number): StdReading => ({
   book: "haralambos", chapter, from, to, kind: "background",
 });
+const n_ = (chapter: number, from?: number, to?: number): StdReading => ({
+  book: "paper1notes", chapter, from, to, kind: "covers",
+});
+const nb = (chapter: number, from?: number, to?: number): StdReading => ({
+  book: "paper1notes", chapter, from, to, kind: "background",
+});
 const r_ = (chapter: number | string, from?: number, to?: number): StdReading => ({
   book: "rao", chapter, from, to, kind: "covers",
 });
@@ -279,51 +326,51 @@ export const STANDARD_READINGS: Record<string, StdReading[]> = {
   // ── Paper I ───────────────────────────────────────────────────────────────
 
   // Foundations
-  p1u1t1: [s_(1, 4, 8), rb(1)],
-  p1u1t2: [s_(1, 4, 10), r_(1)],
-  p1u1t3: [s_(1, 9, 15), r_(2), rb(6)],
-  p1u1t4: [s_(1, 16, 17), rb(2)],
+  p1u1t1: [n_(1, 4, 12), s_(1, 4, 8), rb(1)],
+  p1u1t2: [n_(1, 4, 16), s_(1, 4, 10), r_(1)],
+  p1u1t3: [n_(1, 17, 25), s_(1, 9, 15), r_(2), rb(6)],
+  p1u1t4: [n_(1, 26, 29), s_(1, 16, 17), rb(2)],
 
   // Pathfinders. Sangwan's ch. 4 is the spine; Rao gives each thinker a whole
   // chapter of his own, which is the place to go for a 40-mark answer.
-  p1u2t1: [s_(4, 68, 81), r_(53), hb(13)],
-  p1u2t2: [s_(4, 82, 95), r_(51), hb(13)],
-  p1u2t3: [s_(4, 96, 107), r_(52), hb(7)],
+  p1u2t1: [n_(4, 99, 118), s_(4, 68, 81), r_(53), hb(13)],
+  p1u2t2: [n_(4, 119, 132), s_(4, 82, 95), r_(51), hb(13)],
+  p1u2t3: [n_(4, 133, 145), s_(4, 96, 107), r_(52), hb(7)],
   // p1u2t4 — Simmel. Not in any of the three. See UNCOVERED.
-  p1u2t5: [s_(4, 108, 114), r_(60, 885, 895), hb(13)],
-  p1u2t6: [s_(4, 115, 128), r_(60, 896, 906), hb(13)],
+  p1u2t5: [n_(4, 146, 160), s_(4, 108, 114), r_(60, 885, 895), hb(13)],
+  p1u2t6: [n_(4, 161, 172), s_(4, 115, 128), r_(60, 896, 906), hb(13)],
 
   // Social System
   p1u3t1: [r_(9), r_(11), sb(4, 109, 114)],
   p1u3t2: [r_(13), rb(15)],
   p1u3t3: [r_(31), r_(34), hb(10)],
-  p1u3t4: [r_(18), sb(2, 35, 39)],
+  p1u3t4: [n_(4, 173, 199), r_(18), sb(2, 35, 39)],
   p1u3t5: [r_(17)],
   p1u3t6: [r_(16)],
-  p1u3t7: [r_(10), s_(7, 175, 186), hb(3)],
-  p1u3t8: [r_(30), s_(8, 211, 220), hb(11)],
-  p1u3t9: [r_(28), s_(6, 163, 170)],
+  p1u3t7: [nb(4, 133, 145), r_(10), s_(7, 175, 186), hb(3)],
+  p1u3t8: [nb(8), r_(30), s_(8, 211, 220), hb(11)],
+  p1u3t9: [nb(6), r_(28), s_(6, 163, 170)],
 
   // Stratification
-  p1u4t1: [s_(5, 133, 145), r_("A"), rb(20)],
-  p1u4t2: [s_(5, 153, 159), r_(56), rb(22)],
+  p1u4t1: [n_(5, 200, 218), s_(5, 133, 145), r_("A"), rb(20)],
+  p1u4t2: [n_(5, 219, 231), s_(5, 153, 159), r_(56), rb(22)],
 
   // Economy and Society
-  p1u5t1: [s_(6, 163, 167), r_(55), hb(6)],
-  p1u5t2: [s_(6, 168, 170), r_(19), hb(7)],
-  p1u5t3: [s_(6, 171, 173), hb(6)],
+  p1u5t1: [n_(6, 232, 240), s_(6, 163, 167), r_(55), hb(6)],
+  p1u5t2: [n_(6, 241, 245), s_(6, 168, 170), r_(19), hb(7)],
+  p1u5t3: [n_(6, 246, 248), s_(6, 171, 173), hb(6)],
 
   // Politics and Society
-  p1u6t1: [s_(7, 175, 186), h_(3), rb(29)],
-  p1u6t2: [s_(7, 187, 197), hb(3)],
-  p1u6t3: [s_(7, 198, 207), r_(37), r_(38)],
+  p1u6t1: [n_(7, 249, 275), s_(7, 175, 186), h_(3), rb(29)],
+  p1u6t2: [n_(7, 276, 295), s_(7, 187, 197), hb(3)],
+  p1u6t3: [n_(7, 296, 311), s_(7, 198, 207), r_(37), r_(38)],
 
   // Religion and Society
-  p1u7t1: [s_(8, 221, 222), rb(30), rb(54)],
-  p1u7t2: [s_(8, 223, 225), h_(11), sb(22, 455, 457)],
-  p1u7t3: [s_(8, 226, 229)],
+  p1u7t1: [nb(8), s_(8, 221, 222), rb(30), rb(54)],
+  p1u7t2: [n_(8), s_(8, 223, 225), h_(11), sb(22, 455, 457)],
+  p1u7t3: [nb(8), s_(8, 226, 229)],
   p1u7t4: [s_(8, 216, 220), hb(11)],
-  p1u7t5: [r_(30), sb(8, 215, 220)],
+  p1u7t5: [nb(8), r_(30), sb(8, 215, 220)],
 
   // Science and Technology. Rao's ch. 54 is the only chapter in the three that
   // treats the ethos and the social control of science rather than only its
@@ -334,16 +381,16 @@ export const STANDARD_READINGS: Record<string, StdReading[]> = {
   p1u8t4: [s_(10, 268, 269), r_(54)],
 
   // Research Methods
-  p1u9t1: [s_(3, 42, 45), r_(5, 54, 58)],
-  p1u9t2: [s_(3, 52, 55), r_(5, 60, 70)],
-  p1u9t3: [s_(3, 46, 49), r_(5, 58, 60), hb(12)],
-  p1u9t4: [r_(5, 70, 77), sb(3, 56, 63)],
+  p1u9t1: [n_(3, 55, 62), s_(3, 42, 45), r_(5, 54, 58)],
+  p1u9t2: [n_(3, 63, 72), s_(3, 52, 55), r_(5, 60, 70)],
+  p1u9t3: [n_(3, 73, 81), s_(3, 46, 49), r_(5, 58, 60), hb(12)],
+  p1u9t4: [nb(2, 30, 54), r_(5, 70, 77), sb(3, 56, 63)],
 
   // Social and Cultural Change
-  p1u10t1: [s_(10, 262, 263)],
-  p1u10t2: [s_(10, 264, 265), r_(36)],
-  p1u10t3: [s_(10, 266, 267), r_(27), hb(5)],
-  p1u10t4: [s_(10, 268, 269), r_(54)],
+  p1u10t1: [n_(10, 346, 356), s_(10, 262, 263)],
+  p1u10t2: [n_(10, 357, 368), s_(10, 264, 265), r_(36)],
+  p1u10t3: [nb(10), s_(10, 266, 267), r_(27), hb(5)],
+  p1u10t4: [nb(10, 369, 383), s_(10, 268, 269), r_(54)],
   // p1u10t5 — dominant and celebrity culture. See UNCOVERED.
 
   // ── Paper II ──────────────────────────────────────────────────────────────
@@ -362,7 +409,7 @@ export const STANDARD_READINGS: Record<string, StdReading[]> = {
 
   // Major Institutions
   p2u3t1: [s_(17, 386, 390), r_(24)],
-  p2u3t2: [s_(17, 379, 396), r_(25), r_(26)],
+  p2u3t2: [nb(9, 321, 345), s_(17, 379, 396), r_(25), r_(26)],
   p2u3t3: [s_(17, 390, 391), r_(58, 813, 840)],
   p2u3t4: [s_(22, 449, 455)],
   p2u3t5: [s_(18), r_(30)],
