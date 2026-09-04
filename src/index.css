@@ -604,17 +604,34 @@ input[type="range"]::-moz-range-thumb {
   display: grid;
   gap: 30px;
   width: 100%;
-  max-width: 1040px;
+  max-width: 1280px;
   align-items: start;
 }
 
 @media (min-width: 900px) {
   .setup-split {
-    grid-template-columns: 330px minmax(0, 1fr);
-    gap: 52px;
+    grid-template-columns: 380px minmax(0, 1fr);
+    gap: 60px;
   }
   .setup-intro {
     position: sticky;
     top: 26px;
+  }
+}
+
+/*
+ * Two questions across, once there is room for two.
+ *
+ * The four ran down a single column and left the page half empty and twice as
+ * tall as it needed to be. The sliders are short and the same shape as one
+ * another, so they pair; the name and the starting point stay full width
+ * because one is a text field that should not be a mile wide and the other
+ * unfolds into three rows.
+ */
+@media (min-width: 1150px) {
+  .setup-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 }

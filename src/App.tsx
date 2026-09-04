@@ -759,9 +759,9 @@ function Setup({
           <img
             src="/logo.png"
             alt="WBCS Sociology"
-            width={132}
-            height={132}
-            style={{ display: "block", marginBottom: 20, maxWidth: "48%", height: "auto" }}
+            width={172}
+            height={172}
+            style={{ display: "block", marginBottom: 22, maxWidth: "58%", height: "auto" }}
           />
           <div
             style={{
@@ -774,7 +774,7 @@ function Setup({
           >
             sociology · wbcs
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, margin: "10px 0 8px", letterSpacing: "-0.015em" }}>
+          <h1 style={{ fontSize: 34, fontWeight: 600, margin: "12px 0 10px", letterSpacing: "-0.02em" }}>
             Before we start
           </h1>
           {/*
@@ -976,6 +976,7 @@ function Setup({
             )}
           </section>
 
+          <div className="setup-pair">
           <Field step={3} label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
             <input
               type="range"
@@ -998,6 +999,7 @@ function Setup({
               aria-label="Target coverage"
             />
           </Field>
+          </div>
 
           <section style={panelStyle}>
             <button
