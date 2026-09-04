@@ -213,8 +213,14 @@ const PAPER1_NOTES: StdChapter[] = [
   { n: 4, title: "Sociological Thinkers", from: 82, to: 199 },
   { n: 5, title: "Stratification and Mobility", from: 200, to: 231 },
   { n: 6, title: "Works and Economic Life", from: 232, to: 248 },
-  { n: 7, title: "Politics and Society", from: 249, to: 311 },
-  { n: 8, title: "Religion and Society", from: 312, to: 320 },
+  // Chapter 8 opens on PDF page 294, not 312. Checked against the file: the
+  // "Chapter - 8 | Religion & Society" title page is p294, and the sections
+  // under it run Defining Religion p297, Pluralism p305, Religion and Science
+  // p309, Secularisation p310, Fundamentalism p317. The old boundary handed
+  // eighteen pages of religion to Politics, which is how p1u6t3 — protest and
+  // social movements — came to point at the chapter defining the sacred.
+  { n: 7, title: "Politics and Society", from: 249, to: 293 },
+  { n: 8, title: "Religion and Society", from: 294, to: 320 },
   { n: 9, title: "Systems of Kinship", from: 321, to: 345 },
   { n: 10, title: "Social Change in Modern Society", from: 346, to: 383 },
 ];
@@ -362,15 +368,15 @@ export const STANDARD_READINGS: Record<string, StdReading[]> = {
 
   // Politics and Society
   p1u6t1: [n_(7, 249, 275), s_(7, 175, 186), h_(3), rb(29)],
-  p1u6t2: [n_(7, 276, 295), s_(7, 187, 197), hb(3)],
-  p1u6t3: [n_(7, 296, 311), s_(7, 198, 207), r_(37), r_(38)],
+  p1u6t2: [n_(7, 265, 278), s_(7, 187, 197), hb(3)],
+  p1u6t3: [n_(7, 279, 293), s_(7, 198, 207), r_(37), r_(38)],
 
   // Religion and Society
-  p1u7t1: [nb(8), s_(8, 221, 222), rb(30), rb(54)],
-  p1u7t2: [n_(8), s_(8, 223, 225), h_(11), sb(22, 455, 457)],
-  p1u7t3: [nb(8), s_(8, 226, 229)],
-  p1u7t4: [s_(8, 216, 220), hb(11)],
-  p1u7t5: [nb(8), r_(30), sb(8, 215, 220)],
+  p1u7t1: [n_(8, 309, 310), s_(8, 221, 222), rb(30), rb(54)],
+  p1u7t2: [n_(8, 310, 316), s_(8, 223, 225), h_(11), sb(22, 455, 457)],
+  p1u7t3: [n_(8, 317, 320), s_(8, 226, 229)],
+  p1u7t4: [n_(8, 305, 308), s_(8, 216, 220), hb(11)],
+  p1u7t5: [n_(8, 297, 304), r_(30), sb(8, 215, 220)],
 
   // Science and Technology. Rao's ch. 54 is the only chapter in the three that
   // treats the ethos and the social control of science rather than only its

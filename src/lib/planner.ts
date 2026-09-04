@@ -1,5 +1,6 @@
 import { TOPICS, TOTAL_HOURS } from "../data/syllabus";
 import { PYQS } from "../data/pyq";
+import { keywordsFor } from "../data/keywords";
 import type { Topic } from "../data/syllabus";
 import type { CheckId, Derived, Level, Settings, WindowMonths } from "./events";
 
@@ -150,25 +151,17 @@ export function depthFor(d: Derived, topic: Topic): number {
 /**
  * The parts of a topic, taken from its own name.
  *
- * "Karl Marx — historical materialism, mode of production, alienation, class
- * struggle" already lists what it contains; the syllabus wrote it down and the
- * app was throwing it away at the em dash. Ten topics carry two or more parts
- * this way and they are exactly the expensive ones — every thinker, four to six
- * hours each. The other seventy-five are a single idea and return one part,
- * which is the behaviour everything had before.
+ * Now read from data/keywords.ts, which prefers a list authored against the
+ * standard texts and falls back to the syllabus's own em-dash wording. Thirty
+ * chapters decompose; the rest are a single idea and return nothing, which
+ * every caller must read as "tick the whole thing" rather than as a gap.
  *
  * No new ids, so nothing in the question corpus, the weightage or the hours has
  * to be re-pointed, and an evening on one part of Marx becomes recordable
  * without splitting Marx into four topics that WBCS does not examine separately.
  */
 export function partsOf(topic: Topic): string[] {
-  const tail = topic.name.split(" — ")[1];
-  if (!tail) return [];
-  const parts = tail
-    .split(",")
-    .map((x) => x.trim())
-    .filter(Boolean);
-  return parts.length > 1 ? parts : [];
+  return keywordsFor(topic);
 }
 
 /** Which parts of a topic have this check against them. */

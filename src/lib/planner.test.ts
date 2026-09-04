@@ -62,6 +62,7 @@ import {
   partsDone,
   checkProgress,
 } from "./planner";
+import { KEYWORDS } from "../data/keywords";
 import { PYQS, PYQ_YEARS } from "../data/pyq";
 
 const WEEKLY_HOURS = 10;
@@ -75,7 +76,7 @@ const settings = on.settings(SETTINGS);
 
 const highYield = TOPICS.find((t) => t.pyq >= 3)!;
 /** One idea, no parts — where an answer still implies the reading. */
-const singleIdea = TOPICS.find((t) => t.pyq >= 3 && !t.name.includes(" — "))!;
+const singleIdea = TOPICS.find((t) => t.pyq >= 3 && partsOf(t).length === 0)!;
 /** Never asked, and in a unit that is also cold. */
 const coldTopic = TOPICS.find((t) => t.pyq === 0 && bandOf(t) === 1)!;
 /** Never asked itself, but sitting in a heavily examined unit. */
@@ -420,7 +421,7 @@ describe("answers feed back into the plan", () => {
     expect(byKey.thinkers!.scored).toBe(1);
   });
 
-  it("reads a topic's parts out of its own name", () => {
+  it("reads a chapter's ideas from the keyword data", () => {
     const marx = TOPICS.find((t) => t.name.startsWith("Karl Marx"))!;
     expect(partsOf(marx)).toEqual([
       "historical materialism",
@@ -428,9 +429,14 @@ describe("answers feed back into the plan", () => {
       "alienation",
       "class struggle",
     ]);
-    // A topic that is one idea has no parts, which is every check's old
-    // behaviour and must stay that way for seventy-five of the eighty-five.
-    expect(partsOf(TOPICS.find((t) => !t.name.includes(" — "))!)).toEqual([]);
+    // A chapter that is one idea has none, which is every check's old
+    // behaviour and must stay that way for the majority of the eighty-five.
+    expect(partsOf(singleIdea)).toEqual([]);
+    // And every authored list must belong to a real topic id, or a tick is
+    // recorded against a chapter that does not exist.
+    for (const id of Object.keys(KEYWORDS)) {
+      expect(TOPICS.some((t) => t.id === id), id).toBe(true);
+    }
   });
 
   it("credits a part of a topic as a share of the check", () => {
