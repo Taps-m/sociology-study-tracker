@@ -176,6 +176,17 @@ export interface AttemptDetail {
   weakest?: string;
   rewrite?: string;
   working?: string;
+  /**
+   * Whether the skeleton or the model answer was open while this was written.
+   *
+   * The app briefs those two with the criteria the candidate keeps losing marks
+   * on, which means an aided answer scores better whether or not the candidate
+   * improved — the scaffolding supplies the thing that was missing. Without
+   * this flag every trend in the app quietly launders help into progress, and
+   * the exam hall has no skeleton in it. Absent on attempts recorded before the
+   * question was asked.
+   */
+  aided?: boolean;
   /** The opening of what the model read back, so a misreading is visible. */
   readBack?: string;
   /**
@@ -275,6 +286,7 @@ export function project(events: StudyEvent[]): Derived {
           weakest: e.weakest,
           rewrite: e.rewrite,
           working: e.working,
+          aided: e.aided,
           readBack: e.readBack,
           legible: e.legible,
         });

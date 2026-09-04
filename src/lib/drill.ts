@@ -86,6 +86,23 @@ export function recurringWeakness(d: Derived, window = 6): Weakness | null {
   return { dimension: dimension as Dimension, times, of: scored.length };
 }
 
+/**
+ * The same weakness, but only when it has earned the word.
+ *
+ * One low criterion is an event: it may be the candidate, or it may be that
+ * question, or a marker misreading a page. It becomes a diagnosis when it is
+ * the lowest in a clear majority of at least three attempts — and only then is
+ * it worth pointing an hour of study, or a model's brief, at.
+ *
+ * Everything downstream should ask for this rather than recurringWeakness when
+ * it is about to make a claim about the candidate rather than about a page.
+ */
+export function confirmedWeakness(d: Derived, window = 6): Weakness | null {
+  const w = recurringWeakness(d, window);
+  if (!w) return null;
+  return w.of >= 3 && w.times * 2 > w.of ? w : null;
+}
+
 export interface Drill {
   topic: Topic;
   question: PastQuestion;

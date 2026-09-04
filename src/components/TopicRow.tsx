@@ -190,13 +190,14 @@ export function TopicRow({
             <span style={{ fontSize: 12.5, color: C.muted, marginRight: 10 }}>
               Attempted {trend.count}×{" "}
               <span className="num">
-                {trend.marks.map((m, i) => (
+                {trend.entries.map((e, i) => (
                   <span key={i}>
                     {i > 0 && <span style={{ color: C.muted }}> → </span>}
                     <span
+                      title={e.aided ? "written with the skeleton open" : "written on your own"}
                       style={{
                         color:
-                          i === trend.marks.length - 1 && trend.count > 1
+                          i === trend.entries.length - 1 && trend.count > 1
                             ? trend.change > 0
                               ? "var(--good)"
                               : trend.change < 0
@@ -205,7 +206,8 @@ export function TopicRow({
                             : C.text,
                       }}
                     >
-                      {m}
+                      {e.marks}
+                      {e.aided && <span style={{ fontSize: 10, color: C.muted }}>ᵃ</span>}
                     </span>
                   </span>
                 ))}

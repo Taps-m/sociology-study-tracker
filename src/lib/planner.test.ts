@@ -483,6 +483,35 @@ describe("answers feed back into the plan", () => {
     expect(lastAnswer(build([on.attempt(highYield.id, 22, 40, 35)]), highYield.id)).toBeNull();
   });
 
+  it("keeps the unaided marks as a series of their own", () => {
+    const d = build([
+      on.attempt(highYield.id, 18, 40, 35),
+      // Written with the skeleton open, which is briefed with the candidate's
+      // own weak criteria — so it says nothing about whether they improved.
+      on.attempt(highYield.id, 29, 40, 35, { aided: true }),
+      on.attempt(highYield.id, 21, 40, 35),
+    ]);
+    const t = attemptTrend(d, highYield.id)!;
+    expect(t.marks).toEqual([18, 29, 21]);
+    expect(t.unaided).toEqual([18, 21]);
+    // The headline change flatters: +3 is the truth, +11 is the scaffolding.
+    expect(t.change).toBe(3);
+    expect(t.unaidedChange).toBe(3);
+  });
+
+  it("has no unaided verdict until two answers were written unaided", () => {
+    const d = build([
+      on.attempt(highYield.id, 18, 40, 35),
+      on.attempt(highYield.id, 29, 40, 35, { aided: true }),
+    ]);
+    expect(attemptTrend(d, highYield.id)!.unaidedChange).toBeNull();
+  });
+
+  it("treats attempts recorded before the question was asked as unaided", () => {
+    const d = build([on.attempt(highYield.id, 18, 40, 35), on.attempt(highYield.id, 22, 40, 35)]);
+    expect(attemptTrend(d, highYield.id)!.unaidedChange).toBe(4);
+  });
+
   it("rescales attempts marked before the rubric moved to eights", () => {
     // No rubricOutOf means it was marked out of ten. 5/10 and 4/8 are the same
     // answer; averaged raw they would read as 4.5, which is a trend in the

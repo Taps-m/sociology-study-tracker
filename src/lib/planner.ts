@@ -421,11 +421,24 @@ export interface AttemptTrend {
   count: number;
   /** Every mark, oldest first, on the paper's own 40. */
   marks: number[];
+  /** The same marks with the one thing that changes their meaning. */
+  entries: { marks: number; aided: boolean }[];
   first: number;
   last: number;
   best: number;
   /** Last minus first. Zero on a single attempt. */
   change: number;
+  /**
+   * Marks from answers written without the skeleton open, oldest first.
+   *
+   * The only series that predicts anything. An aided answer scores better
+   * because the app handed the candidate the criterion they keep dropping —
+   * which is the point of the help, and exactly why it cannot be counted as
+   * evidence they no longer need it.
+   */
+  unaided: number[];
+  /** Last minus first across the unaided series. Null under two of them. */
+  unaidedChange: number | null;
 }
 
 /**
@@ -437,21 +450,26 @@ export interface AttemptTrend {
  * working, which is the only thing that keeps someone writing the fourth one.
  */
 export function attemptTrend(d: Derived, topicId: string): AttemptTrend | null {
-  const marks = attemptsFor(d, topicId)
+  const entries = attemptsFor(d, topicId)
     .slice()
     .sort((a, b) => a.at.localeCompare(b.at))
-    .map((a) => a.marks);
-  if (marks.length === 0) return null;
+    .map((a) => ({ marks: a.marks, aided: a.aided === true }));
+  if (entries.length === 0) return null;
+  const marks = entries.map((e) => e.marks);
+  const unaided = entries.filter((e) => !e.aided).map((e) => e.marks);
   const first = marks[0]!;
   const last = marks[marks.length - 1]!;
   return {
     topicId,
     count: marks.length,
     marks,
+    entries,
     first,
     last,
     best: Math.max(...marks),
     change: last - first,
+    unaided,
+    unaidedChange: unaided.length > 1 ? unaided[unaided.length - 1]! - unaided[0]! : null,
   };
 }
 

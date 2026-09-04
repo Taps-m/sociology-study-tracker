@@ -40,6 +40,8 @@ export function AnswerBlueprint({
   paper,
   weak,
   missed,
+  pattern,
+  onOpened,
 }: {
   question: string;
   /** Which chapters the candidate can actually open. */
@@ -58,6 +60,16 @@ export function AnswerBlueprint({
    * the same mark again.
    */
   missed?: { lost: { key: string; lost: number }[]; advice?: string };
+  /**
+   * The criterion this candidate keeps losing marks on, across attempts.
+   *
+   * Separate from `missed` on purpose. One low score is an event and may be
+   * the question's fault; this is a diagnosis and has earned the right to
+   * redirect an hour of work. Only the diagnosis briefs the model hard.
+   */
+  pattern?: { key: string; times: number; of: number };
+  /** Told when the skeleton is actually opened, so the attempt can record it. */
+  onOpened?: () => void;
 }) {
   const [structure, setStructure] = useState<AnswerStructure | null>(() =>
     cachedStructure(question),
@@ -126,15 +138,29 @@ export function AnswerBlueprint({
   // Only the criteria that actually cost marks, worst first. A criterion that
   // lost nothing is not a gap, and listing it would dilute the brief.
   const gaps = (missed?.lost ?? []).filter((l) => l.lost > 0).slice(0, 3);
-  const gapContext =
-    gaps.length > 0
-      ? {
-          lostLastTime: gaps.map((l) => ({
-            criterion: DRILL[l.key as Dimension]?.name ?? l.key,
-            marksLost: l.lost,
-          })),
-          adviceLastTime: missed?.advice,
-        }
+
+  /*
+   * What the model is told to fix, and how firmly.
+   *
+   * A confirmed pattern is a claim about the candidate and is briefed hard. A
+   * single bad criterion is a claim about one page: it may be the question's
+   * shape, a bad evening, or the marker misreading handwriting, and scaffolding
+   * hard against it sends someone to spend an hour on a hole that is not there.
+   * So it goes in as a note rather than as the brief.
+   */
+  const gapContext = pattern
+    ? {
+        lostLastTime: [
+          {
+            criterion: DRILL[pattern.key as Dimension]?.name ?? pattern.key,
+            marksLost: gaps.find((g) => g.key === pattern.key)?.lost,
+            lowestIn: `${pattern.times} of the last ${pattern.of} answers`,
+          },
+        ],
+        adviceLastTime: missed?.advice,
+      }
+    : gaps.length > 0
+      ? { watchThisTime: DRILL[gaps[0]!.key as Dimension]?.name ?? gaps[0]!.key }
       : {};
 
   async function buildAnswer(fresh = false) {
@@ -169,6 +195,7 @@ export function AnswerBlueprint({
     if (res.result) {
       setAnswer(res.result);
       setView("model");
+      onOpened?.();
     } else {
       setAnswerError(res.error);
     }
@@ -178,6 +205,7 @@ export function AnswerBlueprint({
     if (structure) {
       setView("structure");
       setOpen(true);
+      onOpened?.();
       return;
     }
     setBusy(true);
@@ -197,6 +225,7 @@ export function AnswerBlueprint({
       setStructure(res.result);
       setView("structure");
       setOpen(true);
+      onOpened?.();
     } else {
       setError(res.error);
     }
@@ -221,7 +250,7 @@ export function AnswerBlueprint({
           way; saying it here as well is what makes the skeleton legible as an
           answer to their own last attempt rather than a generic one.
         */}
-        {gaps.length > 0 && (
+        {pattern ? (
           <p
             style={{
               fontSize: 13.5,
@@ -234,16 +263,22 @@ export function AnswerBlueprint({
               border: `1px solid ${C.warn}`,
             }}
           >
-            <strong>Do not miss this time:</strong>{" "}
-            {gaps
-              .map(
-                (l) =>
-                  `${(DRILL[l.key as Dimension]?.name ?? l.key).toLowerCase()} (−${l.lost})`,
-              )
-              .join(", ")}
-            . That is where your last answer on this topic lost the most, and
-            the skeleton below is built to supply it.
+            <strong>
+              Do not miss this time:{" "}
+              {(DRILL[pattern.key as Dimension]?.name ?? pattern.key).toLowerCase()}
+            </strong>
+            . It has been your lowest in {pattern.times} of your last {pattern.of}{" "}
+            answers, so the skeleton below is built to supply it.
           </p>
+        ) : (
+          gaps.length > 0 && (
+            <p style={{ fontSize: 13, color: C.muted, margin: "0 0 12px", lineHeight: 1.7 }}>
+              Last time on this topic you dropped the most on{" "}
+              {(DRILL[gaps[0]!.key as Dimension]?.name ?? gaps[0]!.key).toLowerCase()} (−
+              {gaps[0]!.lost}). One answer is not a pattern — it may have been the
+              question — so this is worth watching rather than drilling.
+            </p>
+          )
         )}
 
         <button

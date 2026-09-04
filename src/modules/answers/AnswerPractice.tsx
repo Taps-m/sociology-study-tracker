@@ -17,6 +17,7 @@ import {
 } from "../../lib/planner";
 import { evaluate, prepareUploads, MAX_PAGES, type Evaluation } from "../../lib/ai";
 import { AnswerBlueprint } from "./AnswerBlueprint";
+import { confirmedWeakness } from "../../lib/drill";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
@@ -76,6 +77,7 @@ export function AnswerPractice({
       weakest?: string;
       rewrite?: string;
       working?: string;
+      aided?: boolean;
       readBack?: string;
     },
   ) => void;
@@ -93,6 +95,17 @@ export function AnswerPractice({
   const [result, setResult] = useState<Evaluation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  /*
+   * Whether this answer had help.
+   *
+   * Observed rather than asked for — the app knows when the skeleton was
+   * opened — but confirmable, because observation gets it wrong in both
+   * directions: someone opens the skeleton after writing, to compare, and
+   * someone writes with last week's skeleton still in their notebook. The
+   * toggle below the pages is pre-set from what was observed and takes one tap
+   * to correct, which is the most honest version that costs nobody anything.
+   */
+  const [aided, setAided] = useState(false);
   // The pages of one answer, in the order they were written.
   const [pages, setPages] = useState<File[]>([]);
   const [thumbs, setThumbs] = useState<string[]>([]);
@@ -213,6 +226,7 @@ export function AnswerPractice({
       weakest: result?.weakest,
       rewrite: result?.rewrite,
       working: result?.working,
+      aided,
       questionText: questionText || undefined,
       // Recorded for the first time here. Group B is answered two-from-three
       // and is where candidates quietly lose marks, and the blind-spot report
@@ -239,6 +253,7 @@ export function AnswerPractice({
   // afterwards is only a verdict.
   const trend = attemptTrend(d, topicId);
   const last = lastAnswer(d, topicId);
+  const pattern = confirmedWeakness(d);
 
   return (
     <div className="grid" style={{ gap: 13, maxWidth: 820 }}>
@@ -246,17 +261,24 @@ export function AnswerPractice({
         <Card title={`You have written this topic ${trend.count}×`}>
           <p style={{ fontSize: 15, margin: 0, lineHeight: 1.6 }}>
             <span className="num">
-              {trend.marks.map((m, i) => (
+              {trend.entries.map((e, i) => (
                 <span key={i}>
                   {i > 0 && <span style={{ color: C.muted }}> → </span>}
                   <span
+                    title={e.aided ? "written with the skeleton open" : "written on your own"}
                     style={{
-                      fontSize: i === trend.marks.length - 1 ? 24 : 16,
-                      fontWeight: i === trend.marks.length - 1 ? 700 : 400,
-                      color: i === trend.marks.length - 1 ? C.text : C.muted,
+                      fontSize: i === trend.entries.length - 1 ? 24 : 16,
+                      fontWeight: i === trend.entries.length - 1 ? 700 : 400,
+                      color: i === trend.entries.length - 1 ? C.text : C.muted,
                     }}
                   >
-                    {m}
+                    {e.marks}
+                    {e.aided && (
+                      <span style={{ fontSize: 12, color: C.muted, verticalAlign: "super" }}>
+                        {" "}
+                        aided
+                      </span>
+                    )}
                   </span>
                 </span>
               ))}
@@ -328,14 +350,29 @@ export function AnswerPractice({
             </div>
           )}
 
+          {/*
+            The verdict is read off the unaided answers where there are two of
+            them, and off everything only as a fallback. An aided answer is a
+            measure of the scaffolding, not of the candidate, and saying "up 9
+            marks" on the strength of one is how an app tells someone they are
+            ready when they are not.
+          */}
           <p style={{ fontSize: 13.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
-            {trend.count === 1
-              ? `Beat ${trend.first} today and the practice is working.`
-              : trend.change > 0
-                ? `Up ${trend.change} marks since the first. Your best is ${trend.best} — that is the one to beat.`
-                : trend.change < 0
-                  ? `Your best on this topic is ${trend.best}. The last one came in under it, which is worth a look before you write again.`
-                  : `Flat across ${trend.count} answers. Same mark twice usually means the same gap twice — the criterion below is where to spend this attempt.`}
+            {trend.unaidedChange !== null
+              ? trend.unaidedChange > 0
+                ? `On your own: ${trend.unaided.join(" → ")}. Up ${trend.unaidedChange} without help, which is the number that counts.`
+                : trend.unaidedChange < 0
+                  ? `On your own: ${trend.unaided.join(" → ")}. That has gone backwards, and the aided marks do not offset it.`
+                  : `On your own: ${trend.unaided.join(" → ")}. Flat without help — the same gap twice.`
+              : trend.count === 1
+                ? `Beat ${trend.first} today and the practice is working.`
+                : trend.unaided.length < 2 && trend.entries.some((e) => e.aided)
+                  ? `Only ${trend.unaided.length} of these ${trend.count} was written unaided, so there is nothing yet to compare. One more closed-book answer and this becomes a trend.`
+                  : trend.change > 0
+                    ? `Up ${trend.change} marks since the first. Your best is ${trend.best} — that is the one to beat.`
+                    : trend.change < 0
+                      ? `Your best on this topic is ${trend.best}. The last one came in under it, which is worth a look before you write again.`
+                      : `Flat across ${trend.count} answers. Same mark twice usually means the same gap twice.`}
           </p>
         </Card>
       )}
@@ -503,6 +540,10 @@ export function AnswerPractice({
             result && Object.values(result.scores).reduce((a, b) => a + b, 0) / OUT_OF < 0.5,
           )}
           missed={last ? { lost: last.lost, advice: last.rewrite } : undefined}
+          pattern={
+            pattern ? { key: pattern.dimension, times: pattern.times, of: pattern.of } : undefined
+          }
+          onOpened={() => setAided(true)}
         />
       )}
 
@@ -913,6 +954,56 @@ export function AnswerPractice({
             </p>
           </div>
         )}
+
+        {/*
+          One tap, asked once, that keeps every trend in the app honest.
+
+          The skeleton is briefed with the criteria this candidate keeps
+          dropping, so an aided answer scores better whether or not they got
+          better. Unasked, the app would report that as improvement and the
+          first person to find out otherwise would be him, in the hall.
+        */}
+        <div style={{ marginTop: 16 }}>
+          <p style={{ fontSize: 13.5, color: C.text, margin: "0 0 7px" }}>
+            How did you write it?
+          </p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {([
+              [false, "On my own", "closed book, no skeleton"],
+              [true, "With help open", "skeleton or model answer in front of you"],
+            ] as const).map(([val, label, why]) => (
+              <button
+                key={label}
+                onClick={() => setAided(val)}
+                title={why}
+                style={{
+                  flex: "1 1 170px",
+                  minHeight: 44,
+                  padding: "8px 13px",
+                  borderRadius: 9,
+                  textAlign: "left",
+                  font: "inherit",
+                  cursor: "pointer",
+                  background: aided === val ? C.accentSoft : "transparent",
+                  color: C.text,
+                  border: `1px solid ${aided === val ? C.accent : C.line}`,
+                }}
+              >
+                <span style={{ fontSize: 14, fontWeight: aided === val ? 650 : 500 }}>
+                  {aided === val ? "✓ " : ""}
+                  {label}
+                </span>
+                <span style={{ display: "block", fontSize: 12, color: C.muted, marginTop: 2 }}>
+                  {why}
+                </span>
+              </button>
+            ))}
+          </div>
+          <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+            Only answers written on your own are counted towards whether you are
+            improving. The exam hall has no skeleton in it.
+          </p>
+        </div>
 
         <button
           onClick={save}

@@ -305,8 +305,11 @@ function WritingTrend({ d }: { d: Derived }) {
         {trends.map((t) => {
           const topic = TOPICS.find((x) => x.id === t.topicId);
           if (!topic) return null;
-          const up = t.change > 0;
-          const flat = t.change === 0;
+          // Read off the unaided answers where there are two of them: an aided
+          // mark measures the scaffolding, not the candidate.
+          const change = t.unaidedChange ?? t.change;
+          const up = change > 0;
+          const flat = change === 0;
           return (
             <div
               key={t.topicId}
@@ -322,7 +325,7 @@ function WritingTrend({ d }: { d: Derived }) {
                 {topic.name}
               </span>
               <span className="num" style={{ fontSize: 13, color: C.muted, flexShrink: 0 }}>
-                {t.marks.join(" → ")} / 40
+                {t.entries.map((e) => `${e.marks}${e.aided ? "ᵃ" : ""}`).join(" → ")} / 40
               </span>
               <span
                 className="num"
@@ -335,7 +338,7 @@ function WritingTrend({ d }: { d: Derived }) {
                   color: up ? "var(--good)" : flat ? C.muted : C.warn,
                 }}
               >
-                {flat ? "±0" : `${up ? "+" : ""}${t.change}`}
+                {flat ? "±0" : `${up ? "+" : ""}${change}`}
               </span>
             </div>
           );
