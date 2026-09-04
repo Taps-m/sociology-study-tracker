@@ -745,15 +745,26 @@ function Setup({
   const months: WindowMonths = suggestedMonths(shownLevel);
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
+  const [targetSet, setTargetSet] = useState(false);
   const [known, setKnown] = useState<string[]>([]);
 
   /**
    * What is still unanswered, in the order it is asked.
    *
-   * Only the two that cannot be guessed. A name is decoration — it greets you
-   * and nothing else — and forcing one out of an app whose own lock screen says
-   * there is no account to make would be theatre. The target and the starting
-   * unit have defaults that hold for anybody.
+   * Only what cannot be guessed. The level sets the depth of every topic and
+   * the length of the plan; the hours drive every figure on the next screen,
+   * and twelve against a real seven is the difference between announcing 95% of
+   * the syllabus and the truth being 66%.
+   *
+   * A name is not one of these. It greets you and fills the avatar, and nothing
+   * else — forcing one out of an app whose lock screen says there is no account
+   * to make would be theatre. Nor is the coverage target: 80% is a defensible
+   * opinion for anybody, which is what a default is for.
+   *
+   * All four are still marked as the four that shape the plan, because they do.
+   * Only the two the button actually refuses to proceed without say Required —
+   * a label the button does not enforce teaches the reader that the labels are
+   * decoration, and every honest one afterwards pays for it.
    */
   const missing = [
     level === null ? "where you are starting from" : null,
@@ -785,7 +796,7 @@ function Setup({
 
   return (
     <Shell align="flex-start">
-      <div className="setup-split" style={{ fontFamily: C.sans }}>
+      <div className="setup-split leaves" style={{ fontFamily: C.sans, position: "relative", zIndex: 1 }}>
         <header className="setup-intro">
           <img
             src="/logo.png"
@@ -821,7 +832,7 @@ function Setup({
 
           {/*
             What it is for, before it is used.
-            Four questions is what the page asks of someone; this is what they
+            The questions are what the page asks of someone; this is what they
             get back, and without it the first screen states a cost and no
             benefit.
           */}
@@ -863,6 +874,20 @@ function Setup({
             <div style={{ fontSize: 14.5, fontWeight: 700 }}>WBCS Sociology</div>
             <div style={{ fontSize: 13, color: "var(--rail-muted)", marginTop: 3 }}>
               Understand society. Write better.
+            </div>
+          </div>
+
+          {/*
+            Whose this is. It was on the lock screen and nowhere else, and this
+            is the screen a new user actually spends time on.
+          */}
+          <div style={{ marginTop: 26, fontSize: 12.5, color: C.muted, lineHeight: 1.6 }}>
+            <div>
+              Designed and built by <strong style={{ color: C.text }}>Tapomoy</strong>
+            </div>
+            <div>for WBCS Sociology aspirants</div>
+            <div style={{ marginTop: 7, opacity: 0.75 }}>
+              Copyright © {new Date().getFullYear()} Tapomoy. All rights reserved.
             </div>
           </div>
         </header>
@@ -921,6 +946,7 @@ function Setup({
           <section className="q-card req">
             <Badge name="pin" tint={1} />
             <span className="q-step" aria-hidden>2</span>
+            <span className="q-req" style={{ position: "absolute", top: 14, right: 16 }}>Required</span>
             <div className="q-body">
             <button
               onClick={() => setLevelOpen((v) => !v)}
@@ -1057,6 +1083,7 @@ function Setup({
             icon="clock"
             tint={2}
             step={3}
+            required
             label="Hours a week for sociology"
             help="How much time can you realistically give it?"
             value={hoursSet ? hours : null}
@@ -1084,7 +1111,7 @@ function Setup({
             step={4}
             label="How much of the syllabus are you aiming to cover?"
             help="The target this plan is built to reach."
-            value={target}
+            value={targetSet ? target : null}
             unit="%"
             ticks={["50%", "60%", "70%", "80%", "90%", "100%"]}
             sub="the rest stays visible as optional"
@@ -1095,7 +1122,10 @@ function Setup({
               max={100}
               step={5}
               value={target}
-              onChange={(e) => setTarget(+e.target.value)}
+              onChange={(e) => {
+                setTarget(+e.target.value);
+                setTargetSet(true);
+              }}
               style={{ "--fill": `${((target - 50) / 50) * 100}%` } as React.CSSProperties}
               aria-label="Target coverage"
             />
@@ -1766,6 +1796,7 @@ function Field({
   icon,
   tint,
   step,
+  required,
   ticks,
   children,
 }: {
@@ -1778,17 +1809,24 @@ function Field({
   sub?: string;
   icon: string;
   tint: number;
-  /** Which of the four this is. */
+  /** Where this sits in the list of six. Sequence, not status. */
   step: number;
+  /** True only where Start is actually refused without it. */
+  required?: boolean;
   /** The scale under the track: its ends and a few marks between. */
   ticks?: string[];
   children: ReactNode;
 }) {
   return (
-    <section className="q-card req">
+    <section className={`q-card${required ? " req" : ""}`}>
       <span className="q-step" aria-hidden>
         {step}
       </span>
+      {required && (
+        <span className="q-req" style={{ position: "absolute", top: 14, right: 16 }}>
+          Required
+        </span>
+      )}
       <Badge name={icon} tint={tint} />
       <div className="q-body">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>

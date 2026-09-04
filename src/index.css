@@ -677,10 +677,13 @@ input[type="range"]::-moz-range-thumb {
 /*
  * Required and optional, told apart before either is read.
  *
- * Six cards that look identical make a six-question form out of a four-question
- * promise. The four that are asked for are tinted and outlined in the accent;
- * the two that are not sit flat and quiet, and nothing about them suggests the
- * page is unfinished until they are filled.
+ * Only the two that are actually gated are tinted and outlined in the accent.
+ * An earlier pass ranked four that way and left two plain, which was the
+ * styling asserting one thing while the Start button enforced another — and of
+ * the two stories the reader believes the one they can see.
+ *
+ * The numbers are sequence, not status: they say where you are in a list of
+ * six, and nothing about whether an answer is owed.
  */
 .q-card.req {
   background: var(--accent-soft);
@@ -712,16 +715,16 @@ input[type="range"]::-moz-range-thumb {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
   font-weight: 700;
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--panel);
+  color: var(--muted);
   border: 2px solid var(--page);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
-.q-card.opt .q-step {
-  background: var(--raised);
-  color: var(--muted);
-  border-color: var(--page);
-  box-shadow: inset 0 0 0 1px var(--line);
+.q-card.req .q-step {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: none;
 }
 
 /* What the form insists on, said once, where it applies. */
@@ -793,4 +796,47 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   gap: 13px;
   align-items: center;
+}
+
+/*
+ * Leaves in the corners.
+ *
+ * Drawn as one inline SVG in a data URI rather than an image file, so it costs
+ * no request, tints with the accent and scales to any screen. Fixed, behind
+ * everything, and untouchable — decoration that can swallow a click is not
+ * decoration, it is a bug.
+ *
+ * Only on the way in. A study screen someone opens every evening for four
+ * months should not have foliage on it.
+ */
+.leaves::before,
+.leaves::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  width: 340px;
+  height: 340px;
+  pointer-events: none;
+  opacity: 0.5;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='%234c6b2f' fill-opacity='0.16'%3E%3Cpath d='M30 8c34 6 58 32 58 66 0 18-8 34-22 44C48 108 30 78 30 44V8z'/%3E%3Cpath d='M104 30c30 14 44 46 34 76-6 16-19 28-35 33-14-24-8-58 12-84l-11-25z'/%3E%3Cpath d='M8 92c30-8 60 6 74 34 7 15 7 32 1 47-27-6-49-31-58-60L8 92z'/%3E%3C/g%3E%3Cg stroke='%234c6b2f' stroke-opacity='0.22' fill='none' stroke-width='2'%3E%3Cpath d='M30 8c22 30 34 68 34 110M104 30c-2 34 0 68 6 100M8 92c26 14 50 36 68 62'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.leaves::before {
+  top: -40px;
+  left: -50px;
+}
+
+.leaves::after {
+  bottom: -60px;
+  left: -70px;
+  transform: rotate(-38deg);
+}
+
+@media (max-width: 900px) {
+  .leaves::before,
+  .leaves::after {
+    display: none;
+  }
 }
