@@ -171,42 +171,60 @@ input:focus-visible {
 }
 
 /* Sliders. The browser default reads as an unfinished form; these do not. */
+/*
+ * Sliders that show how far along they are.
+ *
+ * The track was one flat grey line, so a value only lived in the number beside
+ * it and the control itself said nothing. It is filled to the thumb now — the
+ * fill is painted as a gradient sized from a --fill variable the component
+ * sets, because a range input has no standard way to style the part before the
+ * thumb and this is the one trick that works in both engines.
+ */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 24px;
+  height: 26px;
   background: transparent;
   cursor: pointer;
 }
 input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--line);
+  height: 6px;
+  border-radius: 3px;
+  background:
+    linear-gradient(var(--accent), var(--accent)) 0 / var(--fill, 0%) 100% no-repeat,
+    var(--hair);
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   margin-top: -7px;
   border-radius: 50%;
   background: var(--accent);
   border: 3px solid var(--surface);
-  box-shadow: 0 0 0 1px var(--accent);
+  box-shadow: 0 1px 4px rgba(60, 48, 28, 0.28);
 }
 input[type="range"]::-moz-range-track {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--line);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--hair);
+}
+input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
 }
 input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--accent);
-  border: 2px solid var(--surface);
+  border: 3px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(60, 48, 28, 0.28);
 }
+
 
 /* App shell: rail on the left from 900px up, stacked below it. */
 .shell {
@@ -634,4 +652,73 @@ input[type="range"]::-moz-range-thumb {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
+}
+
+/*
+ * A question, as a card with a face.
+ *
+ * Every card was a rectangle with a sentence in it, and eight of them in a
+ * column are impossible to tell apart at a glance. A tinted disc with a mark in
+ * it gives each one something to recognise before the text is read, and the
+ * tints rotate so neighbours never share.
+ */
+.q-card {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 17px 19px;
+  box-shadow: var(--shadow);
+}
+
+.q-badge {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.q-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The scale under a slider: its ends and its middles, evenly spread. */
+.q-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* The consequence of a slider, said quietly, in a pill of its own. */
+.q-note {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--muted);
+  background: var(--raised);
+  border-radius: 999px;
+  padding: 3px 11px;
+  margin-top: 9px;
+}
+
+/* What the app promises, on the way in. */
+.sell {
+  display: grid;
+  gap: 15px;
+  margin-top: 26px;
+  text-align: left;
+}
+
+.sell-row {
+  display: flex;
+  gap: 13px;
+  align-items: center;
 }

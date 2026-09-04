@@ -42,6 +42,7 @@ import { fileToAvatar } from "./lib/avatar";
 import { useSync } from "./lib/useSync";
 import { MIN_PASSPHRASE } from "./lib/sync";
 import { clearAdvice } from "./lib/ai";
+import { Badge } from "./app/Icon";
 import { C } from "./lib/theme";
 import { quoteOfTheDay } from "./data/quotes";
 import { Shell as AppShell } from "./app/Shell";
@@ -774,9 +775,12 @@ function Setup({
           >
             sociology · wbcs
           </div>
-          <h1 style={{ fontSize: 34, fontWeight: 600, margin: "12px 0 10px", letterSpacing: "-0.02em" }}>
+          <h1 style={{ fontSize: 44, fontWeight: 700, margin: "12px 0 6px", letterSpacing: "-0.03em", lineHeight: 1.08 }}>
             Before we start
           </h1>
+          <p style={{ fontSize: 19, color: C.text, margin: "0 0 12px", lineHeight: 1.35, fontWeight: 500 }}>
+            Let's build your study plan.
+          </p>
           {/*
             The promise, then the reassurance — and they are not the same thing.
             Both sat in one grey paragraph, which gave the sentence that explains
@@ -784,13 +788,38 @@ function Setup({
             nothing is permanent. The claim gets the size and the colour; the
             caveat gets small and quiet, which is what a caveat is for.
           */}
-          <p style={{ fontSize: 17, color: C.text, margin: "0 0 9px", lineHeight: 1.5, fontWeight: 500 }}>
-            Four questions, then{" "}
-            <span style={{ color: C.accent, fontWeight: 700 }}>the plan builds itself</span>.
+          <p style={{ fontSize: 14.5, color: C.muted, margin: 0, lineHeight: 1.7 }}>
+            Just four questions, and{" "}
+            <span style={{ color: C.accent, fontWeight: 700 }}>the plan builds itself</span>. You
+            can change any of it later — nothing here is a commitment.
           </p>
-          <p style={{ fontSize: 13.5, color: C.muted, margin: 0, lineHeight: 1.6 }}>
-            All of it can be changed later, and nothing here is a commitment.
-          </p>
+
+          {/*
+            What it is for, before it is used.
+            Four questions is what the page asks of someone; this is what they
+            get back, and without it the first screen states a cost and no
+            benefit.
+          */}
+          <div className="sell">
+            {[
+              ["target", "Built around you", "Your level, your hours, your target"],
+              ["bars", "Weighted by the papers", "Ten years of real questions, counted"],
+              ["book", "Changes when you do", "Nothing is locked in on day one"],
+              ["trophy", "Turns reading into marks", "Answers written, marked and revisited"],
+            ].map(([icon, title, sub], i) => (
+              <div className="sell-row" key={title}>
+                <Badge name={icon!} tint={i} />
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: "block", fontSize: 14.5, fontWeight: 650, color: C.text }}>
+                    {title}
+                  </span>
+                  <span style={{ display: "block", fontSize: 13, color: C.muted, marginTop: 1 }}>
+                    {sub}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
 
           {/*
             The wordmark, in the dark the rail uses. It anchors the left column —
@@ -821,20 +850,18 @@ function Setup({
         */}
         <div>
         <div style={{ display: "grid", gap: 12 }}>
-          <section style={panelStyle}>
+          <section className="q-card">
+            <Badge name="person" tint={0} />
+            <div className="q-body">
             <label
               htmlFor="setup-name"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: 14.5,
-                color: C.text,
-                marginBottom: 10,
-              }}
+              style={{ display: "block", fontSize: 15, fontWeight: 650, color: C.text }}
             >
-              <Step n={1} />
               What should I call you?
             </label>
+            <p style={{ fontSize: 13, color: C.muted, margin: "2px 0 11px" }}>
+              It is only used to greet you. Nothing leaves this device.
+            </p>
             <input
               id="setup-name"
               value={name}
@@ -853,6 +880,7 @@ function Setup({
                 fontSize: 15.5,
               }}
             />
+            </div>
           </section>
 
           {/*
@@ -864,7 +892,9 @@ function Setup({
             Collapsed it states the answer, which is the only part still worth
             reading after it has been given.
           */}
-          <section style={panelStyle}>
+          <section className="q-card">
+            <Badge name="pin" tint={1} />
+            <div className="q-body">
             <button
               onClick={() => setLevelOpen((v) => !v)}
               aria-expanded={levelOpen}
@@ -885,7 +915,7 @@ function Setup({
             >
               <Step n={2} />
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: 14.5 }}>Where are you starting from?</span>
+                <span style={{ fontSize: 15, fontWeight: 650 }}>Where are you starting from?</span>
                 {!levelOpen && (
                   <span
                     style={{
@@ -903,8 +933,17 @@ function Setup({
                   </span>
                 )}
               </span>
-              <span aria-hidden style={{ color: C.muted, fontSize: 18, lineHeight: 1 }}>
-                {levelOpen ? "−" : "+"}
+              <span
+                aria-hidden
+                style={{
+                  color: C.muted,
+                  fontSize: 13,
+                  lineHeight: 1,
+                  transform: levelOpen ? "rotate(180deg)" : "none",
+                  transition: "transform .15s",
+                }}
+              >
+                ▾
               </span>
             </button>
 
@@ -974,21 +1013,41 @@ function Setup({
             </div>
             </>
             )}
+            </div>
           </section>
 
           <div className="setup-pair">
-          <Field step={3} label="Hours a week for sociology" value={hours} unit="h / week" sub={`about ${(hours / 7).toFixed(1)} hours a day`}>
+          <Field
+            icon="clock"
+            tint={2}
+            label="Hours a week for sociology"
+            help="How much time can you realistically give it?"
+            value={hours}
+            unit="h / week"
+            ticks={["1", "10", "20", "30", "40"]}
+            sub={`about ${(hours / 7).toFixed(1)} hours a day`}
+          >
             <input
               type="range"
               min={1}
               max={40}
               value={hours}
               onChange={(e) => setHours(+e.target.value)}
+              style={{ "--fill": `${((hours - 1) / 39) * 100}%` } as React.CSSProperties}
               aria-label="Hours a week"
             />
           </Field>
 
-          <Field step={4} label="How much of the syllabus are you aiming to cover?" value={target} unit="%" sub="the rest stays visible as optional">
+          <Field
+            icon="bars"
+            tint={3}
+            label="How much of the syllabus are you aiming to cover?"
+            help="The target this plan is built to reach."
+            value={target}
+            unit="%"
+            ticks={["50%", "60%", "70%", "80%", "90%", "100%"]}
+            sub="the rest stays visible as optional"
+          >
             <input
               type="range"
               min={50}
@@ -996,12 +1055,15 @@ function Setup({
               step={5}
               value={target}
               onChange={(e) => setTarget(+e.target.value)}
+              style={{ "--fill": `${((target - 50) / 50) * 100}%` } as React.CSSProperties}
               aria-label="Target coverage"
             />
           </Field>
           </div>
 
-          <section style={panelStyle}>
+          <section className="q-card">
+            <Badge name="book" tint={2} />
+            <div className="q-body">
             <button
               onClick={() => setShowKnown(!showKnown)}
               aria-expanded={showKnown}
@@ -1021,7 +1083,9 @@ function Setup({
               }}
             >
               <span>
-                <span style={{ fontSize: 14.5, display: "block" }}>Already know any of this?</span>
+                <span style={{ fontSize: 15, fontWeight: 650, display: "block" }}>
+                  Already know any of this?
+                </span>
                 <span
                   style={{ fontSize: 13, color: C.muted, display: "block", marginTop: 3 }}
                 >
@@ -1030,8 +1094,17 @@ function Setup({
                     : `${known.length} ${known.length === 1 ? "unit" : "units"} ticked.`}
                 </span>
               </span>
-              <span aria-hidden style={{ color: C.muted, fontSize: 18, flex: "0 0 auto" }}>
-                {showKnown ? "−" : "+"}
+              <span
+                aria-hidden
+                style={{
+                  color: C.muted,
+                  fontSize: 13,
+                  flex: "0 0 auto",
+                  transform: showKnown ? "rotate(180deg)" : "none",
+                  transition: "transform .15s",
+                }}
+              >
+                ▾
               </span>
             </button>
 
@@ -1088,20 +1161,21 @@ function Setup({
                 ))}
               </div>
             )}
+            </div>
           </section>
 
-          <section style={panelStyle}>
+          <section className="q-card">
+            <Badge name="compass" tint={3} />
+            <div className="q-body">
             <label
               htmlFor="setup-start"
-              style={{ display: "block", fontSize: 14.5, color: C.text, marginBottom: 6 }}
+              style={{ display: "block", fontSize: 15, fontWeight: 650, color: C.text }}
             >
               Where would you like to start?
             </label>
-            <p style={{ fontSize: 13.5, color: C.muted, margin: "0 0 12px", lineHeight: 1.6 }}>
-              Not everyone begins at the beginning. Pick a unit to work through
-              first, or leave it and the app will lead with the highest-yield
-              topics. Either way you can change it later, and it stops applying
-              once that unit is done.
+            <p style={{ fontSize: 13, color: C.muted, margin: "2px 0 11px", lineHeight: 1.6 }}>
+              Pick a unit to begin with, or let the app lead with the highest-yield topics. You can
+              change it later, and it stops applying once that unit is done.
             </p>
             <select
               id="setup-start"
@@ -1130,6 +1204,7 @@ function Setup({
                 </optgroup>
               ))}
             </select>
+            </div>
           </section>
 
           <section
@@ -1605,45 +1680,75 @@ function Step({ n }: { n: number }) {
 
 function Field({
   label,
+  help,
   value,
   unit,
   sub,
-  step,
+  icon,
+  tint,
+  ticks,
   children,
 }: {
   label: string;
+  /** One line saying what the question is actually asking for. */
+  help?: string;
   value: number;
   unit: string;
   sub?: string;
-  /** Which of the four this is. Omitted on anything that is not one of them. */
-  step?: number;
+  icon: string;
+  tint: number;
+  /** The scale under the track: its ends and a few marks between. */
+  ticks?: string[];
   children: ReactNode;
 }) {
   return (
-    <section style={panelStyle}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
-        <span style={{ fontSize: 14.5, color: C.text, lineHeight: 1.4, display: "flex", alignItems: "center" }}>
-          {step !== undefined && <Step n={step} />}
-          {label}
-        </span>
-        <span style={{ whiteSpace: "nowrap" }}>
-          <span
-            style={{
-              fontFamily: C.mono,
-              fontSize: 26,
-              color: C.accent,
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {value}
+    <section className="q-card">
+      <Badge name={icon} tint={tint} />
+      <div className="q-body">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16 }}>
+          <span style={{ minWidth: 0 }}>
+            <span style={{ display: "block", fontSize: 15, fontWeight: 650, color: C.text, lineHeight: 1.35 }}>
+              {label}
+            </span>
+            {help && (
+              <span style={{ display: "block", fontSize: 13, color: C.muted, marginTop: 2 }}>
+                {help}
+              </span>
+            )}
           </span>
-          <span style={{ fontSize: 13.5, color: C.muted, marginLeft: 5 }}>{unit}</span>
-        </span>
+          <span style={{ whiteSpace: "nowrap" }}>
+            <span
+              style={{
+                fontFamily: C.mono,
+                fontSize: 30,
+                fontWeight: 700,
+                color: C.accent,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {value}
+            </span>
+            <span style={{ fontSize: 13.5, color: C.muted, marginLeft: 5 }}>{unit}</span>
+          </span>
+        </div>
+
+        <div style={{ marginTop: 12 }}>{children}</div>
+
+        {/* The scale, so a number has something to be big or small against. */}
+        {ticks && (
+          <div className="q-ticks">
+            {ticks.map((t) => (
+              <span key={t}>{t}</span>
+            ))}
+          </div>
+        )}
+
+        {sub && (
+          <div style={{ textAlign: "right" }}>
+            <span className="q-note">{sub}</span>
+          </div>
+        )}
       </div>
-      <div style={{ marginTop: 10 }}>{children}</div>
-      {sub && (
-        <div style={{ fontFamily: C.mono, fontSize: 12.5, color: C.muted, marginTop: 8 }}>{sub}</div>
-      )}
     </section>
   );
 }
