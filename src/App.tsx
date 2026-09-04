@@ -517,12 +517,12 @@ function PaceControl({
         {LEVELS.find((l) => l.id === (s.level ?? "guided"))!.blurb}{" "}
         {skipped.length === 0
           ? "At this setting every topic is still in the plan."
-          : `At this setting ${skipped.length} of ${TOPICS.length} topics drop out of the plan — they stay visible in Chapters, but nothing counts them.`}{" "}
-        Moving this never unchecks anything you have already done.
+          : `At this setting ${skipped.length} of ${TOPICS.length} topics fall outside the plan — they remain visible in Chapters, but nothing counts them.`}{" "}
+        Changing this never unchecks anything you have already completed.
       </Note>
 
       <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
-        How long this run is
+        How long the plan runs
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
         {([4, 5, 6] as WindowMonths[]).map((m) => (
@@ -557,7 +557,7 @@ function PaceControl({
           ? "No preparation window set."
           : left === 0
             ? `This run ended on ${end}. Pick a length to start another.`
-            : `Started ${s.startDate ?? "earlier"}, ends ${end} — ${left} days left. Lengthening the run does not reset anything you have already covered.`}
+            : `Started ${s.startDate ?? "earlier"}, ends ${end} — ${left} days left. Extending the plan does not reset anything you have already covered.`}
       </Note>
 
       <div style={{ fontSize: 12.5, color: C.muted, letterSpacing: "0.08em", marginTop: 20 }}>
@@ -868,7 +868,7 @@ function Setup({
             <button
               onClick={() => setLevelOpen((v) => !v)}
               aria-expanded={levelOpen}
-              title="Change how long the run is and how deep to go on the rarely-asked topics"
+              title="Change the length of the plan, and how deeply it covers the rarely-asked topics"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -911,7 +911,7 @@ function Setup({
             {levelOpen && (
             <>
             <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 9px", lineHeight: 1.5 }}>
-              This sets how long the run is and how deep to go on the topics WBCS rarely asks.
+              This sets the length of the plan, and how deeply it covers the topics WBCS rarely asks.
             </p>
             {/*
               Three tight rows, not three cards.

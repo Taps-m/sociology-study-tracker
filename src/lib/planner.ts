@@ -61,22 +61,29 @@ export const LEVELS: {
   blurb: string;
   months: WindowMonths;
 }[] = [
+  /*
+   * The labels describe the candidate, not an action, and they are parallel.
+   * "Have an overview" was an instruction wearing a description's clothes — you
+   * cannot be "have an overview" — and it sat between two phrases of a different
+   * grammar entirely. These three are the same shape as each other and read as
+   * states a person can actually be in.
+   */
   {
     id: "beginner",
-    label: "New to sociology",
-    blurb: "Never studied it formally. The longest run, and nothing gets skipped.",
+    label: "Starting from scratch",
+    blurb: "No formal background in the subject. The longest plan, with nothing left out.",
     months: 6,
   },
   {
     id: "guided",
-    label: "Have an overview",
-    blurb: "You know the ground but want guiding through it. The standard plan.",
+    label: "Some background",
+    blurb: "You know the outline and want to be taken through it properly. The standard plan.",
     months: 5,
   },
   {
     id: "pro",
     label: "Studied it before",
-    blurb: "Graduate, or a repeat attempt. Shortest run, and the rarely-asked tail is trimmed hardest.",
+    blurb: "A graduate, or a repeat attempt. The shortest plan, and the least-asked topics are trimmed hardest.",
     months: 4,
   },
 ];
