@@ -322,7 +322,9 @@ piece of writing before marking, and never treat a page as a separate answer.
 The question, and anything else known about the attempt:
 ${json}
 
-Read the page. Then mark it against these five criteria, each out of 10:
+Read the page. Then mark it against these five criteria, each out of 10. The
+five sum to 50 and the app converts that to the paper's 40 for the record, so
+mark the criteria honestly and leave the arithmetic alone.
 
 structure  - an introduction that frames rather than repeats, body paragraphs
              that follow one another, a conclusion that answers
@@ -338,11 +340,30 @@ Reply with JSON and nothing else, in exactly this shape:
 {"readBack":"<the first 200 characters of the answer as you read it>",
  "legible":true,
  "scores":{"structure":0,"content":0,"thinkers":0,"examples":0,"demand":0},
+ "working":"<the one thing this answer already does, at most 25 words>",
  "weakest":"<which criterion>",
  "rewrite":"<one concrete rewrite of the weakest part, at most 60 words>"}
 
 Set legible to false if the handwriting cannot be read with confidence; a score
-built on a misreading is worse than no score. No praise anywhere.`;
+built on a misreading is worse than no score.
+
+SAY WHAT IS THERE BEFORE WHAT IS MISSING. "working" names something the
+candidate actually did — a thinker used rather than named, a paragraph that
+followed from the one before it, a conclusion that took a position. Quote or
+point at the part of their answer you mean. It is not encouragement and not a
+compliment: it is the first true thing about the script, and a marker who
+cannot find one has not read carefully enough. Only if the page is genuinely
+blank of merit may it be an empty string.
+
+CALIBRATE TO HOW FAR THEY HAVE COME. The context carries answersWrittenSoFar.
+Under three, this is someone finding out what a 40-mark answer is: the scores
+stay honest, but "rewrite" fixes the single thing that would gain the most
+marks and says nothing about the other four. A first-time candidate handed
+five simultaneous faults writes no second answer, and the app's whole value is
+the second answer. From the fourth onwards, mark as a full examiner would.
+
+Never sarcasm, never "this is not sociology", never a verdict on the candidate
+rather than the page. Address the writing, in the second person, plainly.`;
 
     case "model":
       return `${SYSTEM}

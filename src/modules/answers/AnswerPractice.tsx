@@ -174,6 +174,10 @@ export function AnswerPractice({
           minutesTaken: minutes,
           targetMinutes: TARGET_MINUTES,
           pages: prepared.length,
+          // How many answers this candidate has written before this one. A
+          // first attempt is marked with the same honesty and a shorter list
+          // of faults — see the evaluate prompt.
+          answersWrittenSoFar: stats.total,
         },
         prepared,
       );
@@ -703,7 +707,37 @@ export function AnswerPractice({
               Read as: “{result.readBack}…”
             </p>
 
-            <div style={{ marginTop: 12 }}>
+            {/*
+              The mark, on the scale the paper is actually marked on.
+
+              Five criteria out of ten is a mark out of fifty, and that is what
+              the screen showed — while WBCS marks this answer out of forty and
+              the app has been storing the converted figure all along. A
+              candidate reading 33 here and 26 in their history had no way to
+              reconcile the two. The forty is the headline now; the five stay
+              underneath as what they are, a rubric rather than a mark sheet.
+            */}
+            <p style={{ fontSize: 15, margin: "12px 0 0", lineHeight: 1.5 }}>
+              <span className="num" style={{ fontSize: 30, fontWeight: 700, color: C.accent }}>
+                {Math.round(
+                  (Object.values(result.scores).reduce((x, y) => x + y, 0) / 50) * OUT_OF,
+                )}
+              </span>
+              <span style={{ fontSize: 17, color: C.muted }}> / {OUT_OF}</span>
+            </p>
+
+            {result.working && (
+              <p style={{ fontSize: 14.5, lineHeight: 1.7, margin: "10px 0 0" }}>
+                <strong style={{ color: "var(--good)" }}>Working already:</strong>{" "}
+                {result.working}
+              </p>
+            )}
+
+            <p style={{ fontSize: 12.5, color: C.muted, margin: "16px 0 0" }}>
+              How that mark was reached — five criteria, each out of 10
+            </p>
+
+            <div style={{ marginTop: 6 }}>
               {Object.entries(result.scores).map(([k, v]) => (
                 <div key={k} style={{ padding: "6px 0" }}>
                   <div
@@ -740,8 +774,18 @@ export function AnswerPractice({
               ))}
             </div>
 
+            {/*
+              "Weakest" is a verdict; "fix this first" is an instruction.
+
+              They point at the same criterion and the second is the one a
+              candidate three answers into the subject can act on. The verdict
+              comes back once there is a body of work to be a verdict about.
+            */}
             <p style={{ fontSize: 14.5, lineHeight: 1.75, marginTop: 14 }}>
-              <strong>Weakest: {CRITERION_LABEL[result.weakest] ?? result.weakest}.</strong>{" "}
+              <strong>
+                {stats.total < 3 ? "Fix this first" : "Weakest"}:{" "}
+                {CRITERION_LABEL[result.weakest] ?? result.weakest}.
+              </strong>{" "}
               {result.rewrite}
             </p>
           </div>

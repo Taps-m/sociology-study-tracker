@@ -114,6 +114,14 @@ export interface Evaluation {
     examples: number;
     demand: number;
   };
+  /**
+   * What the answer already does, named before what it lacks.
+   *
+   * A first attempt marked as five simultaneous failures is a first attempt
+   * that has no successor, and the app is worth nothing to someone who stops
+   * after one. May be empty when the marker genuinely found nothing.
+   */
+  working?: string;
   weakest: string;
   rewrite: string;
 }
