@@ -717,19 +717,49 @@ function Setup({
 }) {
   const [name, setName] = useState("");
   const [startUnit, setStartUnit] = useState("");
-  const [level, setLevel] = useState<Level>("guided");
-  // Folded from the start: there is already an answer, and it is one tap to change.
-  const [levelOpen, setLevelOpen] = useState(false);
+  /**
+   * Null until it is chosen, not "guided" until it is changed.
+   *
+   * A default nobody saw is not an answer, and this one sets the depth of every
+   * topic and the length of the whole plan. The same goes for the hours: the
+   * slider used to sit at twelve, and twelve against a candidate whose real
+   * figure is seven is the difference between the screen saying 95% of the
+   * syllabus and the truth being 66%. A confident projection built on a number
+   * the reader never agreed to is worse than no projection.
+   *
+   * The two preferences below keep their defaults — a target of 80% and
+   * "highest-yield first" are defensible for anyone, and are opinions rather
+   * than facts about a person.
+   */
+  const [level, setLevel] = useState<Level | null>(null);
+  const [hoursSet, setHoursSet] = useState(false);
+  const [levelOpen, setLevelOpen] = useState(true);
   /**
    * Not asked separately. Someone setting up has no way to know whether four
    * months is enough for them — that is the question they came here to have
    * answered — so the category answers it, and Settings can lengthen the run
    * later, once there is a pace on record to judge it against.
    */
-  const months: WindowMonths = suggestedMonths(level);
+  /** What the page previews before a choice is made. Never what is saved. */
+  const shownLevel: Level = level ?? "guided";
+  const months: WindowMonths = suggestedMonths(shownLevel);
   const [hours, setHours] = useState(12);
   const [target, setTarget] = useState(80);
   const [known, setKnown] = useState<string[]>([]);
+
+  /**
+   * What is still unanswered, in the order it is asked.
+   *
+   * Only the two that cannot be guessed. A name is decoration — it greets you
+   * and nothing else — and forcing one out of an app whose own lock screen says
+   * there is no account to make would be theatre. The target and the starting
+   * unit have defaults that hold for anybody.
+   */
+  const missing = [
+    level === null ? "where you are starting from" : null,
+    !hoursSet ? "how many hours a week you have" : null,
+  ].filter(Boolean) as string[];
+  const ready = missing.length === 0;
   // Folded away by default. Most people setting this up have studied none of
   // it, and eighteen unit chips were the longest thing on the page for a
   // question whose usual answer is "no".
@@ -923,10 +953,16 @@ function Setup({
                       lineHeight: 1.6,
                     }}
                   >
-                    <strong style={{ color: C.accent }}>
-                      {LEVELS.find((l) => l.id === level)?.label}
-                    </strong>{" "}
-                    · {LEVELS.find((l) => l.id === level)?.months} months
+                    {level === null ? (
+                      <strong style={{ color: C.warn }}>Not chosen yet</strong>
+                    ) : (
+                      <>
+                        <strong style={{ color: C.accent }}>
+                          {LEVELS.find((l) => l.id === level)?.label}
+                        </strong>{" "}
+                        · {LEVELS.find((l) => l.id === level)?.months} months
+                      </>
+                    )}
                   </span>
                 )}
               </span>
@@ -966,7 +1002,10 @@ function Setup({
                 return (
                   <button
                     key={l.id}
-                    onClick={() => setLevel(l.id)}
+                    onClick={() => {
+                      setLevel(l.id);
+                      setLevelOpen(false);
+                    }}
                     aria-pressed={on}
                     style={{
                       display: "block",
@@ -1020,7 +1059,7 @@ function Setup({
             step={3}
             label="Hours a week for sociology"
             help="How much time can you realistically give it?"
-            value={hours}
+            value={hoursSet ? hours : null}
             unit="h / week"
             ticks={["1", "10", "20", "30", "40"]}
             sub={`about ${(hours / 7).toFixed(1)} hours a day`}
@@ -1030,7 +1069,10 @@ function Setup({
               min={1}
               max={40}
               value={hours}
-              onChange={(e) => setHours(+e.target.value)}
+              onChange={(e) => {
+                setHours(+e.target.value);
+                setHoursSet(true);
+              }}
               style={{ "--fill": `${((hours - 1) / 39) * 100}%` } as React.CSSProperties}
               aria-label="Hours a week"
             />
@@ -1210,6 +1252,16 @@ function Setup({
             </div>
           </section>
 
+          {/*
+            The projection waits for the numbers it is a projection of.
+
+            This card said "95% of the syllabus at this pace" from a slider
+            nobody had touched. Twelve hours a week was my guess; for a
+            candidate whose real figure is seven the honest answer is 66%, and a
+            confident wrong number on the first screen is worse than no number —
+            it is the one thing on the page a reader would actually act on.
+          */}
+          {ready && (
           <section
             style={{
               ...panelStyle,
@@ -1236,16 +1288,19 @@ function Setup({
                 : `That falls short of your ${target}% target. Reaching it needs about ${weeklyNeeded} hours a week — or a longer run-up. You can also leave it and close the gap later.`}
             </p>
           </section>
+          )}
         </div>
 
         <button
+          disabled={!ready}
+          title={ready ? "Build the plan" : `Still needed: ${missing.join(" and ")}`}
           onClick={() => onDone(
               {
                 name: name.trim() || undefined,
                 startUnit: startUnit || undefined,
                 startDate,
                 windowMonths: months,
-                level,
+                level: level ?? "guided",
                 weeklyHours: hours,
                 targetCoverage: target / 100,
               },
@@ -1255,19 +1310,39 @@ function Setup({
             width: "100%",
             minHeight: 50,
             marginTop: 18,
-            background: C.accent,
+            background: ready ? C.accent : C.raised,
             border: "none",
             borderRadius: 8,
-            color: C.surface,
+            color: ready ? C.accentInk : C.muted,
             fontFamily: C.sans,
             fontSize: 15.5,
             fontWeight: 600,
-            cursor: "pointer",
+            cursor: ready ? "pointer" : "not-allowed",
           }}
         >
           Start my plan
           <span aria-hidden style={{ marginLeft: 9 }}>→</span>
         </button>
+
+        {/*
+          What is still wanted, named. A greyed-out button with no explanation
+          is the most frustrating control there is: it refuses and does not say
+          why, and the reader is left hunting the page for what they missed.
+        */}
+        {!ready && (
+          <p
+            style={{
+              fontSize: 13,
+              color: C.warn,
+              textAlign: "center",
+              margin: "10px 0 0",
+              lineHeight: 1.6,
+            }}
+          >
+            Two things first — {missing.join(", and ")}. Both change the plan enough that
+            guessing them for you would make every figure on the next screen wrong.
+          </p>
+        )}
 
         <button
           onClick={onExit}
@@ -1697,7 +1772,8 @@ function Field({
   label: string;
   /** One line saying what the question is actually asking for. */
   help?: string;
-  value: number;
+  /** Null while the control has never been touched: a default is not a reading. */
+  value: number | null;
   unit: string;
   sub?: string;
   icon: string;
