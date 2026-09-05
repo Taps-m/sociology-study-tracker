@@ -105,17 +105,43 @@ it("each paper's units account for the whole of that paper", () => {
 });
 
 /**
- * The banding is relative to each paper's own average, so it has to mark a few
+ * The banding is relative to each paper's own average, so it must mark a few
  * units and not most of them. A screen where everything is highlighted has
  * highlighted nothing.
+ *
+ * It must also be allowed to mark none. On fourteen years Paper II has no
+ * heavy unit at all — its eight units run from 16.1% down to 10.2% with one
+ * outlier below, which is as flat as eight buckets get. That is a fact about
+ * the paper, not a failure of the banding: Paper I concentrates on the
+ * thinkers and Paper II does not concentrate anywhere. An earlier version of
+ * this test demanded at least one heavy unit per paper and started failing the
+ * moment the corpus got big enough to show the difference.
  */
 it("marks a handful of units, not half of them", () => {
   for (const paper of [1, 2] as const) {
     const units = [...new Set(TOPICS.filter((t) => t.paper === paper).map((t) => t.unit))];
     const heavy = units.filter((u) => unitEmphasis(paper, u) === "heavy");
-    expect(heavy.length, `paper ${paper} heavy`).toBeGreaterThan(0);
     expect(heavy.length, `paper ${paper} heavy`).toBeLessThanOrEqual(Math.ceil(units.length / 4));
   }
+});
+
+/**
+ * The two papers are shaped differently, and the app should not pretend
+ * otherwise. Paper I has a centre of gravity; Paper II is flat.
+ */
+it("Paper I concentrates and Paper II does not", () => {
+  const share = (p: 1 | 2) => {
+    const units = [...new Set(TOPICS.filter((t) => t.paper === p).map((t) => t.unit))];
+    return units.map((u) => unitShare(p, u)).sort((a, b) => b - a);
+  };
+  const p1 = share(1);
+  const p2 = share(2);
+  // Paper I's top unit is worth more than a quarter of the paper.
+  expect(p1[0]!).toBeGreaterThan(25);
+  // Paper II's top unit is worth less than a fifth, and its top three are
+  // within three points of each other.
+  expect(p2[0]!).toBeLessThan(20);
+  expect(p2[0]! - p2[2]!).toBeLessThan(3);
 });
 
 it("the heaviest unit in Paper I is the theorists, and it is marked", () => {

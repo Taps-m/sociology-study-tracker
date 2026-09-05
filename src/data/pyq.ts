@@ -1,5 +1,5 @@
 /**
- * WBCS Main, Sociology optional — every question from 2018 to 2023.
+ * WBCS Main, Sociology optional — every question from 2010 to 2023.
  *
  * Transcribed from the papers themselves, then mapped onto the syllabus topics
  * in `syllabus.ts`. The per-topic `pyq` counts there are the summary; this is
@@ -813,20 +813,396 @@ export const PYQS: PastQuestion[] = [
     text: "Critically evaluate the debates around the Family planning policies in India.",
     topicIds: ["p2u8t7", "p2u6t3"],
   },
+  {
+    year: 2010, paper: 1, group: "A", number: 1, marks: 40,
+    text: "Why the study of apparently insignificant forms of social interaction in day-to-day life is of major importance in Sociology?",
+    topicIds: ["p1u3t4"],
+  },
+  {
+    year: 2010, paper: 1, group: "A", number: 2, marks: 40,
+    text: "“Culture shapes our personality” — Explain.",
+    topicIds: ["p1u3t2", "p1u3t6"],
+  },
+  {
+    year: 2010, paper: 1, group: "A", number: 3, marks: 40,
+    text: "Analyse the ‘new’ form of collective conscience that dominates organic solidarity.",
+    topicIds: ["p1u2t2"],
+  },
+  {
+    year: 2010, paper: 1, group: "A", number: 4, marks: 40,
+    text: "Do you think that humans in modern society are increasingly victims of role conflict?",
+    topicIds: ["p1u3t1"],
+  },
+  {
+    year: 2010, paper: 1, group: "A", number: 5, marks: 40,
+    text: "Explain Merton's concept of anticipatory socialization.",
+    topicIds: ["p1u2t6"],
+    note: "Source prints “Maton's”; Merton is meant.",
+  },
+  {
+    year: 2010, paper: 1, group: "B", number: 6, marks: 40,
+    text: "Some of the highest funding for scientific research and experimentation has traditionally been driven by the need for military development where the end objective is largely destructive. In meeting needs to support armed conflict, has science failed its social responsibility.",
+    topicIds: ["p1u8t2"],
+  },
+  {
+    year: 2010, paper: 1, group: "B", number: 7, marks: 40,
+    text: "Evolution is an outcome of centuries of dialectic change driven by social conflict between social groups with differing amounts of material non-material resource. — Argue the hypothesis.",
+    topicIds: ["p1u2t1"],
+  },
+  {
+    year: 2010, paper: 1, group: "B", number: 8, marks: 40,
+    text: "Gender discrimination has its origins in the distinct evolution of human body and mind of man and woman who have evolved over millions of centuries and is a catalyst for sustainable social equilibrium. — Argue the hypothesis.",
+    topicIds: ["p1u3t2"],
+    note: "Gender has no Paper I topic of its own; parked on heredity and environment, which is the nearest thing the syllabus offers.",
+  },
+  {
+    year: 2010, paper: 2, group: "A", number: 1, marks: 40,
+    text: "How is religion relevant in secular society?",
+    topicIds: ["p2u3t5"],
+  },
+  {
+    year: 2010, paper: 2, group: "A", number: 2, marks: 40,
+    text: "Write a note on the relationship between education and social mobility.",
+    topicIds: ["p2u3t6"],
+  },
+  {
+    year: 2010, paper: 2, group: "A", number: 3, marks: 40,
+    text: "Briefly point out the changes that have occurred in India's social structure and culture after Independence.",
+    topicIds: ["p2u5t2"],
+  },
+  {
+    year: 2010, paper: 2, group: "A", number: 4, marks: 40,
+    text: "What are the main consequences of urbanization for the social life in cities?",
+    topicIds: ["p2u5t5"],
+  },
+  {
+    year: 2010, paper: 2, group: "A", number: 5, marks: 40,
+    text: "Write a brief essay on environmental movements in India.",
+    topicIds: ["p2u7t2"],
+  },
+  {
+    year: 2010, paper: 2, group: "B", number: 6, marks: 40,
+    text: "What are the causes of rural poverty?",
+    topicIds: ["p2u8t1"],
+  },
+  {
+    year: 2010, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Discuss various social factors favouring juvenile delinquency.",
+    topicIds: ["p2u8t5"],
+  },
+  {
+    year: 2010, paper: 2, group: "B", number: 8, marks: 40,
+    text: "What are the causes for the rapid growth of population in India?",
+    topicIds: ["p2u8t7"],
+  },
+  {
+    year: 2011, paper: 1, group: "A", number: 1, marks: 40,
+    text: "“Cooperation crossed by conflict marks society wherever it is revealed”. Examine the relationship of social order and social conflict in the light of the preceding statement.",
+    topicIds: ["p1u3t4"],
+  },
+  {
+    year: 2011, paper: 1, group: "A", number: 2, marks: 40,
+    text: "Define group. Discuss briefly the major types of human groups and their importance in modern social life.",
+    topicIds: ["p1u3t5"],
+  },
+  {
+    year: 2011, paper: 1, group: "A", number: 3, marks: 40,
+    text: "Would you consider Karl Marx a sociologist? Why?",
+    topicIds: ["p1u2t1"],
+  },
+  {
+    year: 2011, paper: 1, group: "A", number: 4, marks: 40,
+    text: "Discuss the relation between personality and socialization, throwing light in course of your discussion on the problem of over socialization.",
+    topicIds: ["p1u3t6"],
+  },
+  {
+    year: 2011, paper: 1, group: "A", number: 5, marks: 40,
+    text: "Distinguish between power and authority. Analyze in short the nature and consequences of bureaucratic authority.",
+    topicIds: ["p1u3t7", "p1u6t1"],
+  },
+  {
+    year: 2011, paper: 1, group: "B", number: 6, marks: 40,
+    text: "Is social control of science and technology necessary in order to ensure their social responsibility? Give reasons for your answer.",
+    topicIds: ["p1u8t2"],
+  },
+  {
+    year: 2011, paper: 1, group: "B", number: 7, marks: 40,
+    text: "Show how sociological theory and empirical research are related.",
+    topicIds: ["p1u9t1"],
+  },
+  {
+    year: 2011, paper: 1, group: "B", number: 8, marks: 40,
+    text: "Write short notes on: (a) The sacred and the profane, (b) The role of consumption and consumerism in today's economy and society.",
+    topicIds: ["p1u3t8", "p1u3t9"],
+    note: "Two unrelated short notes in one question.",
+  },
+  {
+    year: 2011, paper: 2, group: "A", number: 1, marks: 40,
+    text: "Provide a point of view on how the proliferation of technology in the form of gadgets has impacted social and psychological development of a child.",
+    topicIds: ["p2u6t4"],
+  },
+  {
+    year: 2011, paper: 2, group: "A", number: 2, marks: 40,
+    text: "“Industrial and economic progress is counter-productive to environmental balance” — Provide your point of view.",
+    topicIds: ["p2u7t1"],
+  },
+  {
+    year: 2011, paper: 2, group: "A", number: 3, marks: 40,
+    text: "Analyze the changing implications of the Indian caste system from the perspective of modernizing social and economic realities.",
+    topicIds: ["p2u4t2"],
+  },
+  {
+    year: 2011, paper: 2, group: "A", number: 4, marks: 40,
+    text: "Provide a point of view on the role of religion through the looking glass of the Indian social, political and economic fabric.",
+    topicIds: ["p2u3t5"],
+  },
+  {
+    year: 2011, paper: 2, group: "A", number: 5, marks: 40,
+    text: "Discuss the development and impact of Civil Society movements in India.",
+    topicIds: ["p2u5t4"],
+  },
+  {
+    year: 2011, paper: 2, group: "B", number: 6, marks: 40,
+    text: "“To propagate literacy we must first overcome poverty” — analyse.",
+    topicIds: ["p2u8t8", "p2u8t1"],
+  },
+  {
+    year: 2011, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Have different initiatives targeted against gender discrimination been successful in the Indian Society?",
+    topicIds: ["p2u6t3"],
+  },
+  {
+    year: 2011, paper: 2, group: "B", number: 8, marks: 40,
+    text: "How has the modernization of the Indian society impact gender socialization?",
+    topicIds: ["p2u3t3"],
+  },
+  {
+    year: 2012, paper: 1, group: "A", number: 1, marks: 40,
+    text: "What is social evolution? Discuss Spencer's theory of organic analogy.",
+    topicIds: ["p1u1t2"],
+    note: "Spencer and social evolution are not named in the syllabus; parked on the emergence of the discipline.",
+  },
+  {
+    year: 2012, paper: 1, group: "A", number: 2, marks: 40,
+    text: "Define positivism and discuss Comte's contribution to the making of sociological positivism.",
+    topicIds: ["p1u1t2"],
+  },
+  {
+    year: 2012, paper: 1, group: "A", number: 3, marks: 40,
+    text: "Define social interaction. Discuss the nature and role of five major types of social interaction.",
+    topicIds: ["p1u3t4"],
+  },
+  {
+    year: 2012, paper: 1, group: "A", number: 4, marks: 40,
+    text: "Discuss Max Weber's views on power. Analyse three basic types of legitimate authority distinguished by him.",
+    topicIds: ["p1u2t3"],
+  },
+  {
+    year: 2012, paper: 1, group: "A", number: 5, marks: 40,
+    text: "Discuss the meaning and types of environment. Analyse the influence of environment on personality.",
+    topicIds: ["p1u3t2"],
+  },
+  {
+    year: 2012, paper: 1, group: "B", number: 6, marks: 40,
+    text: "Define social theory. Write an essay on the basis of relationship theory and research.",
+    topicIds: ["p1u9t1"],
+  },
+  {
+    year: 2012, paper: 1, group: "B", number: 7, marks: 40,
+    text: "Discuss about the social determinants of economic development.",
+    topicIds: ["p1u3t9"],
+  },
+  {
+    year: 2012, paper: 1, group: "B", number: 8, marks: 40,
+    text: "What is observation method? Discuss in detail merits and demerits and observations method.",
+    topicIds: ["p1u9t3"],
+  },
+  {
+    year: 2012, paper: 2, group: "A", number: 1, marks: 40,
+    text: "Examine the fundamental unity of Indian society in the midst of diversities.",
+    topicIds: ["p2u1t1"],
+  },
+  {
+    year: 2012, paper: 2, group: "A", number: 2, marks: 40,
+    text: "Analyse the dynamics of the caste system in India.",
+    topicIds: ["p2u2t3"],
+  },
+  {
+    year: 2012, paper: 2, group: "A", number: 3, marks: 40,
+    text: "Discuss the factors that have affected traditional functions of family in India. What role does family perform in modern Indian Society?",
+    topicIds: ["p2u3t2"],
+  },
+  {
+    year: 2012, paper: 2, group: "A", number: 4, marks: 40,
+    text: "Give a Sociological explanation of discrimination against women in India.",
+    topicIds: ["p2u6t2"],
+  },
+  {
+    year: 2012, paper: 2, group: "A", number: 5, marks: 40,
+    text: "What is globalization? Does it lead to ecological crisis? Discuss in this context the factors responsible for creating ecological crisis in India.",
+    topicIds: ["p2u7t1"],
+  },
+  {
+    year: 2012, paper: 2, group: "B", number: 6, marks: 40,
+    text: "Following Srinivas distinguish between westernization and Modernization. Discuss in this connection the impact of Westernization in social change in India.",
+    topicIds: ["p2u5t1", "p2u1t3"],
+  },
+  {
+    year: 2012, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Write a note on the problems of the aged in India. How does the State in India address those problems?",
+    topicIds: ["p2u8t6"],
+  },
+  {
+    year: 2012, paper: 2, group: "B", number: 8, marks: 40,
+    text: "Discuss the merits and demerits of the policy of protective discrimination followed by the State in India.",
+    topicIds: ["p2u4t4"],
+  },
+  {
+    year: 2013, paper: 1, group: "A", number: 1, marks: 40,
+    text: "Analyse the factors contributing to the Emergence of Sociology.",
+    topicIds: ["p1u1t2"],
+  },
+  {
+    year: 2013, paper: 1, group: "A", number: 2, marks: 40,
+    text: "Discuss the importance of social fact in Durkheimian sociology.",
+    topicIds: ["p1u2t2"],
+  },
+  {
+    year: 2013, paper: 1, group: "A", number: 3, marks: 40,
+    text: "Discuss Weber's theory of bureaucracy.",
+    topicIds: ["p1u2t3"],
+  },
+  {
+    year: 2013, paper: 1, group: "A", number: 4, marks: 40,
+    text: "Analyse the essential aspects of the Marxian theory of class conflict.",
+    topicIds: ["p1u2t1"],
+  },
+  {
+    year: 2013, paper: 1, group: "A", number: 5, marks: 40,
+    text: "Explain the different forms and causes of Vertical social mobility.",
+    topicIds: ["p1u4t2"],
+  },
+  {
+    year: 2013, paper: 1, group: "B", number: 6, marks: 40,
+    text: "Discuss the concept of ‘pattern Variables’ as formulated by Talcott Parsons.",
+    topicIds: ["p1u2t5"],
+  },
+  {
+    year: 2013, paper: 1, group: "B", number: 7, marks: 40,
+    text: "Analyse the distinction between manifest and latent functions.",
+    topicIds: ["p1u2t6"],
+  },
+  {
+    year: 2013, paper: 1, group: "B", number: 8, marks: 40,
+    text: "Discuss in brief the survey method in social research.",
+    topicIds: ["p1u9t2"],
+  },
+  {
+    year: 2013, paper: 2, group: "A", number: 1, marks: 40,
+    text: "Give a brief analysis of the process of Sanskritization.",
+    topicIds: ["p2u5t1"],
+  },
+  {
+    year: 2013, paper: 2, group: "A", number: 2, marks: 40,
+    text: "Define Hindu marriage. Discuss the factors affecting Hindu marriage.",
+    topicIds: ["p2u3t1"],
+  },
+  {
+    year: 2013, paper: 2, group: "A", number: 3, marks: 40,
+    text: "Explain — Education as a criterion of social stratification.",
+    topicIds: ["p2u4t5"],
+  },
+  {
+    year: 2013, paper: 2, group: "A", number: 4, marks: 40,
+    text: "Discuss the basic components of religion. Analyse in brief the functions of religion.",
+    topicIds: ["p2u3t5"],
+  },
+  {
+    year: 2013, paper: 2, group: "A", number: 5, marks: 40,
+    text: "Define the term ‘Backward Classes’ with a brief discussion about the Backward Classes movement.",
+    topicIds: ["p2u4t3"],
+  },
+  {
+    year: 2013, paper: 2, group: "B", number: 6, marks: 40,
+    text: "Examine the factors facilitating empowerment of women and reasons behind the need for empowerment.",
+    topicIds: ["p2u6t3"],
+  },
+  {
+    year: 2013, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Write a note on the measures for controlling the rapid growth of population.",
+    topicIds: ["p2u8t7"],
+  },
+  {
+    year: 2013, paper: 2, group: "B", number: 8, marks: 40,
+    text: "Discuss the various factors contributed to the problems of youth unrest.",
+    topicIds: ["p2u8t3"],
+  },
+  {
+    year: 2016, paper: 2, group: "A", number: 1, marks: 40,
+    text: "How would you distinguish modernity from tradition? Show how modernity and tradition coexist in the Indian context.",
+    topicIds: ["p2u1t1"],
+  },
+  {
+    year: 2016, paper: 2, group: "A", number: 2, marks: 40,
+    text: "Assess M.N. Srinivas' contribution to the understanding of Indian society.",
+    topicIds: ["p2u1t3"],
+  },
+  {
+    year: 2016, paper: 2, group: "A", number: 3, marks: 40,
+    text: "Comment on the significance of social movements in contemporary times by taking into consideration any social movement in Indian society in the post independence period.",
+    topicIds: ["p2u5t4"],
+  },
+  {
+    year: 2016, paper: 2, group: "A", number: 4, marks: 40,
+    text: "What is religious pluralism? What are the ways in which religion as an institution is undergoing change?",
+    topicIds: ["p2u3t5"],
+  },
+  {
+    year: 2016, paper: 2, group: "A", number: 5, marks: 40,
+    text: "Define social stratification as a sociological concept. Elaborate the changes and continuities in our understanding of social stratification with examples.",
+    topicIds: ["p2u4t1"],
+  },
+  {
+    year: 2016, paper: 2, group: "B", number: 6, marks: 40,
+    text: "Environmental movements in India have articulated alternative visions of development and democracy. Comment.",
+    topicIds: ["p2u7t2"],
+  },
+  {
+    year: 2016, paper: 2, group: "B", number: 7, marks: 40,
+    text: "Do you think women and children in India are vulnerable and exposed to violence because of their structural position in Indian society? Discuss.",
+    topicIds: ["p2u8t9", "p2u6t2"],
+  },
+  {
+    year: 2016, paper: 2, group: "B", number: 8, marks: 40,
+    text: "Discuss some of the problems of youth in contemporary Indian society.",
+    topicIds: ["p2u8t3"],
+  },
 ];
 
 
 /**
- * Years in the corpus. 2014, 2015 and 2018-2023 are complete; 2016 is Paper I
- * only, its Paper II sheet not yet found. Every paper that is here is whole — a
- * test refuses a half-transcribed one, so a partial year can never quietly
- * count as a full one.
+ * Years in the corpus. All fourteen are now complete — 2010 to 2023, both
+ * papers, sixteen questions each, 224 in all. 2016 Paper II was the last hole
+ * and was filled from an official WBPSC scan (code BW-(O)SO-II/16); the
+ * coaching site that hosts the other years files the History optional under
+ * its 2016 Sociology URL, which is why that sheet went missing for so long.
  *
- * Outstanding: 2016 Paper II, and both 2024 papers. 2024 was the last sitting
- * actually held, so the series ends there — 2025 and 2026 are not missing, they
- * do not exist, and nothing should go looking for them.
+ * Every paper here is whole — a test refuses a half-transcribed one, so a
+ * partial year can never quietly count as a full one.
+ *
+ * Outstanding: both 2024 papers, which are not published anywhere findable.
+ * 2024 was the last sitting actually held, so the series ends there — 2025 and
+ * 2026 are not missing, they do not exist, and nothing should look for them.
+ * That absence matters: with no 2024 there is no genuinely unseen year to test
+ * a predictive model against, which caps what may honestly be claimed from
+ * this corpus.
+ *
+ * 2010-2013 came from wbcsmadeeasy.in, re-typed rather than scanned, and carry
+ * their source's spelling faults where those are in the question itself.
  *
  * The 2017 Paper I scan carries no printed year; it arrived paired with a
  * Paper II sheet that is dated, and is recorded as 2017 on that basis.
  */
-export const PYQ_YEARS = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023] as const;
+export const PYQ_YEARS = [
+  2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023,
+] as const;

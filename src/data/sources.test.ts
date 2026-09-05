@@ -61,15 +61,25 @@ describe("the reading map", () => {
     //
     // These counts are derived from the question corpus, so this test also
     // guards the mapping in pyq.ts: retag a question and the list moves.
+    //
+    // It moved when 2010-2013 and 2016 Paper II were added. Three topics
+    // crossed the asked-twice line and have no free reading: the social
+    // control of science (Group B, 2010 and 2011), the problem of youth
+    // (2013, 2016) and juvenile delinquency (2010, and again later). All
+    // three are Group B staples, which is exactly where a candidate has the
+    // least room to dodge — so the list growing here is a finding, not drift.
     const gaps = TOPICS.filter((t) => t.pyq >= 2 && isUncovered(t.id)).map((t) => t.id);
     expect(gaps).toEqual([
       "p1u2t4", // Simmel
       "p1u2t5", // Parsons
       "p1u2t6", // Merton
       "p1u7t1", // religion and science
+      "p1u8t2", // social responsibility and control of science
       "p2u6t3", // welfare programmes for women
       "p2u6t4", // children and child welfare
+      "p2u8t3", // problem of youth
       "p2u8t4", // drug addiction
+      "p2u8t5", // juvenile delinquency
       "p2u8t6", // old age
     ]);
   });
