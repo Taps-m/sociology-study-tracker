@@ -11,6 +11,9 @@ import { completionOf } from "../../lib/planner";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
+/** Size of the first tier, for the arithmetic the trust card spells out. */
+const TIER_FACTS_HIGH_N = 16;
+
 /**
  * What the record predicts — for a candidate, not a statistician.
  *
@@ -37,37 +40,56 @@ const SCOPES: { id: Scope; label: string; why: string }[] = [
   { id: "B", label: "Group B", why: "3 asked, you answer 2" },
 ];
 
-const TIER_COPY: Record<
-  TierId,
-  { name: string; why: string; figure: string; unit: string; range: string; rangeWhy: string }
-> = {
+/**
+ * One figure per tier, in the same language the rows use.
+ *
+ * This header used to carry two percentages side by side: "37% of a typical
+ * paper" and "31-50% in each of the last eight years". Both were true and the
+ * pair was unreadable — they measure different things, and nothing on screen
+ * said which was which.
+ *
+ * Worse, the share of the paper runs the wrong way. The second tier supplies
+ * 63% because it holds 64 chapters against 16, so the larger number sat on the
+ * lower tier and read, at a glance, as "group 2 is likelier" — the exact
+ * opposite of what the grouping means. A number that has to be explained before
+ * it stops misleading does not belong in a headline.
+ *
+ * So the headline is now the odds for a typical chapter in the group, which is
+ * what actually orders the tiers, is monotonic down the screen, and is phrased
+ * exactly as each row phrases itself. The share of the paper still matters —
+ * it is what stops the second tier reading as a skip list — so it is said in
+ * words in the subline and explained properly in the trust card below.
+ */
+const TIER_COPY: Record<TierId, { name: string; why: string }> = {
   high: {
     name: "High yield",
-    why: `16 chapters — 19% of the syllabus — returning ${(
-      TIER_FACTS.yield.high / TIER_FACTS.yield.standard
-    ).toFixed(1)} times the marks per chapter of anything below.`,
-    figure: `${Math.round(TIER_FACTS.share.high)}%`,
-    unit: "of a typical paper",
-    range: `${TIER_FACTS.range.high[0]}–${TIER_FACTS.range.high[1]}%`,
-    rangeWhy: `in each of the last ${TIER_FACTS.years} years`,
+    why: "16 chapters — 19% of the syllabus. The likeliest in the paper, and where hours pay back most.",
   },
   standard: {
     name: "Standard yield",
-    why: "The chapters the model cannot separate from one another. The order inside this group is not evidence.",
-    figure: `${Math.round(TIER_FACTS.share.standard)}%`,
-    unit: "of a typical paper",
-    range: `${TIER_FACTS.range.standard[0]}–${TIER_FACTS.range.standard[1]}%`,
-    rangeWhy: `in each of the last ${TIER_FACTS.years} years`,
+    why: "Each one less likely than the group above — but together they still supply about two-thirds of every paper. Not a skip list, and the order inside this group is not evidence.",
   },
   never: {
     name: "No recorded appearance",
-    why: "Never asked between 2010 and 2023. That is a fact about the record, not a prediction about the next paper.",
-    figure: "0",
-    unit: "questions in 14 years",
-    range: "",
-    rangeWhy: "",
+    why: "Not asked once between 2010 and 2023. Still on the syllabus, and still examinable.",
   },
 };
+
+/**
+ * The odds for a typical chapter in a group, from the median rather than the
+ * mean — one chapter at 55% should not drag the headline for the other fifteen.
+ *
+ * Always computed from the whole-paper ranking, never from the group scope, for
+ * the same reason tier membership is: within Group B, Weber has never been
+ * asked at all, and a scope-sensitive headline would put the high tier below
+ * the standard one and make the ordering look broken.
+ */
+function typicalOdds(chapters: Chance[]): string {
+  if (chapters.length === 0) return "—";
+  const ps = chapters.map((c) => c.p).sort((a, b) => a - b);
+  const median = ps[Math.floor(ps.length / 2)]!;
+  return `1 in ${Math.max(2, Math.round(1 / median))}`;
+}
 
 /**
  * Plain words for a probability, and the odds said the way people say them.
@@ -211,6 +233,7 @@ function Row({ c, d, scope, n }: { c: Chance; d: Derived; scope: Scope; n: numbe
 function TierBlock({
   id,
   chapters,
+  unscoped,
   rank,
   d,
   scope,
@@ -219,6 +242,8 @@ function TierBlock({
 }: {
   id: TierId;
   chapters: Chance[];
+  /** The same chapters at whole-paper rates, so the headline never moves. */
+  unscoped: Chance[];
   rank: Map<string, number>;
   d: Derived;
   scope: Scope;
@@ -290,54 +315,35 @@ function TierBlock({
               lineHeight: 1.5,
             }}
           >
-            {id === "standard" ? `${chapters.length} chapters. ${t.why}` : t.why}
+            {id === "high" ? t.why : `${chapters.length} chapters. ${t.why}`}
           </span>
         </span>
 
-        <span style={{ flex: "0 0 auto", textAlign: "right" }}>
+        <span style={{ flex: "0 0 auto", textAlign: "right", minWidth: 104 }}>
           <span
             style={{
               display: "block",
-              fontSize: 24,
+              fontSize: 23,
               fontWeight: 680,
               lineHeight: 1,
+              letterSpacing: "-0.02em",
               color: tone.figure,
             }}
           >
-            {t.figure}
+            {id === "never" ? "Never" : typicalOdds(unscoped)}
           </span>
-          <span style={{ display: "block", fontSize: 11.5, color: C.muted, marginTop: 4 }}>
-            {t.unit}
-          </span>
-        </span>
-
-        {t.range && (
           <span
             style={{
-              flex: "0 0 auto",
-              width: 116,
-              textAlign: "right",
-              paddingLeft: 14,
-              borderLeft: `1px solid ${C.hair}`,
-              fontFamily: C.mono,
-              fontSize: 13,
+              display: "block",
+              fontSize: 11.5,
               color: C.muted,
+              marginTop: 5,
+              lineHeight: 1.4,
             }}
           >
-            {t.range}
-            <span
-              style={{
-                display: "block",
-                fontFamily: C.sans,
-                fontSize: 11,
-                marginTop: 4,
-                lineHeight: 1.4,
-              }}
-            >
-              {t.rangeWhy}
-            </span>
+            {id === "never" ? "in 14 years of papers" : "years — typical chapter"}
           </span>
-        )}
+        </span>
 
         <span
           aria-hidden
@@ -463,6 +469,7 @@ export function Predictions({ d }: { d: Derived }) {
           chapters={
             scoped ? g.chapters.map((c) => scoped.get(c.topic.id) ?? c) : g.chapters
           }
+          unscoped={g.chapters}
           rank={rank}
           d={d}
           scope={scope}
@@ -479,6 +486,25 @@ export function Predictions({ d }: { d: Derived }) {
           the returns the grouping would have delivered in advance, not in hindsight.
         </p>
         <ul style={{ fontSize: 14, lineHeight: 1.8, margin: "10px 0 0", paddingLeft: 20 }}>
+          <li>
+            <strong>How much of the paper each group supplies.</strong> The first group
+            gives about <strong>{Math.round(TIER_FACTS.share.high)}%</strong> of a
+            typical paper and the second about{" "}
+            <strong>{Math.round(TIER_FACTS.share.standard)}%</strong> — which sounds
+            backwards until you divide by size. The second group holds{" "}
+            {85 - TIER_FACTS_HIGH_N - 5} chapters against {TIER_FACTS_HIGH_N}, so it
+            supplies more in total while each of its chapters is markedly less likely.
+            That is why the headline above each group is the odds per chapter and not
+            this share: the share runs the wrong way and reads as though the lower group
+            were the safer bet.
+          </li>
+          <li>
+            Year to year those shares moved between{" "}
+            {TIER_FACTS.range.high[0]}–{TIER_FACTS.range.high[1]}% for the first group
+            and {TIER_FACTS.range.standard[0]}–{TIER_FACTS.range.standard[1]}% for the
+            second, across the eight years tested. Neither group is ever close to
+            supplying a paper on its own.
+          </li>
           <li>
             Judged in hindsight the first group reads{" "}
             <strong>{TIER_FACTS.inSampleHigh}%</strong>; judged honestly it reads{" "}
