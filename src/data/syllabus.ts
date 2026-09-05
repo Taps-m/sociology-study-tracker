@@ -8,7 +8,7 @@
  * future reader finding a 2025 notification could reasonably assume otherwise
  * and rewrite eighty-five topics for nothing.
  *
- * The last sitting actually held was 2024; see PYQ_YEARS in ./pyq.
+ * The question bank runs to 2023; see PYQ_YEARS in ./pyq.
  */
 import { PYQS } from "./pyq";
 

@@ -13,7 +13,7 @@ const NEVER = GROUPS.find((g) => g.id === "never")!;
  *
  * Everything here is a number a candidate reads and then spends evenings on, so
  * each one is pinned to something checkable rather than to my arithmetic on the
- * day. If the corpus grows — a 2024 paper turns up, a tagging call is settled —
+ * day. If the corpus grows — a new Mains paper is added, a tagging call is settled —
  * these fail, and that is the point: the screen quotes fixed figures, and a
  * fixed figure that has drifted from its data is worse than no figure.
  */

@@ -39,9 +39,10 @@ import { TOPICS, type Topic } from "../data/syllabus";
  * over three years in testing. A low number here means "rarely asked", never
  * "safe to skip", and the screen must say so.
  *
- * And every figure is validated on internal splits only. The 2024 paper is not
- * published anywhere findable, so there is no genuinely unseen year to check
- * against. Until there is, treat all of this as provisional.
+ * And every figure is validated on internal splits of 2010-2023 only. There is
+ * no year outside the corpus to check against, so nothing here has yet faced a
+ * paper it had not already seen. Until one exists, treat all of this as
+ * provisional.
  *
  * Nothing is stored. Everything below is computed from PYQS at render time, so
  * correcting one question's topicIds moves every number the same instant.

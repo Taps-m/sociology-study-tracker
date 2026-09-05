@@ -1190,12 +1190,22 @@ export const PYQS: PastQuestion[] = [
  * Every paper here is whole — a test refuses a half-transcribed one, so a
  * partial year can never quietly count as a full one.
  *
- * Outstanding: both 2024 papers, which are not published anywhere findable.
- * 2024 was the last sitting actually held, so the series ends there — 2025 and
- * 2026 are not missing, they do not exist, and nothing should look for them.
- * That absence matters: with no 2024 there is no genuinely unseen year to test
- * a predictive model against, which caps what may honestly be claimed from
- * this corpus.
+ * The series ends at 2023 because that is the last Mains paper there is. WBCS
+ * 2024 ran its Preliminary only; no 2024 Sociology Mains paper exists, so
+ * nothing should go looking for one. Corrected 5 Sep 2026 — this file
+ * previously recorded 2024 as a sitting whose papers were merely unfindable,
+ * and sent two sessions hunting for a paper that was never written.
+ *
+ * Do not restate WBCS's calendar here. It moves, this file does not, and a
+ * confident wrong sentence about it costs more than no sentence. What matters
+ * to the code is only this: the corpus is 2010-2023, and every year in that
+ * span is present and whole.
+ *
+ * That has one consequence worth stating plainly. Every figure the prediction
+ * model reports is validated on internal splits of these fourteen years. There
+ * is no year outside the corpus to check against, so nothing here has faced a
+ * paper it had not already seen. The next Mains sitting, whenever it is held,
+ * is the first genuine test.
  *
  * 2010-2013 came from wbcsmadeeasy.in, re-typed rather than scanned, and carry
  * their source's spelling faults where those are in the question itself.

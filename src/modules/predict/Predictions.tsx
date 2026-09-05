@@ -498,8 +498,9 @@ export function Predictions({ d }: { d: Derived }) {
             turn up.
           </li>
           <li>
-            The last exam was 2024 and its paper was never published, so nothing here has
-            been checked against a year we had not already seen.
+            Every figure comes from the fourteen years in the bank, 2010 to 2023, split
+            against itself. Nothing here has yet been checked against a paper it had not
+            already seen — the next Mains sitting will be the first real test of it.
           </li>
         </ul>
         <button
