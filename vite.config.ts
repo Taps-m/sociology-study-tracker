@@ -21,6 +21,28 @@ function commit(): string {
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    /**
+     * One bundle, on purpose — do not code-split this app.
+     *
+     * Vite warns above 500 kB and suggests dynamic import(). That advice is
+     * wrong here, and the reason is in sw.js: the service worker caches assets
+     * on first use, deliberately, because there is no build-time precache list
+     * to go stale. Split the bundle and a route the candidate has not opened
+     * yet has no chunk in the cache — so the first time they open Answer
+     * practice on a train with no signal, it fails. A single bundle means one
+     * download and then the whole app works offline, which is the entire point
+     * of a local-first tracker.
+     *
+     * The size is content, not bloat: React is about a quarter of it and the
+     * rest is the 224-question PYQ bank, the planner, the unit briefs and the
+     * book page maps. Splitting would move those bytes, not remove them.
+     *
+     * 150 kB gzipped, fetched once. Raised so the warning stops suggesting a
+     * change that would break offline, and this comment says why.
+     */
+    chunkSizeWarningLimit: 700,
+  },
   define: {
     __BUILD_AT__: JSON.stringify(new Date().toISOString().slice(0, 16).replace("T", " ")),
     __BUILD_COMMIT__: JSON.stringify(commit()),
