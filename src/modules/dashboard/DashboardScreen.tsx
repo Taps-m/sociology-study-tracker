@@ -184,26 +184,51 @@ export function DashboardScreen({
       </div>
 
       {/*
-        Two columns, both of which carry something.
+        Left is what you do; right is where you stand.
 
-        The dashboard was one tall column of four cards beside a single short
-        one, so most of a wide screen sat permanently blank below "Today's
-        focus" while everything else was squeezed into half the width for no
-        reason.
+        The standing used to sit below tonight's block on the left, which put
+        the one number that answers "am I on track" at the bottom of a scroll —
+        read last, if at all, and never at the moment it would change what you
+        did next. It leads the right column now.
 
-        Left is the long view: the block you write tonight, and the wheel that
-        says how far the whole thing has got. Right is today — what is on the list, what
-        you have just finished, how the week reads, and a line worth carrying
-        out of the app. Two columns of roughly equal height, which is the only
-        reason the old one looked broken.
+        Left: today's list and the button that starts it, then the drill when
+        there is a real gap for it to close, then a line worth carrying out of
+        the app. Right: the wheel, then how the week reads.
+
+        The drill is usually absent, and the columns are laid out on the
+        assumption that it is. It appears only once two marked answers share a
+        lowest criterion — see TonightsDrill.
       */}
       <div className="grid" style={{ gap: 13, minWidth: 0 }}>
+        <TodaysFocus d={d} go={go} onToggle={onToggle} />
+
         <TonightsDrill d={d} />
 
+        <section
+          className="card"
+          style={{ padding: 16, display: "flex", gap: 12, alignItems: "flex-start" }}
+        >
+          <span style={{ color: C.accent, opacity: 0.55, flex: "0 0 auto", marginTop: 1 }}>
+            <Icon name="quote" size={22} />
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <blockquote
+              style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, fontStyle: "italic" }}
+            >
+              “{quote.text}”
+            </blockquote>
+            <div style={{ fontSize: 12.5, color: C.muted, marginTop: 8 }}>
+              — {quote.who} · {quote.where}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div className="grid" style={{ gap: 13, minWidth: 0 }}>
         <Card
           title="Overall progress"
           icon="trend"
-        action={
+          action={
           <span
             style={{
               fontSize: 12.5,
@@ -218,9 +243,9 @@ export function DashboardScreen({
           >
             {STANDING_WORD[standing]}
           </span>
-        }
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          }
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <Ring percent={p.percent} colour={STANDING_COLOUR[standing]} />
           <div style={{ flex: 1, minWidth: 220 }}>
             {CHECKS.map((c) => {
@@ -247,34 +272,10 @@ export function DashboardScreen({
               );
             })}
           </div>
-        </div>
+          </div>
         </Card>
 
-      </div>
-
-      <div className="grid" style={{ gap: 13, minWidth: 0 }}>
-        <TodaysFocus d={d} go={go} onToggle={onToggle} />
-
         <WeeklyReview d={d} />
-
-        <section
-          className="card"
-          style={{ padding: 16, display: "flex", gap: 12, alignItems: "flex-start" }}
-        >
-          <span style={{ color: C.accent, opacity: 0.55, flex: "0 0 auto", marginTop: 1 }}>
-            <Icon name="quote" size={22} />
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <blockquote
-              style={{ margin: 0, fontSize: 14.5, lineHeight: 1.65, fontStyle: "italic" }}
-            >
-              “{quote.text}”
-            </blockquote>
-            <div style={{ fontSize: 12.5, color: C.muted, marginTop: 8 }}>
-              — {quote.who} · {quote.where}
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );

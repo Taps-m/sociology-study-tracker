@@ -26,7 +26,22 @@ export function TonightsDrill({ d }: { d: Derived }) {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(drillDoneToday);
 
-  if (!drill) return null;
+  /*
+   * Only when it is aimed at something.
+   *
+   * Without a recurring weakness this card picked a criterion ("content"), a
+   * question by hash of the date, and asked for a block against neither — and
+   * said so out loud in its own badge: "there are no marked answers yet to aim
+   * this at". A drill that admits it is aiming at nothing is not a drill, it is
+   * a second, smaller answer box sitting on the same screen as Answer Practice
+   * and Today's focus, splitting the evening three ways.
+   *
+   * So it stays hidden until two marked answers share a lowest criterion, at
+   * which point `recurringWeakness` has something real and the card can say
+   * which gap it is closing. That is the only state in which it was ever worth
+   * the room it takes.
+   */
+  if (!drill || !drill.weakness) return null;
   const spec = DRILL[drill.dimension];
 
   async function send() {
