@@ -51,6 +51,7 @@ import { useRoute } from "./app/routes";
 import { AskAI } from "./app/AskAI";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
 import { MarkAsRead } from "./modules/read/MarkAsRead";
+import { Predictions } from "./modules/predict/Predictions";
 import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
 import { PlanScreen } from "./modules/plan/PlanScreen";
 import { RevisionDeck } from "./modules/revision/RevisionDeck";
@@ -170,6 +171,8 @@ export default function App() {
       )}
 
       {route === "read" && <MarkAsRead d={d} onToggle={handlers.onToggle} />}
+
+      {route === "predict" && <Predictions d={d} />}
 
       {route === "settings" && (
         <div className="grid" style={{ gap: 14 }}>
