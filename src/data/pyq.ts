@@ -852,8 +852,8 @@ export const PYQS: PastQuestion[] = [
   {
     year: 2010, paper: 1, group: "B", number: 8, marks: 40,
     text: "Gender discrimination has its origins in the distinct evolution of human body and mind of man and woman who have evolved over millions of centuries and is a catalyst for sustainable social equilibrium. — Argue the hypothesis.",
-    topicIds: ["p1u3t2"],
-    note: "Gender has no Paper I topic of its own; parked on heredity and environment, which is the nearest thing the syllabus offers.",
+    topicIds: [],
+    note: "Tapan's ruling: this is the short-note-on-contemporary-society slot, not a syllabus leaf. Paper I names no gender topic, and forcing it onto heredity and environment would have credited that topic with a question nobody would revise it for.",
   },
   {
     year: 2010, paper: 2, group: "A", number: 1, marks: 40,
