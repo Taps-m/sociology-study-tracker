@@ -754,46 +754,6 @@ export async function cheatSheet(
   return { result: parsed, error: null };
 }
 
-/** One five-minute exercise, marked on the single thing it drills. */
-export interface DrillMark {
-  score: number;
-  pass: boolean;
-  verdict: string;
-  better: string;
-}
-
-export async function markDrill(context: unknown): Promise<{
-  result: DrillMark | null;
-  error: string | null;
-}> {
-  const { status, payload, error: reachError } = await askService(
-    { task: "drill", context, deviceId: deviceId() },
-    60_000,
-  );
-  if (reachError) return { result: null, error: reachError };
-  if (status < 200 || status >= 300) {
-    return {
-      result: null,
-      error: [payload.error ?? `request failed (${status})`, payload.detail]
-        .filter(Boolean)
-        .join(" — "),
-    };
-  }
-  const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
-  try {
-    const parsed = JSON.parse(text) as DrillMark;
-    if (typeof parsed?.score !== "number") {
-      return { result: null, error: "The reply parsed but carried no mark." };
-    }
-    return { result: parsed, error: null };
-  } catch {
-    return {
-      result: null,
-      error: `The reply was not the JSON this expects. It began: ${text.slice(0, 120) || "(nothing)"}`,
-    };
-  }
-}
-
 export async function evaluate(
   context: unknown,
   files: Upload[],

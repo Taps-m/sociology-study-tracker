@@ -18,7 +18,6 @@ import { Icon } from "../../app/Icon";
 import type { RouteId } from "../../app/routes";
 import { WeeklyReview } from "./WeeklyReview";
 import { TodaysFocus } from "./TodaysFocus";
-import { TonightsDrill } from "../drill/TonightsDrill";
 import { StudiedToday } from "./StudiedToday";
 
 /** Share of the syllabus, by hours, that has a given check ticked. */
@@ -191,18 +190,11 @@ export function DashboardScreen({
         read last, if at all, and never at the moment it would change what you
         did next. It leads the right column now.
 
-        Left: today's list and the button that starts it, then the drill when
-        there is a real gap for it to close, then a line worth carrying out of
-        the app. Right: the wheel, then how the week reads.
-
-        The drill is usually absent, and the columns are laid out on the
-        assumption that it is. It appears only once two marked answers share a
-        lowest criterion — see TonightsDrill.
+        Left: today's list and the button that starts it, then a line worth
+        carrying out of the app. Right: the wheel, then how the week reads.
       */}
       <div className="grid" style={{ gap: 13, minWidth: 0 }}>
         <TodaysFocus d={d} go={go} onToggle={onToggle} />
-
-        <TonightsDrill d={d} />
 
         <section
           className="card"

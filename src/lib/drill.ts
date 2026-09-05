@@ -1,24 +1,24 @@
 import type { Derived } from "./events";
-import { TOPICS, type Topic } from "../data/syllabus";
-import { PYQS, type PastQuestion } from "../data/pyq";
 
 /**
- * Fifteen minutes that ends in a tick.
+ * What keeps going wrong, from the record rather than from one bad night.
  *
- * The two things that make someone stop are that nothing is finishable in one
- * sitting, and that a bad score teaches nothing. They are the same problem. The
- * units of work in this app are "read a sixty-seven page chapter" and "write a
- * forty-mark answer, photograph it, wait" — and on a Tuesday with half an hour
- * neither can be started, so the app gets closed.
- *
- * But the atomic unit of an answer is not an answer, it is a block: a two-to-
- * four word keyword, a dash, three lines of mechanism, one hard specific. That
- * is what the topper scripts are made of and it takes five minutes to write.
- *
- * And a single score is noise. Three scores with the same hole in them is a
- * diagnosis — so the drill is not a random exercise, it is pointed at whatever
- * the record says keeps going wrong. Nothing else can do that, because nothing
+ * A single score is noise. Three scores with the same hole in them is a
+ * diagnosis, and nothing else in the app can make that call because nothing
  * else has the record.
+ *
+ * This file once also carried a fifteen-minute drill built on that diagnosis —
+ * a past question, aimed at the weakest criterion, answered in one block. It
+ * was removed. The reason it existed was that nothing else here is finishable
+ * on a short evening, and "What did you study today?" now does that job with
+ * two words and a tap; and it needed three marked answers before it could aim
+ * at anything, so in the state most people are actually in it picked a
+ * criterion by default and a question by hashing the date. A drill aimed at
+ * nothing is a third answer box on a screen that already has two.
+ *
+ * What survives is the part that was doing the work: `confirmedWeakness` briefs
+ * the model-answer writer, so last time's gap is still this time's brief, and
+ * `DRILL` names the criteria for Answer Blueprint.
  */
 
 export type Dimension = "structure" | "content" | "thinkers" | "examples" | "demand";
@@ -101,64 +101,4 @@ export function confirmedWeakness(d: Derived, window = 6): Weakness | null {
   const w = recurringWeakness(d, window);
   if (!w) return null;
   return w.of >= 3 && w.times * 2 > w.of ? w : null;
-}
-
-export interface Drill {
-  topic: Topic;
-  question: PastQuestion;
-  dimension: Dimension;
-  weakness: Weakness | null;
-}
-
-/**
- * Tonight's drill: a real past question on a topic already touched, aimed at
- * whatever keeps going wrong.
- *
- * Deliberately drawn from topics already started rather than from the queue.
- * A drill is not new learning, it is the second half of learning — and being
- * asked to write a block on something never read is the kind of thing that
- * makes someone close the app rather than open it.
- */
-export function tonightsDrill(d: Derived, seed = new Date().toISOString().slice(0, 10)): Drill | null {
-  const weakness = recurringWeakness(d);
-  const dimension = weakness?.dimension ?? "content";
-
-  const started = new Set(
-    TOPICS.filter((t) => Object.keys(d.checks[t.id] ?? {}).length > 0).map((t) => t.id),
-  );
-  const pool = PYQS.filter((q) => q.topicIds.some((id) => started.has(id)));
-  const usable = pool.length > 0 ? pool : PYQS.filter((q) => q.topicIds.length > 0);
-  if (usable.length === 0) return null;
-
-  // Stable for the day, so the drill does not change under you on a re-render,
-  // and different tomorrow without any state to store.
-  let h = 0;
-  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  const question = usable[h % usable.length]!;
-  const topic = TOPICS.find((t) => question.topicIds.includes(t.id)) ?? TOPICS[0]!;
-
-  return { topic, question, dimension, weakness };
-}
-
-/**
- * Whether tonight's is done. Kept out of the event log on purpose for now:
- * the log is the durable record of study, and a five-minute drill has not
- * earned a place in it until the shape has settled.
- */
-const DONE_KEY = "wbcs.drillDone.v1";
-
-export function drillDoneToday(): boolean {
-  try {
-    return localStorage.getItem(DONE_KEY) === new Date().toISOString().slice(0, 10);
-  } catch {
-    return false;
-  }
-}
-
-export function markDrillDone() {
-  try {
-    localStorage.setItem(DONE_KEY, new Date().toISOString().slice(0, 10));
-  } catch {
-    // Blocked storage. The tick is cosmetic; nothing else depends on it.
-  }
 }
