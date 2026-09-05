@@ -70,25 +70,40 @@ const TIER_COPY: Record<TierId, { name: string; why: string }> = {
     why: "Each one less likely than the group above — but together they still supply about two-thirds of every paper. Not a skip list, and the order inside this group is not evidence.",
   },
   never: {
-    name: "No recorded appearance",
-    why: "Not asked once between 2010 and 2023. Still on the syllabus, and still examinable.",
+    name: "Never asked",
+    why: "Not once between 2010 and 2023. Still on the syllabus, and still examinable.",
   },
 };
 
 /**
- * The odds for a typical chapter in a group, from the median rather than the
- * mean — one chapter at 55% should not drag the headline for the other fifteen.
+ * How many of the fourteen papers a typical chapter in this group appeared in.
  *
- * Always computed from the whole-paper ranking, never from the group scope, for
- * the same reason tier membership is: within Group B, Weber has never been
- * asked at all, and a scope-sensitive headline would put the high tier below
- * the standard one and make the ordering look broken.
+ * This header has now been wrong twice. First it carried two percentages —
+ * "37% of a typical paper" beside "31-50% in each of the last eight years" —
+ * which measured different things and said which was which nowhere. Then it
+ * carried odds, "1 in 3", which is a fraction with no verb: the reader has to
+ * assemble "one year in three" before it means anything, and the caption under
+ * it did not help.
+ *
+ * A count of papers needs no assembly. It is the same unit every row already
+ * uses — "asked in 10 of the last 14 years" — so the header and the rows are
+ * finally measuring one thing in one way, and 6 against 2 is a difference
+ * nobody has to be talked through.
+ *
+ * The median, not the mean: one chapter asked ten times should not speak for
+ * the other fifteen.
+ *
+ * Note what this is. A count is the record, not the forecast — it is what these
+ * chapters have done. What the model expects next is the percentage on each
+ * row, which is deliberately not the count: pooling pulls a much-asked chapter
+ * below its raw rate, and that gap is the whole reason this module exists
+ * rather than a tally. The header says who these chapters are; the rows say
+ * what they are likely to do.
  */
-function typicalOdds(chapters: Chance[]): string {
+function typicalCount(chapters: Chance[]): string {
   if (chapters.length === 0) return "—";
-  const ps = chapters.map((c) => c.p).sort((a, b) => a - b);
-  const median = ps[Math.floor(ps.length / 2)]!;
-  return `1 in ${Math.max(2, Math.round(1 / median))}`;
+  const a = chapters.map((c) => c.asked).sort((x, y) => x - y);
+  return `${a[Math.floor(a.length / 2)]} of ${chapters[0]!.of}`;
 }
 
 /**
@@ -319,18 +334,18 @@ function TierBlock({
           </span>
         </span>
 
-        <span style={{ flex: "0 0 auto", textAlign: "right", minWidth: 104 }}>
+        <span style={{ flex: "0 0 auto", textAlign: "right", minWidth: 116 }}>
           <span
             style={{
               display: "block",
-              fontSize: 23,
+              fontSize: 22,
               fontWeight: 680,
               lineHeight: 1,
               letterSpacing: "-0.02em",
               color: tone.figure,
             }}
           >
-            {id === "never" ? "Never" : typicalOdds(unscoped)}
+            {typicalCount(unscoped)}
           </span>
           <span
             style={{
@@ -341,7 +356,7 @@ function TierBlock({
               lineHeight: 1.4,
             }}
           >
-            {id === "never" ? "in 14 years of papers" : "years — typical chapter"}
+            {id === "never" ? "papers, all five chapters" : "papers, typical chapter"}
           </span>
         </span>
 
@@ -398,7 +413,9 @@ export function Predictions({ d }: { d: Derived }) {
         <p style={{ fontSize: 14.5, margin: 0, lineHeight: 1.7 }}>
           Every chapter's estimated chance of appearing in a given year, worked out from
           all 224 questions of the last fourteen years, and grouped where the evidence
-          actually separates.
+          actually separates. The count on each group is the record — how many of the
+          fourteen papers a typical chapter in it appeared in. The percentage on each
+          row is the forecast, and it is deliberately not the count.
         </p>
         <p
           style={{
