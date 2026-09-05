@@ -255,3 +255,90 @@ export const BACKTEST = {
   hit: { count: [23, 31, 36, 41], pooled: [24, 32, 38, 41] },
   hitAt: [10, 15, 20, 25],
 } as const;
+
+/* ─────────────────────────── TIERS ─────────────────────────────────────── */
+
+/**
+ * Where the ranking actually divides — and why there is only one division.
+ *
+ * The obvious presentation is three equal tiers: top, middle, bottom third.
+ * Tested, that is the worst of every split available. Equal thirds put 48% of
+ * the paper in the top tier, which reads well until you divide by the number of
+ * chapters it took: 1.70% of the paper per chapter, against 1.04% for the rest.
+ * A 1.6x return. It buys the bigger headline by dragging twelve low-yield
+ * chapters up into the top tier and diluting it.
+ *
+ * Running 1-D k-means over the 85 posterior means finds the real structure. The
+ * first break is at chapter 16 — a 2.09 percentage-point gap, between 31.9% and
+ * 29.8%. The second break k-means proposes has a gap of 0.42pp, which is not a
+ * break; it is the algorithm being made to return three clusters in a region
+ * that contains one. From chapter 17 to chapter 85 the estimates fall by less
+ * than half a point apiece and the questions those chapters actually attracted
+ * are flat across the whole range: 0.98% of the paper per chapter at the top of
+ * that band, 0.91% at the bottom.
+ *
+ * So: two tiers, not three. Cutting the remainder into a "middle" and a
+ * "bottom" would draw a line the evidence does not contain, and a candidate who
+ * believed it would deprioritise chapters on the strength of a 0.4-point
+ * difference. The third group below is not a tier — it is a fact about the
+ * record: five chapters have never been asked in fourteen years.
+ */
+export const TIER_CUT = 16;
+
+/**
+ * What each tier actually delivered, measured out of sample.
+ *
+ * NOT the share of the corpus each tier holds — that is 63%/37% and it is
+ * flattery, because the tiers were drawn using the same questions they are then
+ * scored against. These are from the rolling backtest: for each of the last
+ * eight years the model was refitted on the preceding years only, the tiers
+ * redrawn from that fit, and the share of that year's questions recorded. It is
+ * what the grouping would have delivered in advance. Measured in hindsight the
+ * top tier reads 63%; measured honestly it reads 37%.
+ *
+ * Hard-coded for the same reason BACKTEST is: re-running eight refits in the
+ * browser costs seconds for a number that only moves when the corpus does, and
+ * when the corpus moves a test fails and this gets updated.
+ */
+export const TIER_FACTS = {
+  years: 8,
+  /** Share of a year's questions, and the min and max across those years. */
+  share: { high: 37.3, standard: 62.7 },
+  range: { high: [31, 50], standard: [50, 69] },
+  /** Share of the paper per chapter — the number the tiering exists to move. */
+  yield: { high: 2.331, standard: 0.98 },
+  /** In-sample share of the top tier, kept so the screen can show the gap. */
+  inSampleHigh: 63,
+  /** The gap at the cut, in percentage points, and the two rates either side. */
+  cutGap: 2.09,
+} as const;
+
+export type TierId = "high" | "standard" | "never";
+
+export interface Tier {
+  id: TierId;
+  chapters: Chance[];
+}
+
+/**
+ * The ranking in three groups: the real division, the remainder, and the
+ * chapters with no record at all.
+ *
+ * The tiers are always drawn on the whole-paper ranking, never on the group
+ * scope. A chapter's tier is a claim about its overall priority, and that is
+ * what the backtest above measured; re-cutting it per group would put numbers
+ * on screen that were never tested. The scope still changes each row's own
+ * probability, which is the question it answers.
+ */
+export function tiers(): Tier[] {
+  const all = chances();
+  const asked = new Set<string>();
+  for (const q of PYQS) for (const id of q.topicIds) asked.add(id);
+  const never = all.filter((c) => !asked.has(c.topic.id));
+  const rest = all.filter((c) => asked.has(c.topic.id));
+  return [
+    { id: "high", chapters: rest.slice(0, TIER_CUT) },
+    { id: "standard", chapters: rest.slice(TIER_CUT) },
+    { id: "never", chapters: never },
+  ];
+}

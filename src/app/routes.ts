@@ -25,7 +25,7 @@ export const ROUTES = [
   { id: "plan", label: "Study Plan", icon: "calendar", primary: false },
   { id: "today", label: "Today's Study", icon: "clock", primary: false },
   { id: "pyq", label: "PYQ Explorer", icon: "diamond", primary: false },
-  { id: "predict", label: "What is likely", icon: "trend", primary: false },
+  { id: "predict", label: "Question prediction", icon: "trend", primary: false },
   { id: "progress", label: "Progress", icon: "trend", primary: false },
   { id: "guide", label: "How this works", icon: "question", primary: false },
   { id: "settings", label: "Settings", icon: "gear", primary: false },

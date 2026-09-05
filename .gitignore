@@ -38,3 +38,6 @@ standard books/
 
 # OCR of the paid books. Same reason as "standard books/": this repo is public.
 book-text/
+
+# files delivered into the chat, not source
+Claude outputs/
