@@ -71,39 +71,39 @@ const TIER_COPY: Record<TierId, { name: string; why: string }> = {
   },
   never: {
     name: "Never asked",
-    why: "Not once between 2010 and 2023. Still on the syllabus, and still examinable.",
+    why: "Between 2010 and 2023. Still on the syllabus, and still examinable.",
   },
 };
 
 /**
- * How many of the fourteen papers a typical chapter in this group appeared in.
+ * The group's record, as a sentence rather than as a statistic.
  *
- * This header has now been wrong twice. First it carried two percentages —
- * "37% of a typical paper" beside "31-50% in each of the last eight years" —
- * which measured different things and said which was which nowhere. Then it
- * carried odds, "1 in 3", which is a fraction with no verb: the reader has to
- * assemble "one year in three" before it means anything, and the caption under
- * it did not help.
+ * This header has been wrong three times, each in the same way: a number with a
+ * caption bolted underneath, which the reader has to assemble before it says
+ * anything. It carried two percentages measuring different things. Then odds —
+ * "1 in 3" — a fraction with no verb. Then "6 of 14" over "papers, typical
+ * chapter", which is a stat block wearing a label.
  *
- * A count of papers needs no assembly. It is the same unit every row already
- * uses — "asked in 10 of the last 14 years" — so the header and the rows are
- * finally measuring one thing in one way, and 6 against 2 is a difference
- * nobody has to be talked through.
+ * It now reads straight through: "Asked in 6 / of the last 14 papers". The
+ * line break falls where a person would pause, so nothing has to be decoded,
+ * and it is the unit every row already uses — "asked in 10 of the last 14
+ * years" — so the header and the rows measure one thing in one way.
  *
  * The median, not the mean: one chapter asked ten times should not speak for
  * the other fifteen.
  *
- * Note what this is. A count is the record, not the forecast — it is what these
+ * Note what this is. A count is the record, not the forecast — what these
  * chapters have done. What the model expects next is the percentage on each
- * row, which is deliberately not the count: pooling pulls a much-asked chapter
- * below its raw rate, and that gap is the whole reason this module exists
- * rather than a tally. The header says who these chapters are; the rows say
- * what they are likely to do.
+ * row, deliberately not the count: pooling pulls a much-asked chapter below its
+ * raw rate, and that gap is why this module exists rather than a tally. The
+ * header says who these chapters are; the rows say what they are likely to do.
  */
-function typicalCount(chapters: Chance[]): string {
-  if (chapters.length === 0) return "—";
+function typicalRecord(chapters: Chance[], id: TierId): { lead: string; tail: string } {
+  if (id === "never") return { lead: "Not once", tail: "in 14 years of papers" };
+  if (chapters.length === 0) return { lead: "—", tail: "" };
   const a = chapters.map((c) => c.asked).sort((x, y) => x - y);
-  return `${a[Math.floor(a.length / 2)]} of ${chapters[0]!.of}`;
+  const median = a[Math.floor(a.length / 2)]!;
+  return { lead: `Asked in ${median}`, tail: `of the last ${chapters[0]!.of} papers` };
 }
 
 /**
@@ -266,6 +266,7 @@ function TierBlock({
   onToggle: () => void;
 }) {
   const t = TIER_COPY[id];
+  const record = typicalRecord(unscoped, id);
   const tone =
     id === "high"
       ? { bg: C.accent, fg: "#fff", border: C.accent, figure: C.accent }
@@ -338,25 +339,25 @@ function TierBlock({
           <span
             style={{
               display: "block",
-              fontSize: 22,
-              fontWeight: 680,
-              lineHeight: 1,
-              letterSpacing: "-0.02em",
+              fontSize: 18,
+              fontWeight: 660,
+              lineHeight: 1.15,
+              letterSpacing: "-0.01em",
               color: tone.figure,
             }}
           >
-            {typicalCount(unscoped)}
+            {record.lead}
           </span>
           <span
             style={{
               display: "block",
-              fontSize: 11.5,
+              fontSize: 12,
               color: C.muted,
-              marginTop: 5,
+              marginTop: 2,
               lineHeight: 1.4,
             }}
           >
-            {id === "never" ? "papers, all five chapters" : "papers, typical chapter"}
+            {record.tail}
           </span>
         </span>
 
