@@ -20,11 +20,20 @@ import { TOPICS, type Topic } from "./syllabus";
  *      it away at the em dash.
  *   2. The unit briefs in briefs.ts, whose flow stages were written against the
  *      standard texts and are already committed content.
- *   3. The 152 real questions in pyq.ts. What WBCS actually asks about a
+ *   3. The 224 real questions in pyq.ts. What WBCS actually asks about a
  *      chapter is the best evidence of what the chapter contains, and it is the
  *      same source the weightage is counted from.
+ *   4. The section headings of the two Sociology Optional notes PDFs in
+ *      `standard books/`. These are structured to the UPSC syllabus, not the
+ *      WBCS one, so the mapping is many-to-many: chapter B5 on kinship answers
+ *      three WBCS chapters by itself, while WBCS's own "Westernisation,
+ *      Sanskritisation and secularisation" is scattered across three of theirs.
+ *      Headings are taken as they stand where they fit. Where they do not, the
+ *      syllabus word wins and the gap is stated: "Westernisation" is in the
+ *      list below because WBCS names it, and the notes never use the word as a
+ *      heading at all — worth knowing before you go looking for it.
  *
- * A keyword that could not be traced to one of those three is not here. An
+ * A keyword that could not be traced to one of those four is not here. An
  * invented sub-topic costs the same as an invented chapter number: an hour of
  * looking for something that is not in the book.
  *
@@ -146,6 +155,218 @@ export const KEYWORDS: Record<string, string[]> = {
   p1u10t1: ["development", "dependency"],
   p1u10t4: ["science", "technology", "social change"],
   p1u10t5: ["dominant culture", "celebrity culture"],
+
+  // ── Paper II · Introducing Indian Society ────────────────────────────────
+  // Source: the section headings of the Paper 2 notes, chapters A1 and A2.
+  p2u1t1: [
+    "Defining modernity",
+    "Features of modernity",
+    "Modernisation of Indian tradition",
+    "Little and great tradition",
+    "Orthogenetic and heterogenetic change",
+  ],
+  p2u1t2: [
+    "Indology and its assumptions",
+    "Ghurye on caste",
+    "Ghurye on tribe",
+    "Ghurye on kinship, family and marriage",
+    "Ghurye on religion and Indian sadhus",
+    "Criticism of Indology",
+  ],
+  p2u1t3: [
+    "Structural functionalism",
+    "Radcliffe-Brown's perspective",
+    "Srinivas on the Coorgs",
+    "Sanskritisation",
+    "Dominant caste",
+    "Village studies",
+  ],
+  p2u1t4: [
+    "Marxist sociology in India",
+    "Desai on Indian nationalism",
+    "Desai's five phases of nationalism",
+    "Marxist perspective on modernity",
+  ],
+  p2u1t5: [
+    "Who is a Dalit",
+    "Ambedkar on India as a nation",
+    "Ambedkar on democracy",
+    "Constitutional morality",
+    "Dalit movement",
+  ],
+
+  // ── Paper II · Major Social Groups ───────────────────────────────────────
+  // Source: chapter B6 for the communities, B2 and B3 for caste and tribe.
+  p2u2t1: [
+    "Major religious communities",
+    "Who is a minority",
+    "Problems of religious minorities",
+    "Protecting religious minorities",
+  ],
+  p2u2t3: [
+    "Features of the caste system",
+    "Origin of caste",
+    "Perspectives on untouchability",
+    "Defining a tribe",
+    "Tribes in the Constitution",
+    "Colonial policies and tribes",
+  ],
+
+  // ── Paper II · Major Institutions ────────────────────────────────────────
+  // Source: chapter B5, which answers three WBCS chapters on its own, plus B6
+  // for religion as an institution and C4 for political participation.
+  p2u3t1: [
+    "What is marriage",
+    "Marital choices",
+    "Endogamy and exogamy",
+    "Forms of marriage",
+    "Legal rationalisation of marriage",
+    "Stability in marriage",
+  ],
+  p2u3t2: [
+    "Lineage and descent",
+    "Structural breakdown of the joint family",
+    "The joint family persists",
+    "Changes in family structure",
+    "Single parent households",
+  ],
+  p2u3t3: [
+    "Change in the division of labour",
+    "Patriarchy and entitlements",
+    "Social subordination and exclusion of women",
+    "Transforming intimate relationships",
+  ],
+  p2u3t4: [
+    "Democracy as practised in India",
+    "Citizenship, rights and responsibility",
+    "Active and passive participation",
+    "Political parties and pressure groups",
+    "Social and political elites",
+  ],
+  p2u3t5: [
+    "Problems of religious minorities",
+    "Communal riots and protection",
+    "Uniform Civil Code",
+    "Secular tone in politics",
+  ],
+
+  // ── Paper II · Social Inequality ─────────────────────────────────────────
+  // Source: B2 and B4. p2u4t1 is deliberately absent: the notes cover poverty
+  // and deprivation at length but have no section on the types of inequality
+  // as such, and the syllabus names no parts, so it keeps its whole-chapter
+  // tick rather than being given keywords that do not lead anywhere.
+  p2u4t2: [
+    "Features of the caste system",
+    "Andre Beteille on caste and class",
+    "Agrarian class structure",
+    "Industrial class structure",
+    "Middle classes in India",
+  ],
+  p2u4t3: [
+    "Who is a Dalit",
+    "Backward classes and Dalit movement",
+    "Impact of reservation",
+    "Mandal protests",
+  ],
+  p2u4t5: [
+    "Occupations without caste considerations",
+    "Caste clustering in occupations",
+    "Impact of reservation",
+    "Education and social change",
+  ],
+
+  // ── Paper II · Social Change in Modern India ─────────────────────────────
+  // Source: C5 for the movements, C3 for industry and the city, C1 and C2 for
+  // directed change. "Westernisation" is the syllabus's own word, not the
+  // notes' — they carry Sanskritisation and secularisation but never use it as
+  // a heading, which is worth knowing before you go looking for it.
+  p2u5t1: [
+    "Sanskritisation",
+    "De-Sanskritisation",
+    "Changing notions of purity and pollution",
+    "Westernisation",
+    "Secularisation",
+  ],
+  p2u5t2: [
+    "Development planning and mixed economy",
+    "Community development programme",
+    "Phases of rural development",
+    "Green revolution and social change",
+  ],
+  p2u5t3: [
+    "Constitution, law and social change",
+    "Law as an instrument of social change",
+    "Social reforms",
+  ],
+  p2u5t4: [
+    "Peasant and farmers movements",
+    "Women's movement",
+    "Backward classes and Dalit movement",
+    "Environmental movements",
+    "Ethnicity and identity movements",
+  ],
+  p2u5t5: [
+    "Evolution of modern industry",
+    "Growth of urban settlements",
+    "Working class: structure and growth",
+    "Trade unionism",
+    "Informal sector and child labour",
+    "Slums and deprivation in urban areas",
+  ],
+  p2u5t6: [
+    "Political parties",
+    "Pressure groups",
+    "Social and political elites",
+  ],
+
+  // ── Paper II · Women and Children ────────────────────────────────────────
+  // Source: C7. Only one of this unit's four chapters is in the notes at all.
+  // The programmes for women and the child-welfare chapter are WBCS-only and
+  // have no UPSC counterpart to draw on — see the note at the foot of this file.
+  p2u6t2: [
+    "Defining violence against women",
+    "Forms of violence against women",
+    "Honour killing",
+  ],
+
+  // ── Paper II · Globalisation and Ecology ─────────────────────────────────
+  // Source: C7 for the crisis, C5 for the movements.
+  p2u7t1: [
+    "Sustainable development",
+    "Ecological modernisation",
+    "Environmental problems",
+    "Development-induced displacement",
+  ],
+  p2u7t2: [
+    "Environmental movements in India",
+    "Displacement and protest movements",
+    "Sustainable development",
+    "Ecological modernisation",
+  ],
+
+  // ── Paper II · Social Problems ───────────────────────────────────────────
+  // Source: C7 and C6. Four of this unit's nine chapters have no counterpart in
+  // the notes: youth, drug addiction, juvenile delinquency, and old age beyond
+  // C6's passing note on ageing. Child labour is carried by C3.
+  p2u8t1: [
+    "Poverty: causes",
+    "Poverty: consequences",
+    "Poverty, deprivation and inequality",
+    "Poverty eradication programmes",
+  ],
+  p2u8t7: [
+    "Population size, growth and composition",
+    "Components of population growth",
+    "Causes of a high birth rate",
+    "Malthusian theory and its critics",
+    "Population policy and family planning",
+  ],
+  p2u8t9: [
+    "Defining violence against women",
+    "Forms of violence against women",
+    "Honour killing",
+    "Communal riots",
+  ],
 };
 
 /**
