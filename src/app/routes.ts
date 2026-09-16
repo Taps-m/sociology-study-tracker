@@ -20,8 +20,14 @@ export const ROUTES = [
   { id: "dashboard", label: "Dashboard", icon: "home", primary: true },
   { id: "chapters", label: "Chapters", icon: "layers", primary: true },
   { id: "answers", label: "Answer Practice", icon: "pencil", primary: true },
-  { id: "read", label: "Mark as read", icon: "tick", primary: true },
-  { id: "revision", label: "Quick Revision", icon: "refresh", primary: false },
+  /*
+   * Revision holds the fourth slot — "what comes back round", as described
+   * above. It was taken by a Mark as read tab, which searched the syllabus and
+   * ticked a chapter: two things Chapters and the dashboard logger already did.
+   * Its one distinct trick, ticking a chapter one idea at a time, is on the
+   * topic row now, and its two useful views are filters on Chapters.
+   */
+  { id: "revision", label: "Quick Revision", icon: "refresh", primary: true },
   { id: "plan", label: "Study Plan", icon: "calendar", primary: false },
   { id: "today", label: "Today's Study", icon: "clock", primary: false },
   { id: "pyq", label: "PYQ Explorer", icon: "diamond", primary: false },

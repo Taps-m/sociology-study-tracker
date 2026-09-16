@@ -50,7 +50,6 @@ import { Shell as AppShell, Card } from "./app/Shell";
 import { useRoute } from "./app/routes";
 import { AskAI } from "./app/AskAI";
 import { DashboardScreen } from "./modules/dashboard/DashboardScreen";
-import { MarkAsRead } from "./modules/read/MarkAsRead";
 import { Predictions } from "./modules/predict/Predictions";
 import { ChaptersScreen } from "./modules/chapters/ChaptersScreen";
 import { PlanScreen } from "./modules/plan/PlanScreen";
@@ -169,8 +168,6 @@ export default function App() {
           <RecentActivity events={events} add={add} />
         </div>
       )}
-
-      {route === "read" && <MarkAsRead d={d} onToggle={handlers.onToggle} />}
 
       {route === "predict" && <Predictions d={d} />}
 

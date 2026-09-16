@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { TOPICS } from "../../data/syllabus";
+import { keywordCoverage } from "../../data/keywords";
 import type { CheckId, Derived } from "../../lib/events";
-import { bandOf, completionOf, depthFor,  isOptional } from "../../lib/planner";
+import {
+  bandOf,
+  checksFor,
+  completionOf,
+  depthFor,
+  isOptional,
+  packWeeks,
+  partsDone,
+} from "../../lib/planner";
 import { topicMatches } from "../../lib/topicSearch";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -13,16 +22,25 @@ import { UnitMix } from "./UnitMix";
 import { PrepareCards } from "../topics/PrepareCards";
 
 type Handlers = {
-  onToggle: (id: string, c: CheckId) => void;
+  /** `part` ticks one idea inside the chapter; without it, the whole chapter. */
+  onToggle: (id: string, c: CheckId, part?: string) => void;
   onLogTime: (id: string, c: CheckId, m: number) => void;
   onMarkPrior: (id: string, c: CheckId) => void;
   onAttempt: (id: string, marks: number, outOf: number, minutes: number) => void;
 };
 
-type Filter = "all" | "open" | "untouched" | "high";
+/*
+ * "This week" and "Half read" came from the Mark as Read tab when it was
+ * folded in here. They were the two things that screen did which browsing the
+ * syllabus does not: put tonight's chapters in front of you, and stop a
+ * chapter stalled at two ideas of five from being lost among eighty-five.
+ */
+type Filter = "all" | "week" | "half" | "open" | "untouched" | "high";
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All" },
+  { id: "week", label: "This week" },
+  { id: "half", label: "Half read" },
   { id: "open", label: "Started" },
   { id: "untouched", label: "Not started" },
   { id: "high", label: "High yield" },
@@ -32,12 +50,25 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
   const [open, setOpen] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
+  const cover = keywordCoverage();
+
+  const thisWeek = useMemo(
+    () => new Set((packWeeks(d, 1)[0]?.topics ?? []).map((t) => t.id)),
+    [d],
+  );
 
   const match = (t: (typeof TOPICS)[number]) => {
     const done = completionOf(d, t.id);
     if (filter === "open" && (done === 0 || done >= depthFor(d, t))) return false;
     if (filter === "untouched" && done > 0) return false;
     if (filter === "high" && bandOf(t) < 3) return false;
+    if (filter === "week" && !thisWeek.has(t.id)) return false;
+    if (
+      filter === "half" &&
+      (partsDone(d, t.id, "read").length === 0 || Boolean(checksFor(d, t.id).read))
+    ) {
+      return false;
+    }
     if (query && !topicMatches(t, query)) return false;
     return true;
   };
@@ -103,7 +134,30 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
           <span className="num">{visible}</span> of{" "}
           <span className="num">{TOPICS.length}</span> topics shown
         </p>
+        {/*
+          Carried over from Mark as Read: a chapter broken into ideas can be
+          ticked one evening at a time, on the topic row itself. The rest take
+          one tick for the whole chapter.
+        */}
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+          <span className="num">{cover.chapters}</span> of{" "}
+          <span className="num">{cover.of}</span> chapters are broken into ideas,{" "}
+          <span className="num">{cover.keywords}</span> in all — tick them one at a time
+          under any topic. The rest are a single idea and take one tick.
+        </p>
       </Card>
+
+      {visible === 0 && (
+        <Card>
+          <p style={{ fontSize: 14, color: C.muted, margin: 0, lineHeight: 1.7 }}>
+            {filter === "week"
+              ? "Nothing scheduled this week. Clear the filter to browse the whole syllabus."
+              : filter === "half"
+                ? "No chapter is part-read right now — every one you have started is either finished or untouched."
+                : "Nothing matches that. Try a different filter, or one word instead of two."}
+          </p>
+        </Card>
+      )}
 
       {/*
         One control for both papers, above the per-paper sections rather than

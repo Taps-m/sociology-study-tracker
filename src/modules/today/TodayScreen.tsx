@@ -6,7 +6,8 @@ import { TopicRow } from "../../components/TopicRow";
 import type { RouteId } from "../../app/routes";
 
 type Handlers = {
-  onToggle: (id: string, c: CheckId) => void;
+  /** `part` ticks one idea inside the chapter; without it, the whole chapter. */
+  onToggle: (id: string, c: CheckId, part?: string) => void;
   onLogTime: (id: string, c: CheckId, m: number) => void;
   onMarkPrior: (id: string, c: CheckId) => void;
   onAttempt: (id: string, marks: number, outOf: number, minutes: number) => void;

@@ -4,14 +4,15 @@ import type { CheckId, Derived } from "../lib/events";
 import {
   CHECKS,
   attemptTrend,
+  checkProgress,
   checksFor,
-  partsDone,
-  partsOf,
   completionOf,
   depthFor,
   depthLabel,
   hoursLeftOn,
   isAtDepth,
+  partsDone,
+  partsOf,
 } from "../lib/planner";
 import { C } from "../lib/theme";
 import { chapterUrl, readingLine, readingsFor } from "../data/sources";
@@ -49,6 +50,7 @@ export function TopicRow({
 }: {
   topic: Topic;
   d: Derived;
+  /** `part` ticks one idea inside the chapter; without it, the whole chapter. */
   onToggle: (topicId: string, check: CheckId, part?: string) => void;
   onLogTime?: (topicId: string, check: CheckId, minutes: number) => void;
   onMarkPrior?: (topicId: string, check: CheckId) => void;
@@ -66,8 +68,6 @@ export function TopicRow({
   const depth = depthFor(d, topic);
   const atDepth = isAtDepth(d, topic);
   const trend = attemptTrend(d, topic.id);
-  const parts = partsOf(topic);
-  const readDone = partsDone(d, topic.id, "read");
 
   let acc = 0;
 
@@ -94,6 +94,8 @@ export function TopicRow({
       <TopicCheatSheet topic={topic} />
 
       {onNote && <NoteEditor topicId={topic.id} d={d} onSave={onNote} />}
+
+      <ReadParts topic={topic} d={d} onToggle={onToggle} />
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 9 }}>
         {CHECKS.map((c) => {
@@ -135,12 +137,6 @@ export function TopicRow({
             >
               {on_ ? "✓ " : ""}
               {c.label}
-              {!on_ && parts.length > 0 && c.id === "read" && readDone.length > 0 && (
-                <span className="num" style={{ color: C.accent }}>
-                  {" "}
-                  {readDone.length}/{parts.length}
-                </span>
-              )}
             </button>
           );
         })}
@@ -148,53 +144,6 @@ export function TopicRow({
           {pct}%
         </span>
       </div>
-
-      {/*
-        The parts of a topic, where the syllabus named them.
-
-        Six hours of Marx was one tick, so an evening on class struggle alone
-        could not be recorded: tick it and the app believes all four parts are
-        read, leave it and the app believes none are — and the second is what
-        kept happening, a six-hour topic sitting at zero for a fortnight while
-        the plan went on recommending it.
-
-        Only against "Material read". Reading is what actually happens one part
-        at a time across several sittings; notes and revision are done for the
-        topic, and four rows of parts against four checks would be sixteen chips
-        on a row that has to stay glanceable. Ticking the whole check still wins
-        over any of them, because it is the larger claim.
-      */}
-      {parts.length > 0 && !done.read && (
-        <div style={{ marginTop: 7 }}>
-          <div style={{ fontSize: 12, color: C.muted, marginBottom: 5 }}>
-            Read part by part — {readDone.length} of {parts.length}
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-            {parts.map((part) => {
-              const got = readDone.includes(part);
-              return (
-                <button
-                  key={part}
-                  onClick={() => onToggle(topic.id, "read", part)}
-                  title={got ? "recorded — tap to undo" : "record this part as read"}
-                  style={{
-                    ...chip,
-                    fontSize: 12,
-                    padding: "5px 9px",
-                    minHeight: 30,
-                    color: got ? C.accent : C.muted,
-                    background: got ? C.accentSoft : "transparent",
-                    border: `1px solid ${got ? C.accent : C.line}`,
-                  }}
-                >
-                  {got ? "✓ " : ""}
-                  {part}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {asking && onLogTime && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 9, flexWrap: "wrap" }}>
@@ -316,6 +265,106 @@ export function TopicRow({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * The ideas inside one chapter, each with its own tick.
+ *
+ * Six hours of Marx is four ideas across four evenings, and one whole-chapter
+ * tick makes the honest answer after the first of them unavailable: tick it and
+ * the app believes all four are done, leave it and it believes none are. The
+ * second is what kept happening, so a half-read chapter sat at zero while the
+ * plan went on recommending it.
+ *
+ * This had a screen of its own — the Mark as Read tab — which meant the app had
+ * three places to search for a chapter and tick it. It lives on the topic row
+ * now, so it is wherever a chapter is, and it writes the same event the tab did.
+ */
+function ReadParts({
+  topic,
+  d,
+  onToggle,
+}: {
+  topic: Topic;
+  d: Derived;
+  onToggle: (topicId: string, check: CheckId, part?: string) => void;
+}) {
+  const parts = partsOf(topic);
+  if (parts.length === 0) return null;
+
+  const whole = Boolean(checksFor(d, topic.id).read);
+  const done = partsDone(d, topic.id, "read");
+  const share = checkProgress(d, topic, "read");
+
+  return (
+    <div style={{ marginTop: 9 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 9,
+          marginBottom: 6,
+          fontSize: 12,
+          color: C.muted,
+        }}
+      >
+        <span style={{ flex: "0 0 auto" }}>
+          {whole ? parts.length : done.length} of {parts.length} ideas read
+        </span>
+        <span
+          style={{
+            flex: 1,
+            height: 5,
+            borderRadius: 3,
+            background: "var(--line)",
+            overflow: "hidden",
+          }}
+        >
+          <span
+            style={{
+              display: "block",
+              width: `${share * 100}%`,
+              height: "100%",
+              background: share === 1 ? "var(--good)" : C.accent,
+            }}
+          />
+        </span>
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+        {parts.map((part) => {
+          const got = whole || done.includes(part);
+          return (
+            <button
+              key={part}
+              onClick={() => onToggle(topic.id, "read", part)}
+              disabled={whole}
+              title={
+                whole
+                  ? "the whole chapter is ticked"
+                  : got
+                    ? "recorded — tap to undo"
+                    : "record this idea as read"
+              }
+              style={{
+                ...chip,
+                fontSize: 12,
+                padding: "5px 9px",
+                minHeight: 30,
+                cursor: whole ? "default" : "pointer",
+                background: got ? C.accentSoft : "transparent",
+                color: got ? C.accent : C.muted,
+                border: `1px solid ${got ? C.accent : C.line}`,
+              }}
+            >
+              {got ? "✓ " : ""}
+              {part}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
