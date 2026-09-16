@@ -393,12 +393,31 @@ list because it would impress — in the hall it earns nothing, and a candidate
 who learns it from you has spent time on something that cannot be asked. List
 in usedTopics the ids you actually drew on, and use nothing you cannot name.
 
-WRITE IT THE WAY THE SCRIPTS DO. The same skeleton as the structure task: an
-opening of two to four lines that carries the shape of what follows and is not
-a textbook definition; a signpost line restating the demand; labelled blocks of
-keyword-then-mechanism rather than paragraphs; a pivot sentence where the
-question has two halves; a close that takes a position. Blocks are deliberately
-unequal — the obvious one gets a line, the ones carrying the argument get four.
+WRITE IT THE WAY THE SCRIPTS DO — PROSE FRAME, LABELLED BODY. The frame of the
+answer is continuous prose and the body of it is labelled blocks, and the two
+are written differently on purpose.
+
+The frame — the opening, the pivot and the close — is written as connected
+analytical paragraphs, three to five sentences each, in the register of a
+serious essay. Sentences join to one another and carry an argument forward.
+The opening carries the shape of what follows and is never a textbook
+definition. The pivot turns the answer on its hinge and explains why it turns.
+The close takes a position and defends it in a sentence. Nothing in the frame
+is telegraphic and nothing in it is a fragment — these three are what makes the
+script read as the work of someone who can write, and a reader decides that in
+the first four lines.
+
+The body blocks stay labelled, because that is what an examiner skims and what
+earns the structure marks: a keyword, then the mechanism under it. But write
+each block in full analytical sentences, not in note form. "Ascriptive status
+fixes life chances at birth" is a sentence; "Ascription — birth, fixed, no
+mobility" is a note, and notes lose marks a paragraph would have earned.
+Blocks are deliberately unequal — the obvious one gets two sentences, the ones
+carrying the argument get five.
+
+The test for the whole thing: read it aloud. The frame should sound like an
+argument being made. The blocks should sound like a well-informed person
+explaining one idea at a time, never like a revision card being read out.
 
 MARK IT UP. In every part, list under "underline" the exact phrases from that
 part's own text that should be underlined in the answer booklet: the technical
@@ -406,9 +425,22 @@ terms, the named Acts, the figures. Give the phrase exactly as it appears in
 the text or it cannot be marked. Two to five per part, not every other word —
 underlining everything is the same as underlining nothing.
 
-DRAW ONE THING. Where a branch diagram would carry a group faster than prose,
-give it: a label and three to five items. Where prose is genuinely better,
-return an empty diagram rather than forcing one.
+DRAW ONE THING, IN THE RIGHT SHAPE. Where a diagram would carry something
+faster than prose, give it: a label and three to five items, plus "shape".
+
+Set shape to "branch" when the items are the kinds, types, factors or
+dimensions of the label — things that sit alongside one another and could be
+listed in any order. Set it to "flow" when the items are stages that lead to
+one another — a process, a causal chain, a sequence of consequences, a
+historical progression. Order matters in a flow and the items must be given in
+the order they happen, because they are drawn as a chain with arrows between
+them and the drawing is the argument.
+
+Choose by what the content is, not by variety. A causal chain drawn as a branch
+diagram throws away the one thing it was drawn to show. A set of four
+co-ordinate types drawn as a flow claims a sequence that is not there, which is
+worse than no diagram. Where prose is genuinely better than either, return an
+empty diagram rather than forcing one.
 
 IT HAS TO BE DRAWABLE. This is copied onto paper with a pen, in about ninety
 seconds, by someone with thirty-five minutes for the whole answer. So: the box
@@ -491,6 +523,25 @@ a step "used" that is not actually there — the point of this list is that a
 candidate can hold their own answer against it, and a list that lies teaches
 them to tick boxes rather than to check.
 
+CURRENT INDIAN MATERIAL, DATED AND CHECKABLE. Fill "examples" with two to four
+pieces of datable Indian material this topic can carry into an answer: an Act
+or amendment, a scheme, a Census or NSS or NFHS figure, a committee or
+commission report, a landmark judgment. Each gets "text" — the fact itself,
+one sentence, with its number or provision where it has one — "where", saying
+which part of the answer it belongs in and what it proves there, and "asOf",
+the year that fact belongs to.
+
+Prefer things that are datable and citable over things that are merely topical:
+an Act with a year, a Census figure with its round. Give the year in "asOf"
+always. If you are not sure enough of a figure to date it, leave the example
+out — a wrong figure written confidently into an answer booklet costs more than
+no figure, and the candidate cannot tell which of yours are solid.
+
+Say nothing about how recent these are. Your knowledge stops at a training
+cutoff; the candidate is told on screen to verify every one of these against a
+current source before it goes near an exam, and your job is to give them
+material worth checking, not to certify it.
+
 Reply with JSON and nothing else, in exactly this shape:
 
 {"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"must":"core"},
@@ -501,7 +552,8 @@ Reply with JSON and nothing else, in exactly this shape:
  "method":[{"step":"demand|structure|flow|example|thinker|criticism|conclusion","state":"used|notNeeded","where":"<at most 12 words>"}],
  "demands":[{"label":"<3-8 words>","minutes":0}],
  "independent":true,
- "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
+ "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow","items":[{"name":"...","note":"..."}]},
+ "examples":[{"text":"<one sentence, with the number or provision>","where":"<which part it goes in and what it proves>","asOf":"<year>"}],
  "usedTopics":["<syllabus topic id>"],
  "words":0}
 
@@ -624,6 +676,15 @@ named items, so the candidate can copy it onto the page without deciding
 anything. Where prose genuinely beats a diagram, return an empty label and an
 empty items list and say why in "insteadOfDiagram".
 
+SAY WHICH SHAPE IT IS. "branch" when the items are the kinds, types, factors or
+dimensions of the label — things standing alongside one another, listable in
+any order. "flow" when they are stages leading to one another: a process, a
+causal chain, a sequence of consequences. A flow's items must be given in the
+order they happen, because they are drawn as a chain of arrows and the order is
+the argument. Choose by what the content is: a causal chain drawn as branches
+throws away the thing it was drawn to show, and four co-ordinate types drawn as
+a chain claim a sequence that is not there.
+
 IT HAS TO BE DRAWABLE. This is copied onto paper with a pen, in about ninety
 seconds, by someone with thirty-five minutes for the whole answer. So: the box
 holds the subject in TWO TO FOUR WORDS — "Social Mobility", not "Classification
@@ -709,7 +770,7 @@ Reply with JSON and nothing else, in exactly this shape:
             "thinker":"<name, or empty>","specific":"<number, Act, place, case, or empty>",
             "depth":"full|brief"}],
  "pivot":"<the turning sentence, or empty if the question has one part>",
- "diagram":{"label":"<what it shows, or empty>","items":[{"name":"...","note":"..."}]},
+ "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow","items":[{"name":"...","note":"..."}]},
  "insteadOfDiagram":"<one line, only when there is no diagram>",
  "close":{"type":"two-sided|concessive|forward|answers-demand","text":"<the actual closing lines>"},
  "minutes":[{"section":"<name>","minutes":0}]}

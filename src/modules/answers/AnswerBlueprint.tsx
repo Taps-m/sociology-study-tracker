@@ -468,7 +468,7 @@ export function AnswerBlueprint({
                 >
                   ← Back to the structure
                 </button>
-                <ModelAnswerView answer={answer} />
+                <ModelAnswerView answer={answer} books={books} />
               </>
             )
           )}

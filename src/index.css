@@ -615,6 +615,100 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /*
+ * The other diagram: a chain, for when the items are stages rather than kinds.
+ *
+ * A branch diagram says "these belong to that". A flow says "this leads to
+ * this", and the arrow between two stages is carrying an argument the words on
+ * either side of it do not make on their own. Left to right while there is
+ * room, top to bottom on a phone — the arrows turn with it, because an arrow
+ * pointing sideways at a box stacked underneath is worse than no arrow.
+ */
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  row-gap: 26px;
+}
+
+.flow-step {
+  position: relative;
+  flex: 1 1 148px;
+  min-width: 138px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.flow-step strong {
+  display: block;
+  color: var(--accent);
+  font-weight: 650;
+}
+
+.flow-step span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+}
+
+.flow-step + .flow-step {
+  margin-left: 26px;
+}
+
+/* The stroke between two stages, and the arrowhead that makes it a direction. */
+.flow-step + .flow-step::before {
+  content: "";
+  position: absolute;
+  left: -25px;
+  top: calc(50% - 0.75px);
+  width: 17px;
+  height: 1.5px;
+  background: var(--line);
+}
+
+.flow-step + .flow-step::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: calc(50% - 4px);
+  border: 4px solid transparent;
+  border-left-color: var(--line);
+  border-right-width: 0;
+}
+
+@media (max-width: 560px) {
+  .flow {
+    display: block;
+  }
+  .flow-step + .flow-step {
+    margin-left: 0;
+    margin-top: 26px;
+  }
+  /* Turned a quarter: the chain now runs down the page, so the arrow does too. */
+  .flow-step + .flow-step::before {
+    left: 22px;
+    top: -18px;
+    width: 1.5px;
+    height: 12px;
+  }
+  .flow-step + .flow-step::after {
+    left: 18.5px;
+    top: -7px;
+    border: 4px solid transparent;
+    border-top-color: var(--line);
+    border-bottom-width: 0;
+    border-left-color: transparent;
+    border-right-width: 4px;
+  }
+}
+
+/*
  * The answer, with the method beside it.
  *
  * Underneath, the checklist is something you read once at the end. Alongside,

@@ -209,9 +209,21 @@ export interface StructureBlock {
   must?: Obligation;
 }
 
-/** A branch diagram: one label, and the items hanging off it. */
+/**
+ * A diagram to copy onto the page, in one of two shapes.
+ *
+ * "branch" is one label with items hanging off it — a classification, the
+ * kinds of a thing, the factors behind it. "flow" is the same items read as
+ * stages that lead to one another — a process, a causal chain, a sequence of
+ * consequences. The distinction is not decoration: drawing a causal chain as a
+ * branch diagram loses the very thing it was drawn to show, which is that each
+ * stage follows from the one before it.
+ *
+ * Absent shape means branch, so every diagram written before this still draws.
+ */
 export interface Diagram {
   label: string;
+  shape?: "branch" | "flow";
   items: { name: string; note: string }[];
 }
 
@@ -289,13 +301,32 @@ export interface ModelAnswer {
   /** Whether those demands can be read apart, or run as one argument. */
   independent?: boolean;
   diagram: Diagram;
+  /**
+   * Datable Indian material to carry into the answer — an Act, a scheme, a
+   * Census or survey figure, a committee report.
+   *
+   * Drafted by the model and therefore NOT to be trusted on sight: its
+   * knowledge stops at a training cutoff, so "recent" from it can be a year
+   * stale or simply wrong, and a confidently wrong figure in an answer booklet
+   * costs more than no figure at all. Every one carries the year it belongs to
+   * so it can be checked, and the screen says plainly that checking is the
+   * candidate's job. These are a draft to correct, never a source.
+   */
+  examples?: { text: string; where: string; asOf?: string }[];
   usedTopics: string[];
   words: number;
   /** Ids the model claimed that are not in the syllabus. Shown, never hidden. */
   offSyllabus?: string[];
 }
 
-const MODEL_KEY = "wbcs.models.v3";
+/*
+ * v4: answers are written to a different brief — a prose opening, pivot and
+ * close around labelled blocks, rather than blocks throughout — and carry
+ * examples and a diagram shape that v3 answers have no field for. Bumping the
+ * key retires the old ones rather than leaving a screen where some answers
+ * read one way and some another, with nothing on the page to say why.
+ */
+const MODEL_KEY = "wbcs.models.v4";
 
 const STRUCTURE_KEY = "wbcs.structures.v4";
 
@@ -622,6 +653,16 @@ export async function modelAnswer(
     // also what a single-demand question should do, so the two cases collapse
     // into one and there is no cache to bump.
     if (!Array.isArray(parsed.method)) parsed.method = [];
+
+    /*
+     * An example with nothing to say where it goes is not usable in an answer,
+     * and one the model would not date is one it is not sure of. Both are
+     * dropped here rather than rendered with a hole in them.
+     */
+    parsed.examples = (Array.isArray(parsed.examples) ? parsed.examples : []).filter(
+      (e) => e && typeof e.text === "string" && e.text.trim() && typeof e.where === "string",
+    );
+
     if (!Array.isArray(parsed.demands)) parsed.demands = [];
     parsed.demands = parsed.demands.filter((x) => x && typeof x.label === "string" && x.label);
     const last = parsed.demands.length - 1;
