@@ -273,6 +273,20 @@ input[type="range"]::-moz-range-thumb {
   color: var(--rail-muted);
 }
 
+/*
+ * The page footer's copyright line, shown only where the rail (and its own
+ * copy of this line, in .rail-foot) is not. Mirrors .rail's own breakpoint
+ * so exactly one copy is ever on screen — never both, never neither.
+ */
+.footer-copyright {
+  display: inline;
+}
+@media (min-width: 900px) {
+  .footer-copyright {
+    display: none;
+  }
+}
+
 .rail-item {
   display: flex;
   align-items: center;

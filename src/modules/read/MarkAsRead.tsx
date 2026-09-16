@@ -11,6 +11,7 @@ import {
   partsDone,
   partsOf,
 } from "../../lib/planner";
+import { searchTopics } from "../../lib/topicSearch";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 import { Icon } from "../../app/Icon";
@@ -197,14 +198,7 @@ export function MarkAsRead({
     return weeks[0]?.topics ?? [];
   }, [d]);
 
-  const found = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (q.length < 2) return [];
-    const words = q.split(/\s+/);
-    return TOPICS.filter((t) =>
-      words.every((w) => `${t.name} ${t.unit}`.toLowerCase().includes(w)),
-    ).slice(0, 8);
-  }, [query]);
+  const found = useMemo(() => searchTopics(query, 8), [query]);
 
   const started = TOPICS.filter(
     (t) => partsDone(d, t.id, "read").length > 0 && !checksFor(d, t.id).read,

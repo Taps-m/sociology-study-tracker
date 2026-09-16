@@ -19,6 +19,14 @@ type Handlers = {
  * which contradicted the dashboard card two clicks away. Both now read
  * `todaysTasks`, so there is one answer to "what am I doing today" and the
  * week's remaining work lives where it belongs, under Study Plan.
+ *
+ * It used to also re-render that same checklist a second time, verbatim,
+ * below the ramp card — anyone arriving from Dashboard's "Today's focus"
+ * (which already has the checkboxes) saw their own list again before
+ * reaching anything this screen actually adds. What this screen is for is
+ * the full per-topic controls — notes, readings, time, answer attempts —
+ * that the Dashboard card doesn't have room for. The progress line stays,
+ * folded into "Record what you do" instead of a duplicate list above it.
  */
 export function TodayScreen({
   d,
@@ -67,7 +75,7 @@ export function TodayScreen({
       )}
 
       <Card
-        title="Today"
+        title="Record what you do"
         action={
           <span
             className="num"
@@ -80,45 +88,10 @@ export function TodayScreen({
           </span>
         }
       >
-        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 5 }}>
-          {tasks.map((t) => (
-            <li
-              key={t.id}
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 9,
-                padding: "7px 11px",
-                borderRadius: 8,
-                fontSize: 14.5,
-                lineHeight: 1.55,
-                background: t.done ? C.goodSoft : "transparent",
-                border: `1px solid ${t.done ? C.good : "transparent"}`,
-                color: t.done ? C.muted : C.text,
-              }}
-            >
-              <span aria-hidden style={{ color: t.done ? C.good : C.muted, fontSize: 13 }}>
-                {t.done ? "✓" : "•"}
-              </span>
-              <span
-                style={{
-                  flex: 1,
-                  textDecoration: t.done ? "line-through" : "none",
-                  textDecorationColor: C.good,
-                }}
-              >
-                {t.label}
-              </span>
-              <span className="num" style={{ fontSize: 12.5, color: C.muted }}>
-                {t.done ? "done" : `${t.minutes} min`}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "0 0 14px", lineHeight: 1.6 }}>
           <span className="num">{board.minutesPlanned}</span> min planned against a budget of{" "}
-          <span className="num">{board.budget}</span>. Ticking below marks these off — they stay
-          on the list so you can see what you have cleared. The rest of the week is under{" "}
+          <span className="num">{board.budget}</span>. The checks below are the same log as
+          Dashboard's — tick either place, both move. The rest of the week is under{" "}
           <button
             onClick={() => go("plan")}
             style={{
@@ -136,9 +109,6 @@ export function TodayScreen({
           </button>
           .
         </p>
-      </Card>
-
-      <Card title="Record what you do">
         {topics.map((t) => (
           <TopicRow key={t.id} topic={t} d={d} {...h} optional={isOptional(d, t.id)} />
         ))}

@@ -299,16 +299,23 @@ export function Shell({
           {children}
         </main>
 
+        {/*
+          The rail carries this same line from 900px up (see .rail-foot), and
+          below 900px the rail is hidden entirely — so without a copy here a
+          phone screen would show no copyright at all. `.footer-copyright`
+          is the mirror of `.rail`: shown by default, hidden once the rail
+          takes over, so exactly one of the two is ever on screen.
+        */}
         <footer
           style={{
             borderTop: `1px solid ${C.line}`,
             padding: "18px 16px 28px",
             textAlign: "center",
-            fontSize: 12.5,
-            color: C.muted,
           }}
         >
-          Copyright © {new Date().getFullYear()} Tapomoy. All rights reserved.
+          <span className="footer-copyright" style={{ fontSize: 12.5, color: C.muted }}>
+            Copyright © {new Date().getFullYear()} Tapomoy. All rights reserved.
+          </span>
         </footer>
       </div>
     </div>

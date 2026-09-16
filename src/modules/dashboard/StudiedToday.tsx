@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { TOPICS, type Topic } from "../../data/syllabus";
+import type { Topic } from "../../data/syllabus";
 import type { CheckId, Derived } from "../../lib/events";
 import { CHECKS, checksFor, partsDone, partsOf } from "../../lib/planner";
+import { searchTopics } from "../../lib/topicSearch";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 
@@ -20,16 +21,6 @@ import { Card } from "../../app/Shell";
  * not against the syllabus's own phrasing, because nobody types "historical
  * materialism, mode of production, alienation".
  */
-function matches(query: string): Topic[] {
-  const q = query.trim().toLowerCase();
-  if (q.length < 2) return [];
-  const words = q.split(/\s+/);
-  return TOPICS.filter((t) => {
-    const hay = `${t.name} ${t.unit}`.toLowerCase();
-    return words.every((w) => hay.includes(w));
-  }).slice(0, 6);
-}
-
 /** "Karl Marx — historical materialism, …" reads as "Karl Marx" in a list. */
 function shortName(name: string): string {
   const head = name.split(" — ")[0]!.trim();
@@ -45,7 +36,7 @@ export function StudiedToday({
 }) {
   const [query, setQuery] = useState("");
   const [justLogged, setJustLogged] = useState<Topic | null>(null);
-  const found = useMemo(() => matches(query), [query]);
+  const found = useMemo(() => searchTopics(query, 6), [query]);
 
   function log(topic: Topic, check: CheckId) {
     if (!checksFor(d, topic.id)[check]) onToggle(topic.id, check);

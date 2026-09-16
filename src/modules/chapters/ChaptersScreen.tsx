@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TOPICS } from "../../data/syllabus";
 import type { CheckId, Derived } from "../../lib/events";
 import { bandOf, completionOf, depthFor,  isOptional } from "../../lib/planner";
+import { topicMatches } from "../../lib/topicSearch";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
 import { TopicRow } from "../../components/TopicRow";
@@ -37,7 +38,7 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
     if (filter === "open" && (done === 0 || done >= depthFor(d, t))) return false;
     if (filter === "untouched" && done > 0) return false;
     if (filter === "high" && bandOf(t) < 3) return false;
-    if (query && !`${t.name} ${t.unit}`.toLowerCase().includes(query.toLowerCase())) return false;
+    if (query && !topicMatches(t, query)) return false;
     return true;
   };
 
@@ -104,6 +105,14 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
         </p>
       </Card>
 
+      {/*
+        One control for both papers, above the per-paper sections rather than
+        tucked under Paper I's heading — it writes cards for all 85 topics,
+        and filing it under one paper's heading read as if it only covered
+        that paper.
+      */}
+      <PrepareCards />
+
       {papers.map(({ paper, units }) =>
         units.length === 0 ? null : (
           <div key={paper} className="grid" style={{ gap: 10 }}>
@@ -121,7 +130,6 @@ export function ChaptersScreen({ d, ...h }: { d: Derived } & Handlers) {
             </h2>
 
             <UnitMix paper={paper} />
-            {paper === 1 && <PrepareCards />}
 
             {units.map(({ unit, topics, all }) => {
               const key = `${paper}|${unit}`;
