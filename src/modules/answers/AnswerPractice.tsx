@@ -401,7 +401,7 @@ export function AnswerPractice({
             <optgroup label="Next in your queue">
               {suggested.map((t: Topic) => (
                 <option key={t.id} value={t.id}>
-                  {t.name}
+                  {t.paper === 1 ? "P1" : "P2"} · {t.name}
                 </option>
               ))}
             </optgroup>
@@ -409,7 +409,7 @@ export function AnswerPractice({
           <optgroup label="Everything else">
             {TOPICS.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.name}
+                {t.paper === 1 ? "P1" : "P2"} · {t.name}
               </option>
             ))}
           </optgroup>
