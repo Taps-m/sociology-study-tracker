@@ -358,6 +358,24 @@ export function cachedStructure(question: string): AnswerStructure | null {
   return structureCache()[questionKey(question)] ?? null;
 }
 
+/**
+ * Throw a skeleton away so the next open writes a new one.
+ *
+ * Needed the day the notes arrived: a skeleton cached before then was built
+ * from what the model knew, and nothing on the screen distinguishes it from
+ * one built out of the candidate's own pages. The map is drawn from the
+ * skeleton too, so a stale one is stale twice.
+ */
+export function forgetStructure(question: string) {
+  try {
+    const all = structureCache();
+    delete all[questionKey(question)];
+    localStorage.setItem(STRUCTURE_KEY, JSON.stringify(all));
+  } catch {
+    // Blocked storage: the skeleton stays. Nothing else breaks.
+  }
+}
+
 export async function answerStructure(
   question: string,
   context: unknown,

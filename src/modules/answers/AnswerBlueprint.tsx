@@ -4,6 +4,7 @@ import {
   cachedStructure,
   cachedModelAnswer,
   forgetModelAnswer,
+  forgetStructure,
   modelAnswer,
   typicalAnswerSeconds,
   type AnswerStructure,
@@ -225,8 +226,11 @@ export function AnswerBlueprint({
     }
   }
 
-  async function show() {
-    if (structure) {
+  async function show(fresh = false) {
+    if (fresh) {
+      forgetStructure(question);
+      setStructure(null);
+    } else if (structure) {
       setView("structure");
       setOpen(true);
       onOpened?.();
@@ -372,6 +376,33 @@ export function AnswerBlueprint({
                   {v === "structure" ? "Read the skeleton" : "See it as a map"}
                 </button>
               ))}
+
+              {/*
+                Rebuilding matters most the day a source changes. A skeleton
+                cached before the notes were loaded was written from what the
+                model already knew, and nothing on screen tells the two apart —
+                and because the map is drawn from the skeleton, a stale one is
+                stale in both views at once.
+              */}
+              <button
+                onClick={() => void show(true)}
+                disabled={busy}
+                title="Throw this skeleton away and build a new one. Worth doing on anything built before you loaded your notes — the map is drawn from it too."
+                style={{
+                  minHeight: 36,
+                  padding: "0 12px",
+                  borderRadius: 999,
+                  marginLeft: "auto",
+                  border: `1px solid ${C.line}`,
+                  background: "transparent",
+                  color: C.muted,
+                  font: "inherit",
+                  fontSize: 13,
+                  cursor: busy ? "default" : "pointer",
+                }}
+              >
+                {busy ? "Rebuilding…" : "Rebuild"}
+              </button>
             </div>
           )}
 

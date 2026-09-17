@@ -34,15 +34,31 @@ export function NotesImport() {
     setBusy(true);
     setError(null);
     try {
-      const bundle = JSON.parse(await f.text()) as NotesBundle;
+      const raw = await f.text();
+      /*
+       * The PDF is the obvious wrong answer — the picker opens in the folder
+       * that holds it — so name the right file rather than handing over
+       * whatever JSON.parse said about the first byte it disliked.
+       */
+      if (raw.startsWith("%PDF")) {
+        throw new Error(
+          "That is the PDF itself. You want book-text\\sleepy-notes.json — the extracted text beside it.",
+        );
+      }
+      const bundle = JSON.parse(raw) as NotesBundle;
       const papers = Object.keys(bundle);
       if (papers.length === 0 || !papers.every((k) => Array.isArray(bundle[k]))) {
-        throw new Error("that file is not a notes bundle");
+        throw new Error("That is valid JSON, but not the notes bundle.");
       }
       await saveNotes(bundle);
       refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "could not read that file");
+      const why = e instanceof Error ? e.message : "";
+      setError(
+        why.includes("is not valid JSON")
+          ? "That file is not the notes bundle. Pick book-text\\sleepy-notes.json."
+          : why || "Could not read that file.",
+      );
     }
     setBusy(false);
   }
