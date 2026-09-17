@@ -554,14 +554,18 @@ function Examples({ examples }: { examples: NonNullable<ModelAnswer["examples"]>
 }
 
 /**
- * Where this answer was built from — the app's own chapter map, never the
- * model's.
+ * Where to check this answer — which is not the same as where it came from,
+ * and the wording here has to keep those apart.
  *
- * The model is given these chapters and told to take its sociology from them,
- * but it was never asked to say so, and an answer that names no source is one
- * a candidate cannot go back and read around. These lines come from
- * standardBooks.ts rather than from the reply, so nothing here is a page number
- * a model invented.
+ * The model is handed these citation lines and told to stay inside them. It has
+ * never been handed a page: the OCR of the books is seven pages in, and the
+ * delivery that would put chapter text into the request has never been built.
+ * So calling this "written from" would be a claim the app cannot support, and
+ * an app that overstates its own sourcing teaches a candidate to trust an
+ * answer exactly where it should check one.
+ *
+ * The lines themselves come from standardBooks.ts rather than from the reply,
+ * so no page number here was invented by a model.
  */
 function Sources({ books }: { books: string[] }) {
   if (books.length === 0) return null;
@@ -577,7 +581,7 @@ function Sources({ books }: { books: string[] }) {
           marginBottom: 8,
         }}
       >
-        Written from
+        Where to check this
       </div>
       <ul
         style={{
@@ -596,9 +600,10 @@ function Sources({ books }: { books: string[] }) {
         ))}
       </ul>
       <p style={{ fontSize: 12.5, color: C.muted, margin: "9px 0 0", lineHeight: 1.6 }}>
-        The chapters this answer was built out of, from your own shelf. Read around the parts you
-        would not have written yourself — an answer you cannot source is one you cannot defend if
-        the question turns.
+        The chapters on your shelf that cover this topic. The model was given these citations and
+        told to stay inside them, but it has <strong>not read a page of them</strong> — so this is
+        where to go and check the answer, not evidence of where the answer came from. Read around
+        anything here you would not have written yourself.
       </p>
     </section>
   );

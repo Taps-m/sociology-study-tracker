@@ -206,6 +206,13 @@ export function treeFromStructure(structure: AnswerStructure, question: string):
 
 export function QuestionMap({ tree }: { tree: MapNode }) {
   const [zoom, setZoom] = useState(1);
+  /*
+   * Full screen, because a map inside a window inside a page is a map you
+   * cannot read. The window it normally opens in is about 700px wide and the
+   * tree wants three times that, so Fit was shrinking it to 67% and the leaf
+   * text with it. This takes the whole viewport and refits.
+   */
+  const [full, setFull] = useState(false);
   const box = useRef<HTMLDivElement | null>(null);
 
   const root = layout(tree, 0, { y: 0 }, CAT.demand.colour);
@@ -218,13 +225,27 @@ export function QuestionMap({ tree }: { tree: MapNode }) {
     setZoom(Math.max(0.35, Math.min(1, avail / width)));
   }, [width]);
 
-  // Fit on first paint and on resize, so a map opens showing all of itself
-  // rather than showing the root and leaving the rest to be discovered.
-  useLayoutEffect(fit, [fit]);
+  // Fit on first paint, on resize, and whenever the frame changes size —
+  // so a map opens showing all of itself rather than showing the root and
+  // leaving the rest to be discovered.
+  useLayoutEffect(fit, [fit, full]);
   useEffect(() => {
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
   }, [fit]);
+
+  // Escape leaves full screen rather than closing the whole blueprint window.
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setFull(false);
+      }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [full]);
 
   const cats = [...new Set(nodes.map((n) => n.cat).filter(Boolean))] as Cat[];
 
@@ -242,7 +263,21 @@ export function QuestionMap({ tree }: { tree: MapNode }) {
   };
 
   return (
-    <div>
+    <div
+      style={
+        full
+          ? {
+              position: "fixed",
+              inset: 0,
+              zIndex: 90,
+              background: C.page,
+              padding: "14px 16px 16px",
+              display: "flex",
+              flexDirection: "column",
+            }
+          : undefined
+      }
+    >
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
         <button onClick={() => setZoom((z) => Math.max(0.3, z - 0.15))} aria-label="Zoom out" style={btn}>
           −
@@ -259,6 +294,20 @@ export function QuestionMap({ tree }: { tree: MapNode }) {
         <button onClick={fit} style={{ ...btn, width: "auto", padding: "0 12px", fontSize: 13.5 }}>
           Fit
         </button>
+        <button
+          onClick={() => setFull((v) => !v)}
+          style={{
+            ...btn,
+            width: "auto",
+            padding: "0 14px",
+            fontSize: 13.5,
+            marginLeft: "auto",
+            borderColor: full ? C.accent : C.line,
+            color: full ? C.accent : C.text,
+          }}
+        >
+          {full ? "Exit full screen" : "Full screen"}
+        </button>
       </div>
 
       <div
@@ -268,7 +317,9 @@ export function QuestionMap({ tree }: { tree: MapNode }) {
           border: `1px solid ${C.line}`,
           borderRadius: 10,
           overflow: "auto",
-          maxHeight: "72vh",
+          maxHeight: full ? "none" : "72vh",
+          flex: full ? 1 : undefined,
+          minHeight: 0,
           WebkitOverflowScrolling: "touch",
         }}
       >
