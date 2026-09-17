@@ -13,6 +13,7 @@ import { TOPICS } from "../../data/syllabus";
 import { standardReadingsFor, stdLine } from "../../data/standardBooks";
 import { BOOK_SCAN, scanPagesRead, scanPagesTotal, scanPending } from "../../data/bookScan";
 import { Diagram, ModelAnswerView } from "./ModelAnswerView";
+import { QuestionMap, treeFromStructure } from "../mindmap/QuestionMap";
 import { DRILL, type Dimension } from "../../lib/drill";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -80,7 +81,7 @@ export function AnswerBlueprint({
   // The written answer, behind the skeleton rather than beside it: it is the
   // thing to reach for once the structure has not been enough.
   const [answer, setAnswer] = useState<ModelAnswer | null>(() => cachedModelAnswer(question));
-  const [view, setView] = useState<"structure" | "model">("structure");
+  const [view, setView] = useState<"structure" | "model" | "map">("structure");
   const [answerBusy, setAnswerBusy] = useState(false);
   const [answerError, setAnswerError] = useState<string | null>(null);
 
@@ -311,9 +312,48 @@ export function AnswerBlueprint({
       {open && structure && (
         <Overlay
           onClose={() => setOpen(false)}
-          title={view === "model" ? "A model answer" : "What this answer needed"}
+          title={
+            view === "model"
+              ? "A model answer"
+              : view === "map"
+                ? "This answer as a map"
+                : "What this answer needed"
+          }
         >
-          {view === "structure" ? (
+          {/*
+            Read it, or look at it. Same structure either way — the map is
+            drawn from this question's cached skeleton and costs no call, so
+            the switch is free and there is no reason to hide it behind one.
+          */}
+          {view !== "model" && (
+            <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+              {(["structure", "map"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  aria-pressed={view === v}
+                  style={{
+                    minHeight: 36,
+                    padding: "0 14px",
+                    borderRadius: 999,
+                    cursor: "pointer",
+                    font: "inherit",
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    border: `1px solid ${view === v ? C.accent : C.line}`,
+                    background: view === v ? C.accentSoft : "transparent",
+                    color: view === v ? C.accent : C.muted,
+                  }}
+                >
+                  {v === "structure" ? "Read the skeleton" : "See it as a map"}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {view === "map" ? (
+            <QuestionMap tree={treeFromStructure(structure, question)} />
+          ) : view === "structure" ? (
             <>
               <StructureBody structure={structure} />
               {/* The next step, and it should look like one. This was a grey
