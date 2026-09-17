@@ -522,8 +522,22 @@ than five a designer liked. Pick by what the content is:
                compared. Traditional against modern, rural against urban,
                organised against unorganised.
   "branch"   — kinds or types of one thing, in no particular order, where none
-               of the four above is truer. The plainest shape; use it when the
-               content really is just a list with a parent.
+               of the four above is truer. The plainest shape, and the last
+               resort rather than the default.
+
+BEFORE CHOOSING "branch", TRY TO EARN A QUADRANT. Where you have three to five
+co-ordinate groups — dimensions of a problem, kinds of intervention, sets of
+causes — ask whether each can carry two or three points beneath it. Almost
+always it can: "social security" alone is a label, while "social security —
+non-contributory pensions, IGNOAPS coverage gaps, indexation to inflation" is a
+paragraph the candidate can write from. If each group can hold points, it is a
+quadrant and the quadrant is the better answer, because the branch version
+throws away everything below the label.
+
+Use "branch" only when the items genuinely have nothing under them: a bare
+classification where each kind is a single idea and expanding it would mean
+inventing material. A branch diagram of four policy measures with one clause
+each is the diagram you draw when you have not thought about the measures.
 
 Choose by the content, never for variety. A causal chain drawn as branches
 throws away the one thing it was drawn to show. Four co-ordinate dimensions
