@@ -14,9 +14,31 @@ import { standardReadingsFor, stdLine } from "../../data/standardBooks";
 import { BOOK_SCAN, scanPagesRead, scanPagesTotal, scanPending } from "../../data/bookScan";
 import { Diagram, ModelAnswerView } from "./ModelAnswerView";
 import { QuestionMap, treeFromStructure } from "../mindmap/QuestionMap";
+import { notesSliceFor } from "../../lib/notesStore";
 import { DRILL, type Dimension } from "../../lib/drill";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
+
+/**
+ * The pages of your own notes that cover this topic, if they are loaded.
+ *
+ * This is the difference between a model told which chapter covers a topic and
+ * a model that has read it. Without it the answer is written from whatever the
+ * model already knew and fenced in by the syllabus list; with it, the sociology
+ * comes from the notes the candidate actually revises from — the same
+ * scholars, the same framing, the same words they will recognise in the hall.
+ *
+ * Absent when nothing is loaded, and the prompts treat it as optional, so the
+ * app works exactly as before for anyone who has not imported theirs.
+ */
+async function notesContext(topicId: string) {
+  const slice = await notesSliceFor(topicId);
+  if (!slice) return {};
+  return {
+    notes: slice.text,
+    notesCitation: `Sleepy Classes Paper ${slice.cite.paper}, “${slice.cite.heading}”, pp. ${slice.cite.from}–${slice.cite.to}`,
+  };
+}
 
 /**
  * The skeleton the question was asking for, in a window over the page.
@@ -186,6 +208,7 @@ export function AnswerBlueprint({
         ...gapContext,
         syllabusTopics: paperTopics.map((t) => ({ id: t.id, unit: t.unit, name: t.name })),
         books,
+        ...(await notesContext(topicId)),
         // The skeleton has already told the candidate what to draw. Send it, so
         // the written answer draws that and not a second, different picture.
         diagram: structure?.diagram?.label ? structure.diagram : undefined,
@@ -220,6 +243,7 @@ export function AnswerBlueprint({
       minutes: 35,
       ...gapContext,
       books,
+      ...(await notesContext(topicId)),
     });
     setBusy(false);
     if (res.result) {

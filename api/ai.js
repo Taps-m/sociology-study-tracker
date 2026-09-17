@@ -77,7 +77,29 @@ other block, it is decoration and it earns nothing. A named Act, a figure, a
 case, a place, attached to the sentence it demonstrates.
 `;
 
-const SOURCES_RULE = `SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
+const SOURCES_RULE = `THE NOTES COME FIRST, WHERE THEY ARE THERE. If the context carries "notes",
+that is the candidate's own study material — the exact pages they revise from,
+sent verbatim, with "notesCitation" naming the section and pages.
+
+Build the answer out of it. Its scholars, its definitions, its classifications
+and its framing take precedence over anything you would otherwise have reached
+for, even where your own version is broader or more current. The reason is not
+that the notes are better sociology: it is that this is what the candidate has
+read, will revise again the night before, and can check. An answer naming a
+scholar their notes name is one they can defend; one built from material they
+have never seen is one they must take on trust and cannot revise from.
+
+Use the names the notes use. Where the notes define a term, define it their way.
+Where they give a classification, follow it rather than substituting a tidier
+one. You may add an Indian fact, an Act or a figure the notes do not carry —
+that is the exam's general-studies ground — but do not import a rival framework
+or an outside scholar to improve on what is there.
+
+Where the notes are thin on something the question needs, say so in that part
+rather than papering over it, and fall back to the books below for that part
+only. Where "notes" is absent, everything below is the whole rule.
+
+SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
 exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
 and Perspectives and Shankar Rao's Principles of Sociology that cover this
 topic. Those three are the candidate's entire shelf. Take the sociology from
@@ -459,6 +481,28 @@ show a different idea. A model answer whose diagram contradicts the skeleton it
 came from teaches the candidate to trust neither.
 
 ${METHOD_RULES}
+THE NOTES COME FIRST, WHERE THEY ARE THERE. If the context carries "notes",
+that is the candidate's own study material — the exact pages they revise from,
+sent verbatim, with "notesCitation" naming the section and pages.
+
+Build the answer out of it. Its scholars, its definitions, its classifications
+and its framing take precedence over anything you would otherwise have reached
+for, even where your own version is broader or more current. The reason is not
+that the notes are better sociology: it is that this is what the candidate has
+read, will revise again the night before, and can check. An answer naming a
+scholar their notes name is one they can defend; one built from material they
+have never seen is one they must take on trust and cannot revise from.
+
+Use the names the notes use. Where the notes define a term, define it their way.
+Where they give a classification, follow it rather than substituting a tidier
+one. You may add an Indian fact, an Act or a figure the notes do not carry —
+that is the exam's general-studies ground — but do not import a rival framework
+or an outside scholar to improve on what is there.
+
+Where the notes are thin on something the question needs, say so in that part
+rather than papering over it, and fall back to the books below for that part
+only. Where "notes" is absent, everything below is the whole rule.
+
 SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
 exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
 and Perspectives and Shankar Rao's Principles of Sociology that cover this
@@ -724,6 +768,28 @@ total failure, and never a prediction dressed as certainty: a direction with a
 condition attached is sociology, a forecast is not.
 
 ${METHOD_RULES}
+THE NOTES COME FIRST, WHERE THEY ARE THERE. If the context carries "notes",
+that is the candidate's own study material — the exact pages they revise from,
+sent verbatim, with "notesCitation" naming the section and pages.
+
+Build the answer out of it. Its scholars, its definitions, its classifications
+and its framing take precedence over anything you would otherwise have reached
+for, even where your own version is broader or more current. The reason is not
+that the notes are better sociology: it is that this is what the candidate has
+read, will revise again the night before, and can check. An answer naming a
+scholar their notes name is one they can defend; one built from material they
+have never seen is one they must take on trust and cannot revise from.
+
+Use the names the notes use. Where the notes define a term, define it their way.
+Where they give a classification, follow it rather than substituting a tidier
+one. You may add an Indian fact, an Act or a figure the notes do not carry —
+that is the exam's general-studies ground — but do not import a rival framework
+or an outside scholar to improve on what is there.
+
+Where the notes are thin on something the question needs, say so in that part
+rather than papering over it, and fall back to the books below for that part
+only. Where "notes" is absent, everything below is the whole rule.
+
 SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
 exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
 and Perspectives and Shankar Rao's Principles of Sociology that cover this
