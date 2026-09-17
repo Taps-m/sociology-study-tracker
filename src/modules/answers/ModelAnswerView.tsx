@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { openInTab } from "../../lib/printable";
 import type {
   Diagram as DiagramData,
   MethodStep,
@@ -234,6 +235,208 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
  * caption says what it costs in minutes: a diagram that takes five is not worth
  * drawing in a thirty-five minute answer.
  */
+/** A group of points inside a diagram: a heading, then what sits under it. */
+function Group({ item, tone }: { item: DiagramData["items"][number]; tone: string }) {
+  return (
+    <div style={{ border: `1.5px solid ${tone}`, borderRadius: 9, padding: "9px 11px" }}>
+      <div
+        style={{
+          fontFamily: C.mono,
+          fontSize: 10.5,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: tone,
+          fontWeight: 700,
+        }}
+      >
+        {item.name}
+      </div>
+      <ul style={{ margin: "6px 0 0", paddingLeft: 15, fontSize: 12.5, lineHeight: 1.6 }}>
+        {(item.points ?? (item.note ? [item.note] : [])).map((p) => (
+          <li key={p}>{p}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * The centre term, quartered.
+ *
+ * This is Medha Anand's (Rank 13) page: "factors affecting mental well-being"
+ * written across the middle, and the space around it divided into Social,
+ * Economic, Political and Others, each with its own short list. It does in one
+ * glance what a paragraph beginning "there are four dimensions" does in five
+ * lines, and it is the shape that suits a sociology question best, because most
+ * of them ask for the dimensions of something.
+ *
+ * Four groups get the label in the middle of the cross. Three or five have no
+ * middle to sit in, so the label goes above and the groups run beneath.
+ */
+function Quadrant({ diagram }: { diagram: DiagramData }) {
+  const centred = diagram.items.length === 4;
+  return (
+    <div style={{ position: "relative" }}>
+      {!centred && (
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: C.accent,
+            textAlign: "center",
+            marginBottom: 10,
+          }}
+        >
+          {diagram.label}
+        </div>
+      )}
+      <div
+        className="quad"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+          gap: centred ? 54 : 12,
+        }}
+      >
+        {diagram.items.map((it) => (
+          <Group key={it.name} item={it} tone={C.accent} />
+        ))}
+      </div>
+      {centred && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            padding: "6px 12px",
+            maxWidth: 190,
+            textAlign: "center",
+            background: C.panel,
+            color: C.accent,
+            fontSize: 13.5,
+            fontWeight: 700,
+            lineHeight: 1.3,
+          }}
+        >
+          {diagram.label}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Levels, widest at the base. For anything that stacks or ranks. */
+function Pyramid({ diagram }: { diagram: DiagramData }) {
+  const n = diagram.items.length;
+  return (
+    <div>
+      <div
+        style={{ fontSize: 14, fontWeight: 700, color: C.accent, textAlign: "center", marginBottom: 10 }}
+      >
+        {diagram.label}
+      </div>
+      <div style={{ display: "grid", gap: 6, justifyItems: "center" }}>
+        {diagram.items.map((it, i) => (
+          <div
+            key={it.name}
+            style={{
+              width: `${Math.round(46 + ((i + 1) / n) * 54)}%`,
+              minWidth: 150,
+              padding: "8px 12px",
+              borderRadius: 8,
+              textAlign: "center",
+              background: C.raised,
+              border: `1.5px solid ${C.accent}`,
+            }}
+          >
+            <strong style={{ fontSize: 13.5 }}>{it.name}</strong>
+            {it.note && (
+              <span style={{ fontSize: 12.5, color: C.muted }}> — {it.note}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Two things held against each other, on a stated basis.
+ *
+ * The left-hand column is what makes this worth drawing rather than writing.
+ * Two lists side by side are two lists: the reader has to work out for
+ * themselves what is being compared with what, and an examiner will not. Name
+ * the basis of each row — ownership, mobility, sanction, unit of stratification
+ * — and the table argues instead of listing.
+ *
+ * Where a reply gives no rows, the older column form still draws, because an
+ * answer cached before this existed should not lose its diagram.
+ */
+function Compare({ diagram }: { diagram: DiagramData }) {
+  const rows = diagram.rows ?? [];
+  const [a, b] = diagram.items;
+
+  const cell: React.CSSProperties = {
+    padding: "8px 10px",
+    borderTop: `1px solid ${C.line}`,
+    fontSize: 13,
+    lineHeight: 1.55,
+    verticalAlign: "top",
+  };
+  const head: React.CSSProperties = {
+    ...cell,
+    borderTop: "none",
+    fontFamily: C.mono,
+    fontSize: 10.5,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    fontWeight: 700,
+    color: C.accent,
+  };
+
+  return (
+    <div>
+      <div
+        style={{ fontSize: 14, fontWeight: 700, color: C.accent, textAlign: "center", marginBottom: 10 }}
+      >
+        {diagram.label}
+      </div>
+
+      {rows.length > 0 && a && b ? (
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 380 }}>
+            <thead>
+              <tr>
+                <th style={{ ...head, color: C.muted, width: "26%", textAlign: "left" }}>Basis</th>
+                <th style={{ ...head, textAlign: "left" }}>{a.name}</th>
+                <th style={{ ...head, textAlign: "left", color: C.warn }}>{b.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.basis}>
+                  <td style={{ ...cell, color: C.muted, fontWeight: 600 }}>{r.basis}</td>
+                  <td style={cell}>{r.a}</td>
+                  <td style={cell}>{r.b}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 12 }}
+        >
+          {diagram.items.slice(0, 3).map((it, i) => (
+            <Group key={it.name} item={it} tone={i === 0 ? C.accent : C.warn} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
   if (!diagram?.label || diagram.items.length === 0) return null;
   const flow = diagram.shape === "flow";
@@ -253,7 +456,13 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
         Copy this onto the page
       </div>
 
-      {flow ? (
+      {diagram.shape === "quadrant" ? (
+        <Quadrant diagram={diagram} />
+      ) : diagram.shape === "pyramid" ? (
+        <Pyramid diagram={diagram} />
+      ) : diagram.shape === "compare" ? (
+        <Compare diagram={diagram} />
+      ) : flow ? (
         /*
          * A chain, because the order is the argument.
          *
@@ -295,6 +504,22 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
           <>
             <span className="num">{diagram.items.length}</span> stages, each arrow read as
             "leads to". The order carries the argument, so draw them in it.
+          </>
+        ) : diagram.shape === "quadrant" ? (
+          <>
+            The term in the middle,{" "}
+            <span className="num">{diagram.items.length}</span> labelled groups around it — the
+            shape Medha Anand (Rank 13) used for factors affecting mental well-being.
+          </>
+        ) : diagram.shape === "pyramid" ? (
+          <>
+            <span className="num">{diagram.items.length}</span> levels, widest at the base. Draw
+            the base first and work up.
+          </>
+        ) : diagram.shape === "compare" ? (
+          <>
+            Rule the basis column first, then the two sides. The left column is what makes it a
+            comparison rather than two lists.
           </>
         ) : (
           <>
@@ -384,12 +609,21 @@ function Section({
 
 const STEP_NAMES: Record<MethodStep, string> = {
   demand: "Demand",
-  structure: "Structure",
-  flow: "What → why → how",
-  example: "Example",
-  thinker: "Thinker",
-  criticism: "Criticism",
+  define: "Define and introduce",
+  flow: "Flow — what → why → how",
+  coreBody: "Core body",
+  example: "Examples",
+  thinker: "Thinkers",
   conclusion: "Conclusion",
+};
+
+/**
+ * What the steps used to be called, so answers written before the audit was
+ * reconciled still read as English rather than as raw ids.
+ */
+const OLD_STEP_NAMES: Record<string, string> = {
+  structure: "Structure (old step)",
+  criticism: "Criticism (old step)",
 };
 
 /**
@@ -401,9 +635,10 @@ const STEP_NAMES: Record<MethodStep, string> = {
  * happened, and holding your own answer against it is the exercise.
  *
  * "Not needed here" is set in the same grey as the rest and is never a cross.
- * Two of the seven — the thinker and the criticism — are more often rightly
- * absent than present, and a checklist that scolds an answer for leaving out a
- * scholar it did not need is the thing that makes people force one in.
+ * One of the seven — the thinker — is value addition rather than foundation and
+ * is often rightly absent, and a checklist that scolds an answer for leaving out
+ * a scholar it did not need is the thing that makes people force one in. The
+ * other six are expected every time.
  */
 function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> }) {
   if (method.length === 0) return null;
@@ -459,7 +694,7 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
                     color: used ? C.text : C.muted,
                   }}
                 >
-                  {STEP_NAMES[m.step] ?? m.step}
+                  {STEP_NAMES[m.step] ?? OLD_STEP_NAMES[m.step] ?? m.step}
                 </span>
                 <span
                   style={{
@@ -478,9 +713,11 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
         })}
       </ul>
       <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
-        A dash is not a miss. A thinker this question did not need, or a criticism it never asked
-        for, is correctly absent — forcing either in is what the examiner notices. Hold your own
-        answer against this list; that is the whole exercise.
+        A dash is not a miss. Thinkers are value addition rather than foundation, and the flow and
+        the example are judged on the question — forcing any of the three in is what the examiner
+        notices. But the demand, the core body and the conclusion are never rightly absent: a dash
+        against one of those is a gap, not a judgement. Hold your own answer against this list;
+        that is the whole exercise.
       </p>
     </section>
   );
@@ -554,6 +791,44 @@ function Examples({ examples }: { examples: NonNullable<ModelAnswer["examples"]>
 }
 
 /**
+ * What this was built from, in one line, at the top where it is read.
+ *
+ * Two things that look identical on screen are not: a skeleton written out of
+ * the candidate's own pages, and one written out of whatever the model knew
+ * because the notes were not loaded that day. Until this line existed there was
+ * no way to tell them apart, which made the whole point of loading the notes
+ * unverifiable — and an unverifiable improvement is one nobody trusts.
+ */
+export function BuiltFrom({ from }: { from?: string }) {
+  const grounded = Boolean(from);
+  return (
+    <p
+      style={{
+        fontSize: 12.5,
+        lineHeight: 1.6,
+        margin: "0 0 14px",
+        padding: "8px 11px",
+        borderRadius: 8,
+        background: grounded ? C.goodSoft : C.raised,
+        borderLeft: `2px solid ${grounded ? C.good : C.line}`,
+        color: grounded ? C.text : C.muted,
+      }}
+    >
+      {grounded ? (
+        <>
+          <strong>Built from your notes</strong> — {from}
+        </>
+      ) : (
+        <>
+          <strong>Built without your notes.</strong> Either they were not loaded when this was
+          written, or this topic has no section in them. Rebuild to use them.
+        </>
+      )}
+    </p>
+  );
+}
+
+/**
  * Where to check this answer — which is not the same as where it came from,
  * and the wording here has to keep those apart.
  *
@@ -612,15 +887,53 @@ function Sources({ books }: { books: string[] }) {
 export function ModelAnswerView({
   answer,
   books = [],
+  question = "A model answer",
 }: {
   answer: ModelAnswer;
   /** Chapter lines from standardBooks.ts — the app's map, not the model's claim. */
   books?: string[];
+  /** Used as the heading of the printable copy. */
+  question?: string;
 }) {
   let blockIndex = -1;
+  const sheet = useRef<HTMLDivElement | null>(null);
+  const [blocked, setBlocked] = useState(false);
   return (
-    <div className="answer-split">
+    <div className="answer-split" ref={sheet}>
       <div className="answer-main">
+      {/*
+        A thousand words should not be read through a scrollport inside a modal.
+        The new tab is the same rendering at full page width, and the browser's
+        print dialog turns it into a PDF from there.
+      */}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginBottom: 4 }}>
+        <button
+          onClick={() => {
+            if (sheet.current) setBlocked(!openInTab(sheet.current, question));
+          }}
+          title="Open this answer in its own tab, where it can be read at full width or saved as a PDF with your browser's print dialog."
+          style={{
+            minHeight: 34,
+            padding: "0 13px",
+            borderRadius: 8,
+            border: `1px solid ${C.line}`,
+            background: C.raised,
+            color: C.text,
+            font: "inherit",
+            fontSize: 13,
+            cursor: "pointer",
+          }}
+        >
+          Open in a new tab
+        </button>
+      </div>
+      {blocked && (
+        <p style={{ fontSize: 12.5, color: C.warn, margin: "0 0 10px", textAlign: "right" }}>
+          Your browser blocked the new tab — allow pop-ups for this site.
+        </p>
+      )}
+
+      <BuiltFrom from={answer.notesFrom} />
       <p
         style={{
           fontSize: 13,

@@ -223,8 +223,36 @@ export interface StructureBlock {
  */
 export interface Diagram {
   label: string;
-  shape?: "branch" | "flow";
-  items: { name: string; note: string }[];
+  /**
+   * Which of the five shapes the toppers' scripts actually use.
+   *
+   * Taken from Vision IAS's presentation deck, where each is a scan of a real
+   * script: Aditya Srivastava (Rank 1, 2023) draws a linear chain of boxes for
+   * a causal argument; Medha Anand (Rank 13) writes the central term in the
+   * middle of the page and quarters the space around it into labelled groups;
+   * the deck's other two are the pyramid and the two-column comparison.
+   *
+   * All five are drawable with a pen in ninety seconds — that is why they are
+   * the ones that show up in scripts. The vocabulary is wider than branch and
+   * flow, but the constraint has not moved.
+   */
+  shape?: "branch" | "flow" | "quadrant" | "pyramid" | "compare";
+  items: {
+    name: string;
+    note: string;
+    /** For quadrant and compare: what goes inside this group. */
+    points?: string[];
+  }[];
+  /**
+   * A comparison table's rows, where the shape is "compare".
+   *
+   * The column that makes a comparison worth drawing is the one on the left:
+   * without a stated basis, two lists side by side are two lists, and the
+   * reader has to work out for themselves what is being held against what.
+   * `items[0]` and `items[1]` head the two columns; each row names the basis
+   * and what each side says about it.
+   */
+  rows?: { basis: string; a: string; b: string }[];
 }
 
 export interface AnswerStructure {
@@ -249,6 +277,17 @@ export interface AnswerStructure {
   insteadOfDiagram?: string;
   close: { type: string; text: string };
   minutes: { section: string; minutes: number }[];
+  /**
+   * Which pages of the candidate's own notes this was built from, stamped when
+   * it was built rather than worked out when it is read.
+   *
+   * Worked out at read time it would lie: it would report whatever the notes
+   * cover now, on a skeleton written weeks ago before they were ever loaded.
+   * Absent means the model had no pages — either none were loaded then, or this
+   * topic has no section — and the screen says so rather than staying quiet,
+   * because "no source shown" and "built from your notes" must not look alike.
+   */
+  notesFrom?: string;
 }
 
 /**
@@ -261,13 +300,28 @@ export interface AnswerStructure {
  * topics it drew on — it is checked, because an answer that wanders outside the
  * syllabus teaches a candidate something that cannot be asked.
  */
+/**
+ * The seven steps, as Sandesh Jain sets them out (AIR 161, 309 in Sociology).
+ *
+ * These were nearly his and not quite, which is the worst of both: the audit
+ * carried a "structure" step he does not have, a "criticism" step he does not
+ * have either, and no "define" or "core body" at all. Two parts of the app
+ * therefore taught two different seven-step methods, and a method learned as
+ * two methods is not learned.
+ *
+ * Criticism is gone as a step and that is deliberate rather than a loss: in his
+ * model the core body is written "as per demand", so a question that says
+ * "critically examine" gets criticism inside the body, and one that says
+ * "describe" correctly gets none. Making it a step of its own invited the
+ * bolted-on limitations paragraph that answers a question nobody set.
+ */
 export type MethodStep =
   | "demand"
-  | "structure"
+  | "define"
   | "flow"
+  | "coreBody"
   | "example"
   | "thinker"
-  | "criticism"
   | "conclusion";
 
 export interface ModelAnswerPart {
@@ -317,6 +371,8 @@ export interface ModelAnswer {
   words: number;
   /** Ids the model claimed that are not in the syllabus. Shown, never hidden. */
   offSyllabus?: string[];
+  /** The notes pages this was written from. See AnswerStructure.notesFrom. */
+  notesFrom?: string;
 }
 
 /*
@@ -376,6 +432,12 @@ export function forgetStructure(question: string) {
   }
 }
 
+/** The notes citation a request carried, if it carried one. */
+function citationOf(context: unknown): string | undefined {
+  const c = context as { notesCitation?: unknown } | null;
+  return typeof c?.notesCitation === "string" ? c.notesCitation : undefined;
+}
+
 export async function answerStructure(
   question: string,
   context: unknown,
@@ -415,6 +477,9 @@ export async function answerStructure(
           : `The reply was not the JSON this expects. It began: ${text.slice(0, 120) || "(nothing)"}`,
       };
     }
+
+    // Stamp what it was actually built from, before it is cached.
+    parsed.notesFrom = citationOf(context);
 
     // An older reply, or an older cache, carried `diagram` as a sentence. Take
     // it as a label rather than letting a string reach a renderer expecting an
@@ -665,6 +730,7 @@ export async function modelAnswer(
     const allowed = new Set(syllabusIds);
     parsed.offSyllabus = (parsed.usedTopics ?? []).filter((id) => !allowed.has(id));
     parsed.diagram = parsed.diagram ?? { label: "", items: [] };
+    parsed.notesFrom = citationOf(context);
 
     // Sections are optional and must stay optional. An answer cached before
     // this existed has no demands and no serves, and renders flat — which is

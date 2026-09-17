@@ -53,10 +53,29 @@ practice. Not as headings — as the movement of the three lines. A block that
 only says what something is has stopped at the first of the three and reads like
 a definition, which is where most answers lose their marks.
 
-SUBHEADINGS COME FROM THE DEMAND, NOT THE TOPIC. The signpost and any section
-headings restate what the question obliges. A heading naming the topic tells the
-examiner you know the topic; a heading naming the demand tells him you read the
-question.
+SUBHEADINGS COME FROM THE DEMAND, NOT THE TOPIC, AND THEY COUNT. The signpost
+and any section headings restate what the question obliges. A heading naming the
+topic tells the examiner you know the topic; a heading naming the demand tells
+him you read the question.
+
+Where a heading introduces a set, put the number in it: "Four structural causes
+of old-age dependency", not "Causes of old-age dependency". The number tells the
+examiner what is coming and commits you to delivering it, which is why it reads
+as planned rather than as whatever occurred to you. Only where the number is
+real — a heading promising five and delivering three is worse than one that
+promised nothing.
+
+ATTRIBUTE, DO NOT ASSERT. An opinion in your own voice is a candidate's opinion.
+The same point carried by a named source is evidence: "the 2011 Census records",
+"the National Policy on Older Persons holds", "as Tibbitts defines it". Prefer
+the attributed form wherever a source genuinely says it.
+
+The guard, and it is absolute: name only committees, reports, commissions,
+surveys and scholars that appear in the notes or the books you were given, or
+that you are certain of. Never invent a report number, a commission's number, a
+year or a page to make a sentence sound authoritative. A fabricated "Law
+Commission 267th Report" is worse than the plain sentence it replaced — it will
+be repeated in an exam hall by someone who cannot check it.
 
 A THINKER ONLY WHERE HE DOES WORK. Most blocks have none, and that is correct —
 one real answer at ten marks cites nobody at all. Name a thinker only where the
@@ -65,11 +84,27 @@ breath what he is for. A forced scholar is worse than no scholar: it costs a
 line, it shows the answer was assembled rather than argued, and every examiner
 has read a hundred of them. Never reach for a name to fill the field.
 
-CRITICISM ONLY WHERE IT IS DEMANDED. "Critically examine", "evaluate" and
-"comment on" ask for it. "Discuss", "examine", "describe" and "analyse" do not,
-and a limitations paragraph bolted onto them answers a question nobody set while
-spending the minutes the real demand needed. When the command word does ask,
-criticism is part of the argument, not an appendix at the end.
+CRITICISM LIVES IN THE BODY, AND ONLY WHERE IT IS DEMANDED. It is not a step of
+its own — the core body is written as per the demand, so criticism belongs in it
+when the demand asks and nowhere at all when it does not. "Critically examine",
+"evaluate" and "comment on" ask for it. "Discuss", "examine", "describe" and
+"analyse" do not, and a limitations paragraph bolted onto them answers a
+question nobody set while spending the minutes the real demand needed. When the
+command word does ask, criticism is part of the argument, not an appendix.
+
+THE DEMAND IS WHERE THE MARKS ARE LOST. Ninety per cent of candidates fail at
+the first step, not the seventh: they answer the topic rather than the question.
+Before anything else, name the task the command word sets and the key words that
+fix its scope, and let every later part serve that. An answer that is excellent
+about the topic and silent on the demand is a bad answer.
+
+KEEP THE INTRODUCTION SHORT AND RELEVANT. Define precisely, set the context, name
+a thinker only if one genuinely belongs there, and stop. An introduction that
+runs long has spent the body's minutes proving nothing.
+
+CLOSE THE LOOP. The conclusion answers the question directly and briefly — an
+overall assessment, a way forward, a balanced view, or the contemporary
+relevance. It never introduces a new argument and never trails off.
 
 AN EXAMPLE HAS TO PROVE THE POINT IT SITS UNDER. Not illustrate the topic —
 prove the claim of that particular block. If it would sit equally well under any
@@ -441,28 +476,63 @@ The test for the whole thing: read it aloud. The frame should sound like an
 argument being made. The blocks should sound like a well-informed person
 explaining one idea at a time, never like a revision card being read out.
 
-MARK IT UP. In every part, list under "underline" the exact phrases from that
-part's own text that should be underlined in the answer booklet: the technical
-terms, the named Acts, the figures. Give the phrase exactly as it appears in
-the text or it cannot be marked. Two to five per part, not every other word —
+MARK IT UP, AND MARK THREE KINDS OF THING. In every part, list under "underline"
+the exact phrases from that part's own text that should be underlined in the
+answer booklet. Give each phrase exactly as it appears in the text or it cannot
+be marked.
+
+Aim at one of each kind rather than a count: the CONCEPT the part turns on
+(a technical term, a named idea), the EVIDENCE that proves it (an Act, a figure,
+a Census round, a committee, a scholar), and the CONSEQUENCE it lands on (the
+impact word — "erodes", "displaces", "reproduces inequality"). Three marks of
+three kinds tell an examiner skimming the page what the paragraph argued;
+five marks on five nouns tell him nothing.
+
+Two to five per part where the part carries that much, never every other word —
 underlining everything is the same as underlining nothing.
 
 DRAW ONE THING, IN THE RIGHT SHAPE. Where a diagram would carry something
 faster than prose, give it: a label and three to five items, plus "shape".
 
-Set shape to "branch" when the items are the kinds, types, factors or
-dimensions of the label — things that sit alongside one another and could be
-listed in any order. Set it to "flow" when the items are stages that lead to
-one another — a process, a causal chain, a sequence of consequences, a
-historical progression. Order matters in a flow and the items must be given in
-the order they happen, because they are drawn as a chain with arrows between
-them and the drawing is the argument.
+Five shapes, and they are the five that appear in real topper scripts rather
+than five a designer liked. Pick by what the content is:
 
-Choose by what the content is, not by variety. A causal chain drawn as a branch
-diagram throws away the one thing it was drawn to show. A set of four
-co-ordinate types drawn as a flow claims a sequence that is not there, which is
-worse than no diagram. Where prose is genuinely better than either, return an
-empty diagram rather than forcing one.
+  "flow"     — stages that lead to one another: a causal chain, a process, a
+               sequence of consequences. Items go in the order they happen,
+               because they are drawn as a chain of arrows and the order IS the
+               argument. Aditya Srivastava, Rank 1, drew relative deprivation
+               this way: threat to culture → feeling of deprivation → third-party
+               framing → resentment and regionalism.
+  "quadrant" — a central term with its dimensions grouped around it. The best
+               shape for most sociology questions, because most of them ask for
+               the dimensions of something. Medha Anand, Rank 13, wrote "factors
+               affecting mental well-being" across the middle of the page and
+               quartered the space into Social, Economic, Political and Others.
+               Four groups is the shape at its best. Each item is a group: its
+               "name" is the label — Social, Economic, Political, Cultural — and
+               its "points" are the two to four things under it.
+  "pyramid"  — levels that stack or rank: a hierarchy, stages of development,
+               a base that supports what is above it. Items from base upward.
+  "compare"  — two things held against each other. Exactly two items, whose
+               "name" heads each column, plus "rows": one per basis of
+               comparison, each giving that basis and what the two sides say
+               about it. The basis column is the point of the table — ownership,
+               mobility, sanction, unit of stratification. Without it, two lists
+               sit side by side and the reader has to work out what is being
+               compared. Traditional against modern, rural against urban,
+               organised against unorganised.
+  "branch"   — kinds or types of one thing, in no particular order, where none
+               of the four above is truer. The plainest shape; use it when the
+               content really is just a list with a parent.
+
+Choose by the content, never for variety. A causal chain drawn as branches
+throws away the one thing it was drawn to show. Four co-ordinate dimensions
+drawn as a flow claim a sequence that is not there, which is worse than no
+diagram at all. Where prose genuinely beats all five, return an empty diagram.
+
+All five are drawn with a pen in ninety seconds by a tired hand — that is why
+they are the ones that turn up in scripts, and the limits below still hold
+whichever you pick.
 
 IT HAS TO BE DRAWABLE. This is copied onto paper with a pen, in about ninety
 seconds, by someone with thirty-five minutes for the whole answer. So: the box
@@ -554,16 +624,40 @@ one thing — nature, causes, remedies — are not independent, and saying they 
 lets the reader carve up an argument that was meant to flow.
 
 SHOW WHERE THE METHOD LANDED. Fill "method" with all seven steps, in order:
-demand, structure, flow, example, thinker, criticism, conclusion. For each, say
+demand, define, flow, coreBody, example, thinker, conclusion. These are Sandesh
+Jain's seven and the names are his — "define" is the definition and the setting
+of context, "coreBody" is the sub-dimensions written as per the demand. For each, say
 where it happened in the answer you just wrote — "the demand is unpacked in the
 opening", "block c moves what to why to how" — in at most twelve words.
 
 Two states only, and the second is not a failure. "used" means it is in the
 answer. "notNeeded" means this question did not call for it, and then "where"
 says why in the same breath: "no thinker — this is a policy question, not a
-theoretical one", "not a critical command word, so no limitations section".
-Thinker and criticism are the two that are most often rightly absent. Never mark
-a step "used" that is not actually there — the point of this list is that a
+theoretical one", "the demand is comparative, so the movement is A against B
+rather than what to why to how".
+
+NOT ALL SEVEN FIT EVERY QUESTION, BUT THREE ALWAYS DO. Judge each on the
+question in front of you rather than filling all seven to look complete — and
+judge honestly in both directions:
+
+  demand     — never absent. An answer that does not meet the demand has failed
+               whatever else it does.
+  coreBody   — never absent. It is the answer.
+  conclusion — never absent. An answer that stops rather than closes loses the
+               easiest marks on the page.
+  define     — almost always present, sometimes a single line. Absent only where
+               the question is wholly evaluative and a definition would delay it.
+  flow       — a manner of writing rather than a section. "notNeeded" where the
+               question's logic is comparative, or a straight enumeration, and
+               forcing what-why-how onto it would distort the argument.
+  example    — essential wherever the topic touches Indian society. "notNeeded"
+               only for a purely theoretical demand, where a contemporary
+               example would be decoration bolted to a concept.
+  thinker    — value addition, not foundation, and the most often rightly
+               absent. Never reach for a name to fill the field.
+
+Never mark a step "used" that is not actually there, and never mark one
+"notNeeded" to excuse having skipped it — the point of this list is that a
 candidate can hold their own answer against it, and a list that lies teaches
 them to tick boxes rather than to check.
 
@@ -593,10 +687,10 @@ Reply with JSON and nothing else, in exactly this shape:
           {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours"},
           {"kind":"pivot","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
           {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"must":"core"}],
- "method":[{"step":"demand|structure|flow|example|thinker|criticism|conclusion","state":"used|notNeeded","where":"<at most 12 words>"}],
+ "method":[{"step":"demand|define|flow|coreBody|example|thinker|conclusion","state":"used|notNeeded","where":"<at most 12 words>"}],
  "demands":[{"label":"<3-8 words>","minutes":0}],
  "independent":true,
- "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow","items":[{"name":"...","note":"..."}]},
+ "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
  "examples":[{"text":"<one sentence, with the number or provision>","where":"<which part it goes in and what it proves>","asOf":"<year>"}],
  "usedTopics":["<syllabus topic id>"],
  "words":0}
@@ -644,7 +738,7 @@ Reply with JSON and nothing else, in exactly this shape:
 {"must":[{"term":"<1-4 words>","line":"<what it means, at most 15 words>"}],
  "thinkers":[{"name":"...","for":"<what he is for here, at most 10 words>"}],
  "specifics":["<a named Act, figure, case or place>"],
- "diagram":{"label":"<2-4 words, or empty>","items":[{"name":"...","note":"..."}]},
+ "diagram":{"label":"<2-4 words, or empty>","shape":"branch|flow|quadrant|pyramid|compare","items":[{"name":"...","note":"...","points":["<for quadrant and compare>"]}]},
  "trap":"<one line>",
  "askedAs":["<how this topic is typically worded in a question>"],
  "usedTopics":["<syllabus topic id>"]}
@@ -836,7 +930,7 @@ Reply with JSON and nothing else, in exactly this shape:
             "thinker":"<name, or empty>","specific":"<number, Act, place, case, or empty>",
             "depth":"full|brief"}],
  "pivot":"<the turning sentence, or empty if the question has one part>",
- "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow","items":[{"name":"...","note":"..."}]},
+ "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
  "insteadOfDiagram":"<one line, only when there is no diagram>",
  "close":{"type":"two-sided|concessive|forward|answers-demand","text":"<the actual closing lines>"},
  "minutes":[{"section":"<name>","minutes":0}]}
