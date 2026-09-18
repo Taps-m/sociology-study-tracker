@@ -665,12 +665,15 @@ export function AnswerBlueprint({
                 )}
 
                 {/*
-                  Where the words in this answer actually come from.
-                  The books are cited beside the answer, but until they have
-                  been read into text the model has not seen a page of them —
-                  it writes from what it knows and the citation sits next to it.
-                  That is a real difference and it is not the reader's job to
-                  guess at it, so the state is on the screen until it changes.
+                  Which of the three books the model can actually read.
+                  This used to say the books had not been read and that every
+                  answer was therefore written from the model's own knowledge.
+                  That was true when it was written and stopped being true the
+                  day Sangwan finished scanning — a warning left standing after
+                  it stops applying teaches the reader to ignore warnings.
+                  So it states what is read and what is not, and leaves the
+                  question of what THIS answer used to the stamp at the top of
+                  the answer, which is recorded when it is written.
                 */}
                 {!answerBusy && scanPending() && (
                   <div
@@ -683,11 +686,13 @@ export function AnswerBlueprint({
                       lineHeight: 1.6,
                     }}
                   >
-                    <span style={{ color: C.warn, fontWeight: 600 }}>Books not read yet</span> —{" "}
-                    <span className="num">{scanPagesRead()}</span> of{" "}
-                    <span className="num">{scanPagesTotal()}</span> pages scanned. Until this
-                    finishes, the answer is written from the model's own knowledge with your
-                    chapters cited beside it, not out of the chapters themselves.
+                    <span style={{ fontWeight: 600, color: C.text }}>What has been read</span> —
+                    Sangwan is finished, at{" "}
+                    <span className="num">{BOOK_SCAN.sangwan.read}</span> pages, and its chapter
+                    travels with the question once the book is loaded in Settings. Haralambos has
+                    not been scanned, so where a topic leans on it the answer is written from the
+                    model's own knowledge with the chapter cited beside it. Shankar Rao is cited
+                    but not loaded either.
                     <div style={{ marginTop: 6, height: 3, background: C.hair, borderRadius: 2 }}>
                       <div
                         style={{
@@ -702,8 +707,12 @@ export function AnswerBlueprint({
                       Sangwan <span className="num">{BOOK_SCAN.sangwan.read}</span>/
                       <span className="num">{BOOK_SCAN.sangwan.total}</span> · Haralambos{" "}
                       <span className="num">{BOOK_SCAN.haralambos.read}</span>/
-                      <span className="num">{BOOK_SCAN.haralambos.total}</span> · Shankar Rao
-                      already readable
+                      <span className="num">{BOOK_SCAN.haralambos.total}</span> · Shankar Rao not
+                      scanned
+                    </div>
+                    <div style={{ marginTop: 5, fontSize: 11.5 }}>
+                      Whether <em>this</em> answer used them is on the line at the top of it, not
+                      here — that one is stamped when the answer is written.
                     </div>
                   </div>
                 )}
