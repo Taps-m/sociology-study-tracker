@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { clearNotes, notesStatus, saveNotes, type NotesBundle } from "../../lib/notesStore";
+import {
+  clearNotes,
+  notesStatus,
+  saveNotes,
+  type NotesBundle,
+  type SourceId,
+} from "../../lib/notesStore";
 import { NOTE_SECTIONS } from "../../data/notes";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -19,6 +25,53 @@ import { Card } from "../../app/Shell";
  * send it to.
  */
 export function NotesImport() {
+  return (
+    <>
+      <SourceCard
+        source="sleepy"
+        icon="book"
+        title="Your notes"
+        fileName="book-text\\sleepy-notes.json"
+        what={
+          <>
+            The app knows which pages of your Sleepy Classes notes cover which topic —{" "}
+            <span className="num">{NOTE_SECTIONS.length}</span> sections across both papers. Load
+            the notes themselves and every skeleton, answer and map is written out of them rather
+            than out of what the model happens to know.
+          </>
+        }
+      />
+      <SourceCard
+        source="sangwan"
+        icon="book"
+        title="Essential Sociology"
+        fileName="book-text\\sangwan-text.json"
+        what={
+          <>
+            All <span className="num">547</span> pages of Sangwan, scanned and read. The chapter
+            map already says which pages answer which topic; load the book and those pages travel
+            with the question instead of being cited at it. It is OCR of a photographed book, so
+            expect the odd mangled line — the sociology survives, the typesetting does not.
+          </>
+        }
+      />
+    </>
+  );
+}
+
+function SourceCard({
+  source,
+  icon,
+  title,
+  fileName,
+  what,
+}: {
+  source: SourceId;
+  icon: string;
+  title: string;
+  fileName: string;
+  what: React.ReactNode;
+}) {
   const [state, setState] = useState<{ loaded: boolean; pages: number }>({
     loaded: false,
     pages: 0,
@@ -27,7 +80,7 @@ export function NotesImport() {
   const [error, setError] = useState<string | null>(null);
   const file = useRef<HTMLInputElement | null>(null);
 
-  const refresh = () => void notesStatus().then(setState);
+  const refresh = () => void notesStatus(source).then(setState);
   useEffect(refresh, []);
 
   async function take(f: File) {
@@ -41,43 +94,48 @@ export function NotesImport() {
        * whatever JSON.parse said about the first byte it disliked.
        */
       if (raw.startsWith("%PDF")) {
-        throw new Error(
-          "That is the PDF itself. You want book-text\\sleepy-notes.json — the extracted text beside it.",
-        );
+        throw new Error(`That is the PDF itself. You want ${fileName} — the extracted text.`);
       }
       const bundle = JSON.parse(raw) as NotesBundle;
-      const papers = Object.keys(bundle);
-      if (papers.length === 0 || !papers.every((k) => Array.isArray(bundle[k]))) {
-        throw new Error("That is valid JSON, but not the notes bundle.");
+      const keys = Object.keys(bundle);
+      if (keys.length === 0 || !keys.every((k) => Array.isArray(bundle[k]))) {
+        throw new Error("That is valid JSON, but not a bundle of pages.");
       }
-      await saveNotes(bundle);
+      /*
+       * Each bundle knows which source it is: the notes are keyed by paper
+       * number, the book by its own id. Loading one into the other's slot would
+       * fail silently later — a question would find no pages and simply write
+       * an ungrounded answer — so it is refused here, where it can be explained.
+       */
+      const wantsSangwan = source === "sangwan";
+      if (wantsSangwan !== keys.includes("sangwan")) {
+        throw new Error(
+          wantsSangwan
+            ? "That looks like the notes bundle. This slot wants sangwan-text.json."
+            : "That looks like the Sangwan bundle. This slot wants sleepy-notes.json.",
+        );
+      }
+      await saveNotes(bundle, source);
       refresh();
     } catch (e) {
       const why = e instanceof Error ? e.message : "";
       setError(
         why.includes("is not valid JSON")
-          ? "That file is not the notes bundle. Pick book-text\\sleepy-notes.json."
+          ? `That file is not a page bundle. Pick ${fileName}.`
           : why || "Could not read that file.",
       );
     }
     setBusy(false);
   }
 
-  const indexed = NOTE_SECTIONS.length;
-
   return (
-    <Card icon="book" title="Your notes">
-      <p style={{ fontSize: 14, color: C.muted, margin: 0, lineHeight: 1.7 }}>
-        The app knows which pages of your Sleepy Classes notes cover which topic —{" "}
-        <span className="num">{indexed}</span> sections across both papers. Load the notes
-        themselves and every skeleton, answer and map is written out of them rather than out of
-        what the model happens to know.
-      </p>
+    <Card icon={icon} title={title}>
+      <p style={{ fontSize: 14, color: C.muted, margin: 0, lineHeight: 1.7 }}>{what}</p>
 
       <p style={{ fontSize: 12.5, color: C.muted, margin: "9px 0 0", lineHeight: 1.65 }}>
-        The file is <span className="num">book-text/sleepy-notes.json</span>, beside the PDFs. It
-        stays on this device — it is never uploaded, never committed, and never leaves the browser
-        except as the few pages a question needs, inside that question's own request.
+        The file is <span className="num">{fileName}</span>, beside the PDFs. It stays on this
+        device — never uploaded, never committed, and it leaves the browser only as the few pages a
+        question needs, inside that question's own request.
       </p>
 
       <div style={{ display: "flex", gap: 9, flexWrap: "wrap", alignItems: "center", marginTop: 14 }}>
@@ -108,7 +166,7 @@ export function NotesImport() {
             cursor: busy ? "default" : "pointer",
           }}
         >
-          {busy ? "Loading…" : state.loaded ? "Load a newer copy" : "Load my notes"}
+          {busy ? "Loading…" : state.loaded ? "Load a newer copy" : `Load ${title.toLowerCase()}`}
         </button>
 
         {state.loaded && (
@@ -117,7 +175,7 @@ export function NotesImport() {
               <span className="num">{state.pages}</span> pages loaded
             </span>
             <button
-              onClick={() => void clearNotes().then(refresh)}
+              onClick={() => void clearNotes(source).then(refresh)}
               style={{
                 minHeight: 38,
                 padding: "0 13px",
@@ -142,8 +200,8 @@ export function NotesImport() {
 
       {!state.loaded && !busy && (
         <p style={{ fontSize: 12.5, color: C.muted, margin: "10px 0 0", lineHeight: 1.6 }}>
-          Until this is loaded the app works exactly as it did before: the model is told which
-          chapters cover a topic but has not read them.
+          Until this is loaded the model is told which chapters cover a topic but has not read
+          them.
         </p>
       )}
     </Card>

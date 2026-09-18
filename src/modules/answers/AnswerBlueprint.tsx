@@ -7,15 +7,17 @@ import {
   forgetStructure,
   modelAnswer,
   typicalAnswerSeconds,
+  type AnswerSource,
   type AnswerStructure,
   type ModelAnswer,
 } from "../../lib/ai";
 import { TOPICS } from "../../data/syllabus";
 import { standardReadingsFor, stdLine } from "../../data/standardBooks";
 import { BOOK_SCAN, scanPagesRead, scanPagesTotal, scanPending } from "../../data/bookScan";
-import { Diagram, ModelAnswerView } from "./ModelAnswerView";
-import { QuestionMap, treeFromStructure } from "../mindmap/QuestionMap";
-import { notesSliceFor } from "../../lib/notesStore";
+import { BuiltFrom, Diagram, ModelAnswerView } from "./ModelAnswerView";
+import { QuestionMap, treeFromOutline, treeFromStructure } from "../mindmap/QuestionMap";
+import { notesOutlineFor, notesSliceFor, sangwanSliceFor } from "../../lib/notesStore";
+import type { OutlineNode } from "../../lib/notesOutline";
 import { DRILL, type Dimension } from "../../lib/drill";
 import { C } from "../../lib/theme";
 import { Card } from "../../app/Shell";
@@ -32,13 +34,152 @@ import { Card } from "../../app/Shell";
  * Absent when nothing is loaded, and the prompts treat it as optional, so the
  * app works exactly as before for anyone who has not imported theirs.
  */
-async function notesContext(topicId: string) {
-  const slice = await notesSliceFor(topicId);
-  if (!slice) return {};
-  return {
-    notes: slice.text,
-    notesCitation: `Sleepy Classes Paper ${slice.cite.paper}, “${slice.cite.heading}”, pp. ${slice.cite.from}–${slice.cite.to}`,
-  };
+/**
+ * Fetches the notes outline, and says which source the map is drawn from.
+ *
+ * The label is not decoration. A map from the notes and a map from the
+ * skeleton look alike and are not alike — one is the subject as the candidate's
+ * own material organises it, the other is the scaffold of an answer — and a
+ * revision tool that will not say which it is showing cannot be trusted.
+ */
+function MapSource({
+  topicId,
+  onFound,
+}: {
+  topicId: string;
+  onFound: (o: OutlineNode) => void;
+}) {
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    void notesOutlineFor(topicId).then((hit) => {
+      if (!live) return;
+      if (hit) onFound(hit.outline);
+      setChecked(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, [topicId, onFound]);
+
+  if (!checked) return null;
+  return (
+    <span style={{ fontSize: 12, color: C.muted, alignSelf: "center", marginLeft: 4 }}>
+      from the skeleton — load your notes in Settings for the fuller map
+    </span>
+  );
+}
+
+/**
+ * The same question, answered out of the other source.
+ *
+ * Offered rather than asked. Choosing a source before reading anything is
+ * choosing blind — the useful judgement, that one of them handles this
+ * particular question better, only exists once there is an answer in front of
+ * you — and 66 of the 85 topics sit in both sources, so a prompt up front would
+ * have appeared on four questions in five and become a keystroke rather than a
+ * decision.
+ *
+ * It appears only where Sangwan has a chapter for the topic and the book is
+ * loaded. The second version costs a call; after that both are kept and
+ * flipping between them is free.
+ */
+function SourceSwitch({
+  topicId,
+  source,
+  busy,
+  onPick,
+}: {
+  topicId: string;
+  source: AnswerSource;
+  busy: boolean;
+  onPick: (s: AnswerSource) => void;
+}) {
+  const [has, setHas] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    void sangwanSliceFor(topicId, 1).then((hit) => {
+      if (live) setHas(Boolean(hit));
+    });
+    return () => {
+      live = false;
+    };
+  }, [topicId]);
+
+  if (!has) return null;
+  const onSangwan = source === "sangwan";
+
+  return (
+    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+      <button
+        onClick={() => onPick(onSangwan ? "default" : "sangwan")}
+        disabled={busy}
+        title={
+          onSangwan
+            ? "Back to the answer written from your Sleepy Classes notes."
+            : "Answer the same question out of Sangwan's chapter instead. Costs one call the first time; after that both are kept and switching is free."
+        }
+        style={{
+          minHeight: 34,
+          padding: "0 13px",
+          borderRadius: 8,
+          border: `1px solid ${C.line}`,
+          background: C.raised,
+          color: busy ? C.muted : C.text,
+          font: "inherit",
+          fontSize: 13,
+          cursor: busy ? "default" : "pointer",
+        }}
+      >
+        {busy
+          ? "Writing…"
+          : onSangwan
+            ? "← Back to the notes version"
+            : "Write this from Sangwan instead"}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * The pages that travel with this question, and only the right ones.
+ *
+ * Each version gets one source and not the other. Blending them would give a
+ * marginally better single answer — the notes leading, the textbook filling
+ * what they skim — but it would make "the Sleepy version" a name for something
+ * that is not quite the Sleepy version, and then the comparison the second call
+ * was paid for compares a blend against a book.
+ *
+ * Sleepy leads because it is the newer material and the material actually
+ * revised from. Sangwan is the second opinion, asked for deliberately.
+ */
+async function notesContext(topicId: string, source: AnswerSource = "default") {
+  const [slice, book] = await Promise.all([
+    source === "sangwan" ? Promise.resolve(null) : notesSliceFor(topicId),
+    source === "sangwan" ? sangwanSliceFor(topicId) : Promise.resolve(null),
+  ]);
+
+  const cited: string[] = [];
+  const out: Record<string, string> = {};
+
+  if (slice) {
+    out.notes = slice.text;
+    out.notesCitation = `Sleepy Classes Paper ${slice.cite.paper}, “${slice.cite.heading}”, pp. ${slice.cite.from}–${slice.cite.to}`;
+    cited.push(out.notesCitation);
+  }
+  if (book) {
+    out.book = book.text;
+    out.bookCitation = book.cite;
+    cited.push(book.cite);
+  }
+
+  // One line naming every source that actually travelled, for the stamp the
+  // screen shows. Built here rather than in the view, because only this knows
+  // what was really sent.
+  if (cited.length > 0) out.notesCitation = cited.join(" · ");
+  return out;
 }
 
 /**
@@ -104,7 +245,15 @@ export function AnswerBlueprint({
   // The written answer, behind the skeleton rather than beside it: it is the
   // thing to reach for once the structure has not been enough.
   const [answer, setAnswer] = useState<ModelAnswer | null>(() => cachedModelAnswer(question));
+  /* Which source the answer on screen was written from. */
+  const [source, setSource] = useState<AnswerSource>("default");
   const [view, setView] = useState<"structure" | "model" | "map">("structure");
+  /*
+   * The notes' outline for this topic, if they are loaded. Fetched when the
+   * map is first opened rather than on mount: it reads a megabyte and a half
+   * out of IndexedDB, which is not work to do for a screen nobody opened.
+   */
+  const [outline, setOutline] = useState<OutlineNode | null>(null);
   const [answerBusy, setAnswerBusy] = useState(false);
   const [answerError, setAnswerError] = useState<string | null>(null);
 
@@ -187,14 +336,22 @@ export function AnswerBlueprint({
       ? { watchThisTime: DRILL[gaps[0]!.key as Dimension]?.name ?? gaps[0]!.key }
       : {};
 
-  async function buildAnswer(fresh = false) {
+  async function buildAnswer(fresh = false, want: AnswerSource = source) {
     if (fresh) {
-      forgetModelAnswer(question);
+      forgetModelAnswer(question, want);
       setAnswer(null);
-    } else if (answer) {
-      setView("model");
-      return;
+    } else {
+      const kept = cachedModelAnswer(question, want);
+      if (kept) {
+        // Already paid for. Flipping between the two versions is free after
+        // the first time each was written.
+        setAnswer(kept);
+        setSource(want);
+        setView("model");
+        return;
+      }
     }
+    setSource(want);
     setAnswerBusy(true);
     setAnswerError(null);
     const res = await modelAnswer(
@@ -209,12 +366,13 @@ export function AnswerBlueprint({
         ...gapContext,
         syllabusTopics: paperTopics.map((t) => ({ id: t.id, unit: t.unit, name: t.name })),
         books,
-        ...(await notesContext(topicId)),
+        ...(await notesContext(topicId, want)),
         // The skeleton has already told the candidate what to draw. Send it, so
         // the written answer draws that and not a second, different picture.
         diagram: structure?.diagram?.label ? structure.diagram : undefined,
       },
       paperTopics.map((t) => t.id),
+      want,
     );
     setAnswerBusy(false);
     if (res.result) {
@@ -376,6 +534,10 @@ export function AnswerBlueprint({
                   {v === "structure" ? "Read the skeleton" : "See it as a map"}
                 </button>
               ))}
+              {/* Pull the outline the first time the map is asked for. */}
+              {view === "map" && !outline && (
+                <MapSource topicId={topicId} onFound={setOutline} />
+              )}
 
               {/*
                 Rebuilding matters most the day a source changes. A skeleton
@@ -407,7 +569,9 @@ export function AnswerBlueprint({
           )}
 
           {view === "map" ? (
-            <QuestionMap tree={treeFromStructure(structure, question)} />
+            <QuestionMap
+              tree={outline ? treeFromOutline(outline) : treeFromStructure(structure, question)}
+            />
           ) : view === "structure" ? (
             <>
               <StructureBody structure={structure} />
@@ -563,7 +727,13 @@ export function AnswerBlueprint({
                 >
                   ← Back to the structure
                 </button>
-                <ModelAnswerView answer={answer} books={books} />
+                <SourceSwitch
+                  topicId={topicId}
+                  source={source}
+                  busy={answerBusy}
+                  onPick={(s) => void buildAnswer(false, s)}
+                />
+                <ModelAnswerView answer={answer} books={books} question={question} />
               </>
             )
           )}
@@ -733,6 +903,7 @@ function Sentence({ children }: { children: ReactNode }) {
 function StructureBody({ structure }: { structure: AnswerStructure }) {
   return (
     <div>
+      <BuiltFrom from={structure.notesFrom} />
       <section style={{ marginTop: 14 }}>
         <div style={label}>The demand</div>
         {structure.demand.commandWords.length > 0 && (

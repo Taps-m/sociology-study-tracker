@@ -530,8 +530,30 @@ function modelCache(): Record<string, ModelAnswer> {
   }
 }
 
-export function cachedModelAnswer(question: string): ModelAnswer | null {
-  return modelCache()[questionKey(question)] ?? null;
+/**
+ * Which sources an answer was written from.
+ *
+ * "default" is the notes leading and Sangwan filling what they are thin on —
+ * what nine questions in ten want. "sangwan" is the same question answered out
+ * of the textbook alone, for the one in ten where it is worth seeing how a
+ * fuller exposition handles it.
+ *
+ * Both are kept, because the second one costs a call and a comparison you can
+ * only make once is not a comparison. The default keeps the bare key it always
+ * had, so nothing already written is orphaned by this existing.
+ */
+export type AnswerSource = "default" | "sangwan";
+
+function variantKey(question: string, source: AnswerSource): string {
+  const k = questionKey(question);
+  return source === "default" ? k : `${k}::${source}`;
+}
+
+export function cachedModelAnswer(
+  question: string,
+  source: AnswerSource = "default",
+): ModelAnswer | null {
+  return modelCache()[variantKey(question, source)] ?? null;
 }
 
 /**
@@ -543,10 +565,10 @@ export function cachedModelAnswer(question: string): ModelAnswer | null {
  * answer written before a prompt change can never show what the change does —
  * the old one is served forever.
  */
-export function forgetModelAnswer(question: string) {
+export function forgetModelAnswer(question: string, source: AnswerSource = "default") {
   try {
     const all = modelCache();
-    delete all[questionKey(question)];
+    delete all[variantKey(question, source)];
     localStorage.setItem(MODEL_KEY, JSON.stringify(all));
   } catch {
     // Blocked storage: the answer stays. Nothing else breaks.
@@ -686,8 +708,9 @@ export async function modelAnswer(
   question: string,
   context: unknown,
   syllabusIds: string[],
+  source: AnswerSource = "default",
 ): Promise<{ result: ModelAnswer | null; error: string | null }> {
-  const key = questionKey(question);
+  const key = variantKey(question, source);
   const hit = modelCache()[key];
   if (hit) return { result: hit, error: null };
 

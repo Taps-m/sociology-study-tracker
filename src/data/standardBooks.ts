@@ -231,7 +231,17 @@ export const STD_BOOKS: StdBook[] = [
     short: "Sangwan",
     title: "Essential Sociology for Civil Services Main",
     author: "Seema and Nitin Sangwan",
-    pdfOffset: null,
+    /*
+     * Measured, not assumed: 17 Sep 2026, from the OCR of all 547 pages. Of the
+     * 195 pages where the printed number survived recognition, 158 sit exactly
+     * twelve below their PDF page and 37 read as thirteen — and those are
+     * almost certainly the OCR dropping or adding a digit rather than a real
+     * jump, since the offset never drifts as the book goes on.
+     *
+     * So twelve, and anything reading from it should take a page of padding
+     * either side rather than trusting the boundary exactly.
+     */
+    pdfOffset: 12,
     note: "Organised by the syllabus rather than by the discipline, so a topic usually maps to one chapter and stops there. Start here.",
     chapters: SANGWAN,
   },
