@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AnswerStructure } from "../../lib/ai";
+import type { OutlineNode } from "../../lib/notesOutline";
 import { C } from "../../lib/theme";
 
 /**
@@ -202,6 +203,32 @@ export function treeFromStructure(structure: AnswerStructure, question: string):
   }
 
   return { name: clip(question, 90), cat: "demand", children };
+}
+
+/**
+ * The notes' own outline, as a map.
+ *
+ * Preferred over the skeleton wherever the notes are loaded, because this is
+ * the tree a candidate needs in their head: the subject's divisions in the
+ * subject's own words, three levels deep, rather than the two-level scaffold
+ * of how an answer gets assembled. Headings carry the colour, scholars keep
+ * theirs, and the points inherit — so a branch reads as one idea.
+ */
+export function treeFromOutline(node: OutlineNode, depth = 0): MapNode {
+  const cat: Cat | undefined =
+    depth === 0
+      ? "demand"
+      : node.kind === "heading"
+        ? "concept"
+        : node.kind === "definition"
+          ? "thinker"
+          : undefined;
+
+  return {
+    name: node.text,
+    cat,
+    children: node.children?.map((c) => treeFromOutline(c, depth + 1)),
+  };
 }
 
 export function QuestionMap({ tree }: { tree: MapNode }) {
