@@ -127,6 +127,8 @@ main { max-width: 1090px; margin: 0 auto; }
   justify-content: center;
 }
 .answer-main { flex: 1 1 760px; max-width: 760px; min-width: 0; }
+/* A map is for moving around a page you scroll, not one you hold. */
+.answer-map { display: none; }
 .answer-aside { flex: 0 0 258px; position: sticky; top: 16px; }
 h1.sheet-title { font-size: 19px; line-height: 1.35; margin: 0 0 22px; }
 @media (max-width: 1000px) {

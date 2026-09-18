@@ -731,6 +731,34 @@ input[type="range"]::-moz-range-thumb {
   min-width: 0;
 }
 
+/*
+ * The shape of the answer, down the left, when it is asked for.
+ *
+ * Three columns need about twelve hundred pixels. Below that the map does not
+ * disappear — it was asked for — it moves above the answer and runs across,
+ * which is the one place a list of keywords still works without taking width
+ * off the reading column.
+ */
+.answer-map {
+  flex: 0 0 186px;
+  position: sticky;
+  top: 4px;
+  max-height: calc(100vh - 20px);
+  overflow-y: auto;
+}
+
+@media (max-width: 1180px) {
+  .answer-split { flex-wrap: wrap; }
+  .answer-map {
+    flex: 1 1 100%;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
 .answer-aside {
   flex: 0 0 244px;
   position: sticky;

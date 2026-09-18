@@ -251,6 +251,142 @@ function Versions({
 }
 
 /**
+ * Go to a part, opening whatever it is folded inside.
+ *
+ * Scrolling to something inside a shut <details> does nothing at all — the
+ * element has no box — so a link that looks live is dead. Every fold above it
+ * is opened first, from the inside out.
+ */
+function goToPart(index: number) {
+  const el = document.getElementById(`part-${index}`);
+  if (!el) return;
+  let fold = el.closest("details");
+  while (fold) {
+    fold.open = true;
+    fold = fold.parentElement?.closest("details") ?? null;
+  }
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/**
+ * The shape of the answer, down the left, for whoever asks for it.
+ *
+ * A thousand words read one screen at a time has no shape — you can be four
+ * blocks in and unable to say what the answer is doing or how much is left.
+ * This is the skeleton: the opening, every block by its keyword, the pivot,
+ * the close, in order, under the demands they serve. Roughly the list the
+ * examiner builds in his head while he skims.
+ *
+ * Off by default, because it is not the answer and most readings do not want
+ * it, and because on a narrow window a third column costs the reading column
+ * width it cannot spare. It is a keystroke away when the wall of text is the
+ * problem.
+ */
+function AnswerMap({
+  parts,
+  demands,
+}: {
+  parts: ModelAnswerPart[];
+  demands: { label: string; minutes: number }[];
+}) {
+  let block = -1;
+  const rows = parts.map((p, i) => {
+    if (p.kind === "block") block += 1;
+    return {
+      i,
+      serves: p.serves ?? 0,
+      kind: p.kind,
+      letter: p.kind === "block" ? String.fromCharCode(97 + block) : "",
+      label:
+        p.kind === "block"
+          ? p.keyword
+          : p.kind === "opening"
+            ? "Opening"
+            : p.kind === "signpost"
+              ? "Signpost"
+              : p.kind === "pivot"
+                ? "Pivot"
+                : "Close",
+    };
+  });
+
+  const groups =
+    demands.length > 1
+      ? demands.map((d, di) => ({ label: d.label, rows: rows.filter((r) => r.serves === di) }))
+      : [{ label: "", rows }];
+
+  return (
+    <nav aria-label="The shape of this answer">
+      <div
+        style={{
+          fontFamily: C.mono,
+          fontSize: 10.5,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: C.muted,
+          marginBottom: 9,
+        }}
+      >
+        The shape of this answer
+      </div>
+
+      {groups.map((g, gi) => (
+        <div key={g.label || gi} style={{ marginBottom: 12 }}>
+          {g.label && (
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: C.accent,
+                lineHeight: 1.4,
+                margin: "0 0 5px",
+              }}
+            >
+              {gi + 1}. {g.label}
+            </div>
+          )}
+          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {g.rows.map((r) => {
+              const frame = r.kind !== "block";
+              return (
+                <li key={r.i}>
+                  <button
+                    onClick={() => goToPart(r.i)}
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "3px 0",
+                      border: "none",
+                      background: "transparent",
+                      font: "inherit",
+                      fontSize: 12.5,
+                      lineHeight: 1.45,
+                      color: frame ? C.muted : C.text,
+                      fontStyle: frame ? "italic" : "normal",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span
+                      className="num"
+                      style={{ color: C.muted, flex: "0 0 13px", fontSize: 11.5 }}
+                    >
+                      {r.letter && `${r.letter})`}
+                    </span>
+                    <span style={{ minWidth: 0 }}>{r.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+/**
  * Which of the five faces of the question the answer actually argued from.
  *
  * The deck's instruction is to cover socio, economic, political, cultural and
@@ -294,21 +430,8 @@ function DimensionStrip({ parts }: { parts: ModelAnswerPart[] }) {
               key={d.id}
               disabled={!on}
               onClick={() => {
-                /*
-                 * The block it points at may be inside a part that is folded
-                 * shut, and scrolling to something display:none does nothing
-                 * at all — a chip that looks live and is dead. So every fold
-                 * above it is opened first, and React is told, because each
-                 * <details> reports its own toggle back.
-                 */
-                const el = document.getElementById(`dim-${d.id}`);
-                if (!el) return;
-                let fold = el.closest("details");
-                while (fold) {
-                  fold.open = true;
-                  fold = fold.parentElement?.closest("details") ?? null;
-                }
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                const at = parts.findIndex((p) => p.kind === "block" && p.dimension === d.id);
+                if (at >= 0) goToPart(at);
               }}
               title={on ? "Jump to the block that argues this side" : "Nothing in this answer argues from this side"}
               style={{
@@ -364,7 +487,7 @@ function Part({
   index: number | null;
   /** Other ways this opening or close could have been written. */
   alts?: { type: string; text: string }[];
-  /** Set on the first block of each dimension, so the strip can jump to it. */
+  /** `part-<index>`, so the map and the dimension chips can jump to it. */
   anchorId?: string;
   /** Hide the prose until it is asked for, so the block can be attempted first. */
   practice?: boolean;
@@ -375,7 +498,9 @@ function Part({
   if (part.kind === "signpost") {
     return (
       <p
+        id={anchorId}
         style={{
+          scrollMarginTop: 12,
           fontSize: 15.5,
           fontWeight: 700,
           margin: "26px 0 0",
@@ -393,7 +518,9 @@ function Part({
     const close = part.kind === "close";
     return (
       <div
+        id={anchorId}
         style={{
+          scrollMarginTop: 12,
           margin: "20px 0 0",
           padding: "13px 15px",
           borderRadius: 10,
@@ -439,7 +566,7 @@ function Part({
 
   if (part.kind === "opening") {
     return (
-      <div style={{ margin: "14px 0 0" }}>
+      <div id={anchorId} style={{ margin: "14px 0 0", scrollMarginTop: 12 }}>
         <MustBadge must={part.must} />
         {alts.length > 0 && (
           <div style={{ marginTop: 7 }}>
@@ -1310,19 +1437,16 @@ export function ModelAnswerView({
   const sheet = useRef<HTMLDivElement | null>(null);
   const [blocked, setBlocked] = useState(false);
   const [practice, setPractice] = useState(false);
+  const [map, setMap] = useState(false);
 
-  /*
-   * One anchor per dimension, on the first block that argues from it, so the
-   * strip above can jump to the thing it is claiming exists.
-   */
-  const anchored = new Map<string, number>();
-  answer.parts.forEach((p, i) => {
-    if (p.kind === "block" && p.dimension && !anchored.has(p.dimension)) {
-      anchored.set(p.dimension, i);
-    }
-  });
+
   return (
     <div className="answer-split" ref={sheet}>
+      {map && (
+        <aside className="answer-map">
+          <AnswerMap parts={answer.parts} demands={answer.demands ?? []} />
+        </aside>
+      )}
       <div className="answer-main">
       {/*
         A thousand words should not be read through a scrollport inside a modal.
@@ -1330,6 +1454,24 @@ export function ModelAnswerView({
         print dialog turns it into a PDF from there.
       */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginBottom: 4 }}>
+        <button
+          onClick={() => setMap((v) => !v)}
+          title="Show the skeleton of this answer down the left — every block by its keyword, in order. Click one to jump to it."
+          style={{
+            minHeight: 34,
+            padding: "0 13px",
+            borderRadius: 8,
+            border: `1px solid ${map ? C.accent : C.line}`,
+            background: map ? C.accentSoft : C.raised,
+            color: map ? C.accent : C.text,
+            font: "inherit",
+            fontSize: 13,
+            fontWeight: map ? 650 : 400,
+            cursor: "pointer",
+          }}
+        >
+          {map ? "Hide the map" : "Map"}
+        </button>
         <button
           onClick={() => setPractice((v) => !v)}
           title="Hide every block's prose and leave only its keyword. Write the block yourself, then reveal it and see what you left out."
@@ -1408,11 +1550,7 @@ export function ModelAnswerView({
                     ? (answer.altCloses ?? [])
                     : []
               }
-              anchorId={
-                part.dimension && anchored.get(part.dimension) === i
-                  ? `dim-${part.dimension}`
-                  : undefined
-              }
+              anchorId={`part-${i}`}
               practice={practice}
             />
           );
