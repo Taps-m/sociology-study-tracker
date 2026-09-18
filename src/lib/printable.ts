@@ -74,6 +74,18 @@ function themeVars(): string {
  * instead of leaving a button that silently does nothing.
  */
 export function openInTab(node: HTMLElement, title: string): boolean {
+  /*
+   * Folded sections open in the copy that leaves.
+   *
+   * On screen the apparatus is collapsed so the answer is the answer. A tab
+   * that is about to become a PDF is the opposite case: nothing there can be
+   * clicked open later, so a fold that travelled shut would take the sources
+   * and the legend out of the printed copy silently. The clone is opened; the
+   * page on screen is untouched.
+   */
+  const copy = node.cloneNode(true) as HTMLElement;
+  for (const d of Array.from(copy.querySelectorAll("details"))) d.setAttribute("open", "");
+
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -135,7 +147,7 @@ h1.sheet-title { font-size: 19px; line-height: 1.35; margin: 0 0 22px; }
 <body>
 <main>
 <h1 class="sheet-title">${title.replace(/[<&]/g, " ")}</h1>
-${node.outerHTML}
+${copy.outerHTML}
 </main>
 </body>
 </html>`;

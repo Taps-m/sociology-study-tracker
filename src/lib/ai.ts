@@ -224,19 +224,21 @@ export interface StructureBlock {
 export interface Diagram {
   label: string;
   /**
-   * Which of the five shapes the toppers' scripts actually use.
+   * Which of the six shapes the toppers' scripts actually use.
    *
    * Taken from Vision IAS's presentation deck, where each is a scan of a real
    * script: Aditya Srivastava (Rank 1, 2023) draws a linear chain of boxes for
    * a causal argument; Medha Anand (Rank 13) writes the central term in the
    * middle of the page and quarters the space around it into labelled groups;
-   * the deck's other two are the pyramid and the two-column comparison.
+   * the deck's others are the pyramid, the two-column comparison, and the
+   * circle — Medha Anand again, twice, for a self-feeding loop where the last
+   * stage returns to the first.
    *
-   * All five are drawable with a pen in ninety seconds — that is why they are
+   * All six are drawable with a pen in ninety seconds — that is why they are
    * the ones that show up in scripts. The vocabulary is wider than branch and
    * flow, but the constraint has not moved.
    */
-  shape?: "branch" | "flow" | "quadrant" | "pyramid" | "compare";
+  shape?: "branch" | "flow" | "quadrant" | "pyramid" | "compare" | "circular";
   items: {
     name: string;
     note: string;
@@ -334,7 +336,53 @@ export interface ModelAnswerPart {
   thinker?: string;
   specific?: string;
   must?: Obligation;
+  /**
+   * Which of the six openings this is, where the part is the opening.
+   *
+   * Vision IAS's deck gives a candidate a menu rather than a habit: definition,
+   * recent event, report, data, background, summarise. The point of naming the
+   * one used is that the other five become visible — an opening is a choice,
+   * and a candidate who only ever writes the definition one has not made it.
+   */
+  /**
+   * The phrases inside this part that are the factual support, not the claim.
+   *
+   * A subset of what the answer says, marked apart so the screen can colour it:
+   * the Act, the Census round, the figure, the report. Underlining already
+   * marks what to underline on paper; this marks where the proof is, which is
+   * the thing a candidate cannot see when every sentence is the same colour.
+   */
+  evidence?: string[];
+  openingType?: OpeningType;
+  /** Which of the three closes this is, where the part is the close. */
+  closeType?: CloseType;
+  /**
+   * Which face of the question a body block argues from.
+   *
+   * The deck's instruction is to cover socio, economic, political, cultural and
+   * environmental. Recorded per block so the page can show which of the five an
+   * answer actually touched — the gap is the thing worth seeing, and it is
+   * invisible while the answer reads well.
+   */
+  dimension?: Dimension;
 }
+
+export type OpeningType =
+  | "definition"
+  | "event"
+  | "report"
+  | "data"
+  | "background"
+  | "summarise";
+
+export type CloseType = "summarised" | "balanced" | "reformist";
+
+export type Dimension =
+  | "social"
+  | "economic"
+  | "political"
+  | "cultural"
+  | "environmental";
 
 export interface ModelAnswer {
   parts: ModelAnswerPart[];
@@ -367,6 +415,18 @@ export interface ModelAnswer {
    * candidate's job. These are a draft to correct, never a source.
    */
   examples?: { text: string; where: string; asOf?: string }[];
+  /**
+   * The same answer's opening, written two other ways.
+   *
+   * Fetched with the answer rather than on demand, because a second call to
+   * rewrite one paragraph costs a whole request out of a capped monthly
+   * allowance and buys nothing the first call could not have carried. The
+   * screen turns them into tabs: the candidate sees that the opening they were
+   * given was picked from a menu, and reads the menu.
+   */
+  altOpenings?: { type: OpeningType; text: string }[];
+  /** The same, for the close: summarised, balanced, reformist. */
+  altCloses?: { type: CloseType; text: string }[];
   usedTopics: string[];
   words: number;
   /** Ids the model claimed that are not in the syllabus. Shown, never hidden. */
@@ -769,6 +829,19 @@ export async function modelAnswer(
     parsed.examples = (Array.isArray(parsed.examples) ? parsed.examples : []).filter(
       (e) => e && typeof e.text === "string" && e.text.trim() && typeof e.where === "string",
     );
+
+    /*
+     * An alternative with no text is a tab that opens onto nothing. Dropped
+     * here so the screen can assume that what it has, it can render.
+     */
+    function alts<T extends { type: string; text: string }>(v: unknown): T[] {
+      const list = Array.isArray(v) ? (v as T[]) : [];
+      return list.filter(
+        (x) => !!x && typeof x.text === "string" && !!x.text.trim() && typeof x.type === "string",
+      );
+    }
+    parsed.altOpenings = alts<{ type: OpeningType; text: string }>(parsed.altOpenings);
+    parsed.altCloses = alts<{ type: CloseType; text: string }>(parsed.altCloses);
 
     if (!Array.isArray(parsed.demands)) parsed.demands = [];
     parsed.demands = parsed.demands.filter((x) => x && typeof x.label === "string" && x.label);

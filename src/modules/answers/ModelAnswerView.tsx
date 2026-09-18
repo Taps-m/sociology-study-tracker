@@ -2,10 +2,13 @@ import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import { openInTab } from "../../lib/printable";
 import type {
+  CloseType,
   Diagram as DiagramData,
+  Dimension,
   MethodStep,
   ModelAnswer,
   ModelAnswerPart,
+  OpeningType,
 } from "../../lib/ai";
 import { C } from "../../lib/theme";
 
@@ -18,9 +21,22 @@ import { C } from "../../lib/theme";
  * missing underline is invisible, a mangled sentence is not.
  */
 
-/** Underline the given phrases where they appear, longest first. */
-function marked(text: string, phrases: string[]): ReactNode {
-  const wanted = [...new Set(phrases.filter(Boolean))].sort((a, b) => b.length - a.length);
+/**
+ * Underline the given phrases where they appear, longest first.
+ *
+ * Two colours, because two different things are being marked. The accent marks
+ * what to underline in the booklet: the concept the sentence turns on, the word
+ * it lands on. The amber marks the evidence inside it — the Act, the Census
+ * round, the figure — and that one is a screen aid rather than an instruction,
+ * since a candidate has one pen. Its job is that the supporting fact can be
+ * found without reading the paragraph, so a block resting on nothing is
+ * visible as a block with no amber in it.
+ */
+function marked(text: string, phrases: string[], evidence: string[] = []): ReactNode {
+  const facts = new Set(evidence.filter(Boolean));
+  const wanted = [...new Set([...phrases, ...evidence].filter(Boolean))].sort(
+    (a, b) => b.length - a.length,
+  );
   let pieces: ReactNode[] = [text];
 
   for (const phrase of wanted) {
@@ -40,12 +56,23 @@ function marked(text: string, phrases: string[]): ReactNode {
         piece.slice(0, at),
         <span
           key={`${phrase}-${at}`}
-          style={{
-            textDecoration: "underline",
-            textUnderlineOffset: 3,
-            textDecorationColor: C.accent,
-            textDecorationThickness: 1.5,
-          }}
+          style={
+            facts.has(phrase)
+              ? {
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                  textDecorationColor: C.warn,
+                  textDecorationThickness: 1.5,
+                  color: C.warn,
+                  fontWeight: 600,
+                }
+              : {
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                  textDecorationColor: C.accent,
+                  textDecorationThickness: 1.5,
+                }
+          }
         >
           {phrase}
         </span>,
@@ -82,6 +109,149 @@ function MustBadge({ must }: { must?: "core" | "yours" }) {
 }
 
 /**
+ * The six ways into an answer, and the three ways out.
+ *
+ * Vision IAS's deck sets them out as a menu, which is the thing a candidate
+ * never sees: they write the definition opening every time because it is the
+ * only one they have ever written, not because the question rewarded it. So the
+ * opening is labelled with the choice that was made and the other two are one
+ * click away — the paragraph is the same argument each time, and what changes
+ * is the way in.
+ */
+const OPENING_NAMES: Record<OpeningType, string> = {
+  definition: "Definition",
+  event: "Recent event",
+  report: "Report",
+  data: "Data or figure",
+  background: "Background",
+  summarise: "Summarise the question",
+};
+
+const CLOSE_NAMES: Record<CloseType, string> = {
+  summarised: "Summarised",
+  balanced: "Balanced",
+  reformist: "Reformist",
+};
+
+/** The tab row over a swappable opening or close. One is the model's pick. */
+function Versions({
+  names,
+  at,
+  onPick,
+}: {
+  names: string[];
+  at: number;
+  onPick: (i: number) => void;
+}) {
+  if (names.length < 2) return null;
+  return (
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 7 }}>
+      {names.map((name, i) => (
+        <button
+          key={`${name}-${i}`}
+          onClick={() => onPick(i)}
+          title={i === 0 ? "The one the model chose for this question" : "The same argument, entered a different way"}
+          style={{
+            minHeight: 26,
+            padding: "0 9px",
+            borderRadius: 999,
+            border: `1px solid ${i === at ? C.accent : C.line}`,
+            background: i === at ? C.accentSoft : "transparent",
+            color: i === at ? C.accent : C.muted,
+            font: "inherit",
+            fontSize: 12,
+            fontWeight: i === at ? 700 : 500,
+            cursor: "pointer",
+          }}
+        >
+          {name}
+          {i === 0 && " \u2713"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Which of the five faces of the question the answer actually argued from.
+ *
+ * The deck's instruction is to cover socio, economic, political, cultural and
+ * environmental, and the reason it has to be shown rather than said is that a
+ * one-sided answer reads perfectly well. Four lit chips and one grey one is the
+ * only way to see, in a second, that nothing in nine hundred words touched the
+ * economic side of a question that asked for it.
+ */
+const DIMENSIONS: { id: Dimension; label: string }[] = [
+  { id: "social", label: "Social" },
+  { id: "economic", label: "Economic" },
+  { id: "political", label: "Political" },
+  { id: "cultural", label: "Cultural" },
+  { id: "environmental", label: "Environmental" },
+];
+
+function DimensionStrip({ parts }: { parts: ModelAnswerPart[] }) {
+  const covered = new Set(
+    parts.filter((p) => p.kind === "block" && p.dimension).map((p) => p.dimension as Dimension),
+  );
+  if (covered.size === 0) return null;
+  return (
+    <section style={{ margin: "16px 0 0" }}>
+      <div
+        style={{
+          fontFamily: C.mono,
+          fontSize: 10.5,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: C.muted,
+          marginBottom: 7,
+        }}
+      >
+        Sides of the question this covers
+      </div>
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
+        {DIMENSIONS.map((d) => {
+          const on = covered.has(d.id);
+          return (
+            <button
+              key={d.id}
+              disabled={!on}
+              onClick={() =>
+                document
+                  .getElementById(`dim-${d.id}`)
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" })
+              }
+              title={on ? "Jump to the block that argues this side" : "Nothing in this answer argues from this side"}
+              style={{
+                minHeight: 28,
+                padding: "0 11px",
+                borderRadius: 999,
+                border: `1px ${on ? "solid" : "dashed"} ${on ? C.good : C.line}`,
+                background: on ? C.goodSoft : "transparent",
+                color: on ? C.good : C.muted,
+                font: "inherit",
+                fontSize: 12.5,
+                fontWeight: on ? 650 : 500,
+                cursor: on ? "pointer" : "default",
+                opacity: on ? 1 : 0.65,
+              }}
+            >
+              {d.label}
+            </button>
+          );
+        })}
+      </div>
+      {covered.size < 3 && (
+        <p style={{ fontSize: 12.5, color: C.muted, margin: "7px 0 0", lineHeight: 1.6 }}>
+          Grey is not always a fault — a purely theoretical question has no economic side. But
+          where the question asks about Indian society and only one chip is lit, that is the gap
+          the examiner will see too.
+        </p>
+      )}
+    </section>
+  );
+}
+
+/**
  * One part of the answer, dressed so the shape is visible before it is read.
  *
  * It was all one column of grey paragraphs, which is exactly what an answer
@@ -93,7 +263,25 @@ function MustBadge({ must }: { must?: "core" | "yours" }) {
  * position. Colour carries the same information the layout does, never
  * information of its own.
  */
-function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) {
+function Part({
+  part,
+  index,
+  alts = [],
+  anchorId,
+  practice = false,
+}: {
+  part: ModelAnswerPart;
+  index: number | null;
+  /** Other ways this opening or close could have been written. */
+  alts?: { type: string; text: string }[];
+  /** Set on the first block of each dimension, so the strip can jump to it. */
+  anchorId?: string;
+  /** Hide the prose until it is asked for, so the block can be attempted first. */
+  practice?: boolean;
+}) {
+  const [version, setVersion] = useState(0);
+  const [shown, setShown] = useState(false);
+
   if (part.kind === "signpost") {
     return (
       <p
@@ -140,8 +328,20 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
           </span>
           <MustBadge must={part.must} />
         </div>
+        {close && alts.length > 0 && (
+          <Versions
+            names={[
+              CLOSE_NAMES[part.closeType ?? "summarised"],
+              ...alts.map((a) => CLOSE_NAMES[a.type as CloseType] ?? a.type),
+            ]}
+            at={version}
+            onPick={setVersion}
+          />
+        )}
         <p style={{ fontSize: 15, lineHeight: 1.85, margin: 0 }}>
-          {marked(part.text, part.underline)}
+          {version === 0
+            ? marked(part.text, part.underline, part.evidence)
+            : (alts[version - 1]?.text ?? part.text)}
         </p>
       </div>
     );
@@ -151,7 +351,19 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
     return (
       <div style={{ margin: "14px 0 0" }}>
         <MustBadge must={part.must} />
-          <p
+        {alts.length > 0 && (
+          <div style={{ marginTop: 7 }}>
+            <Versions
+              names={[
+                OPENING_NAMES[part.openingType ?? "definition"],
+                ...alts.map((a) => OPENING_NAMES[a.type as OpeningType] ?? a.type),
+              ]}
+              at={version}
+              onPick={setVersion}
+            />
+          </div>
+        )}
+        <p
           style={{
             fontSize: 15.5,
             lineHeight: 1.85,
@@ -161,7 +373,9 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
             color: C.text,
           }}
         >
-          {marked(part.text, part.underline)}
+          {version === 0
+            ? marked(part.text, part.underline, part.evidence)
+            : (alts[version - 1]?.text ?? part.text)}
         </p>
       </div>
     );
@@ -180,10 +394,12 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
    */
   return (
     <div
+      id={anchorId}
       style={{
         margin: "20px 0 0",
         paddingLeft: 14,
         borderLeft: `2px solid ${C.line}`,
+        scrollMarginTop: 12,
       }}
     >
       <div
@@ -203,10 +419,48 @@ function Part({ part, index }: { part: ModelAnswerPart; index: number | null }) 
         <span style={{ fontSize: 15.5, fontWeight: 700, color: C.text }}>{part.keyword}</span>
         <MustBadge must={part.must} />
       </div>
-      <p style={{ fontSize: 15, lineHeight: 1.85, margin: 0 }}>
-        {marked(part.text, part.underline)}
-      </p>
-      {(part.thinker || part.specific) && (
+      {practice && !shown ? (
+        /*
+         * The keyword, and nothing else, until it has been attempted.
+         *
+         * Reading a model answer teaches almost nothing — the sentences make
+         * sense as they are read and the mind mistakes that for being able to
+         * produce them. Covering the prose and leaving the label turns the same
+         * page into the exam: you write the block from the keyword, then reveal
+         * and see what you left out. The word count is shown because knowing
+         * you are eighty words short is half the correction.
+         */
+        <button
+          onClick={() => setShown(true)}
+          style={{
+            display: "block",
+            width: "100%",
+            textAlign: "left",
+            minHeight: 46,
+            padding: "11px 13px",
+            borderRadius: 9,
+            border: `1px dashed ${C.line}`,
+            background: "transparent",
+            color: C.muted,
+            font: "inherit",
+            fontSize: 13,
+            lineHeight: 1.6,
+            cursor: "pointer",
+          }}
+        >
+          Write this block from the keyword, then tap to reveal —{" "}
+          <span className="num">{part.text.trim().split(/\s+/).length}</span> words,{" "}
+          {part.evidence && part.evidence.length > 0
+            ? `${part.evidence.length} fact${part.evidence.length === 1 ? "" : "s"} in it`
+            : "no fact in it"}
+          .
+        </button>
+      ) : (
+        <p style={{ fontSize: 15, lineHeight: 1.85, margin: 0 }}>
+          {marked(part.text, part.underline, part.evidence)}
+        </p>
+      )}
+      {(!practice || shown) && (part.thinker || part.specific) && (
         <p
           style={{
             fontSize: 12.5,
@@ -437,6 +691,116 @@ function Compare({ diagram }: { diagram: DiagramData }) {
   );
 }
 
+/**
+ * A loop that feeds itself, drawn as one.
+ *
+ * Medha Anand (Rank 13) drew this twice, and sociology is full of the shape:
+ * poverty to poor schooling to low skill to low wage to poverty again. Written
+ * out as a list it reads as four separate causes; drawn as a circle it reads as
+ * the one thing it is, which is that the last stage is the first stage's cause.
+ * The arrows carry the whole argument, so they are drawn rather than implied.
+ */
+function Circular({ diagram }: { diagram: DiagramData }) {
+  const items = diagram.items.slice(0, 5);
+  const n = items.length;
+  if (n < 3) return null;
+
+  const step = 360 / n;
+  const pad = Math.min(step * 0.34, 30);
+  const at = (deg: number, r: number) => {
+    const rad = ((deg - 90) * Math.PI) / 180;
+    return { x: 50 + r * Math.cos(rad), y: 50 + r * Math.sin(rad) };
+  };
+
+  return (
+    <div>
+      <div
+        style={{
+          fontSize: 14,
+          fontWeight: 700,
+          color: C.accent,
+          textAlign: "center",
+          marginBottom: 8,
+        }}
+      >
+        {diagram.label}
+      </div>
+
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: 420,
+          aspectRatio: "1 / 1",
+          margin: "0 auto",
+        }}
+      >
+        <svg
+          viewBox="0 0 100 100"
+          aria-hidden
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+        >
+          <defs>
+            <marker
+              id="loop-arrow"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="5"
+              markerHeight="5"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 1 L 9 5 L 0 9 z" fill={C.accent} />
+            </marker>
+          </defs>
+          {items.map((_, i) => {
+            const from = at(i * step + pad, 33);
+            const to = at((i + 1) * step - pad, 33);
+            return (
+              <path
+                key={i}
+                d={`M ${from.x} ${from.y} A 33 33 0 0 1 ${to.x} ${to.y}`}
+                fill="none"
+                stroke={C.accent}
+                strokeWidth="1.1"
+                markerEnd="url(#loop-arrow)"
+              />
+            );
+          })}
+        </svg>
+
+        {items.map((it, i) => {
+          const pos = at(i * step, 36);
+          return (
+            <div
+              key={it.name}
+              style={{
+                position: "absolute",
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                transform: "translate(-50%, -50%)",
+                width: "38%",
+                textAlign: "center",
+                padding: "7px 8px",
+                borderRadius: 9,
+                border: `1.5px solid ${C.line}`,
+                background: C.raised,
+              }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35 }}>{it.name}</div>
+              {it.note && (
+                <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.4, marginTop: 2 }}>
+                  {it.note}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
   if (!diagram?.label || diagram.items.length === 0) return null;
   const flow = diagram.shape === "flow";
@@ -456,7 +820,9 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
         Copy this onto the page
       </div>
 
-      {diagram.shape === "quadrant" ? (
+      {diagram.shape === "circular" ? (
+        <Circular diagram={diagram} />
+      ) : diagram.shape === "quadrant" ? (
         <Quadrant diagram={diagram} />
       ) : diagram.shape === "pyramid" ? (
         <Pyramid diagram={diagram} />
@@ -515,6 +881,12 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
           <>
             <span className="num">{diagram.items.length}</span> levels, widest at the base. Draw
             the base first and work up.
+          </>
+        ) : diagram.shape === "circular" ? (
+          <>
+            <span className="num">{diagram.items.length}</span> stages and the last arrow closes
+            back onto the first — the point is that it feeds itself. Draw the circle first, then
+            the boxes on it.
           </>
         ) : diagram.shape === "compare" ? (
           <>
@@ -817,6 +1189,75 @@ function Sources({ books }: { books: string[] }) {
   );
 }
 
+/**
+ * The apparatus, folded away until it is wanted.
+ *
+ * Where the chapters are, what the badges mean, how long the answer runs — all
+ * of it is worth having and none of it is the answer. Left open it ran on
+ * below the conclusion for half a screen, so the page ended in housekeeping
+ * and the answer looked longer than it was. Shut, it is one line; and the copy
+ * that goes to a new tab or a printer opens it again, because nothing there
+ * can be clicked.
+ */
+function Fold({
+  title,
+  tone = "quiet",
+  children,
+}: {
+  title: string;
+  /** A caution still has to be seen while shut, so it keeps its colour. */
+  tone?: "quiet" | "warn";
+  children: ReactNode;
+}) {
+  const warn = tone === "warn";
+  return (
+    <details style={{ marginTop: warn ? 12 : 22 }}>
+      <summary
+        style={{
+          cursor: "pointer",
+          listStyle: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          fontFamily: warn ? "inherit" : C.mono,
+          fontSize: warn ? 13 : 11,
+          fontWeight: warn ? 650 : 400,
+          letterSpacing: warn ? "normal" : "0.1em",
+          textTransform: warn ? "none" : "uppercase",
+          color: warn ? C.warn : C.muted,
+          padding: warn ? "8px 11px" : "7px 0",
+          borderTop: warn ? "none" : `1px solid ${C.line}`,
+          borderLeft: warn ? `2px solid ${C.warn}` : "none",
+          borderRadius: warn ? 8 : 0,
+          background: warn ? C.warnSoft : "transparent",
+        }}
+      >
+        <span
+          aria-hidden
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 17,
+            height: 17,
+            borderRadius: 5,
+            border: `1px solid ${warn ? C.warn : C.line}`,
+            fontSize: 12,
+            lineHeight: 1,
+            flex: "0 0 auto",
+          }}
+        >
+          +
+        </span>
+        {title}
+      </summary>
+      <div style={warn ? { padding: "2px 13px 0", fontSize: 13, lineHeight: 1.7 } : undefined}>
+        {children}
+      </div>
+    </details>
+  );
+}
+
 export function ModelAnswerView({
   answer,
   books = [],
@@ -831,6 +1272,18 @@ export function ModelAnswerView({
   let blockIndex = -1;
   const sheet = useRef<HTMLDivElement | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [practice, setPractice] = useState(false);
+
+  /*
+   * One anchor per dimension, on the first block that argues from it, so the
+   * strip above can jump to the thing it is claiming exists.
+   */
+  const anchored = new Map<string, number>();
+  answer.parts.forEach((p, i) => {
+    if (p.kind === "block" && p.dimension && !anchored.has(p.dimension)) {
+      anchored.set(p.dimension, i);
+    }
+  });
   return (
     <div className="answer-split" ref={sheet}>
       <div className="answer-main">
@@ -840,6 +1293,24 @@ export function ModelAnswerView({
         print dialog turns it into a PDF from there.
       */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginBottom: 4 }}>
+        <button
+          onClick={() => setPractice((v) => !v)}
+          title="Hide every block's prose and leave only its keyword. Write the block yourself, then reveal it and see what you left out."
+          style={{
+            minHeight: 34,
+            padding: "0 13px",
+            borderRadius: 8,
+            border: `1px solid ${practice ? C.accent : C.line}`,
+            background: practice ? C.accentSoft : C.raised,
+            color: practice ? C.accent : C.text,
+            font: "inherit",
+            fontSize: 13,
+            fontWeight: practice ? 650 : 400,
+            cursor: "pointer",
+          }}
+        >
+          {practice ? "Showing keywords only" : "Practice mode"}
+        </button>
         <button
           onClick={() => {
             if (sheet.current) setBlocked(!openInTab(sheet.current, question));
@@ -867,32 +1338,45 @@ export function ModelAnswerView({
       )}
 
       <BuiltFrom from={answer.notesFrom} />
-      <p
-        style={{
-          fontSize: 13,
-          lineHeight: 1.7,
-          margin: "12px 0 0",
-          padding: "11px 13px",
-          borderRadius: 8,
-          background: C.warnSoft,
-          borderLeft: `2px solid ${C.warn}`,
-        }}
-      >
-        <strong>A model answer — change it.</strong> The question will be worded differently on
-        the day, and an answer reproduced from memory reads like one. Take the shape, the
-        underlining and the way the facts are placed; put your own phrasing through it. And check
-        every figure, Act and report before you write it in the hall — they are drafted by a model
-        whose knowledge has a cutoff, and wrong-and-confident costs more marks than absent.
-      </p>
+      {/*
+        The caution folds, because it does not change.
+        It was five lines of the same warning above every answer ever opened,
+        which is how a warning stops being read: the eye learns its shape and
+        skips it, and it pushes the first paragraph of the answer below the
+        fold on a laptop. Shut it is one amber line — still the first thing on
+        the page, still amber, and still there on the twentieth answer.
+      */}
+      <Fold tone="warn" title="A model answer — change it, and check every figure">
+        The question will be worded differently on the day, and an answer reproduced from memory
+        reads like one. Take the shape, the underlining and the way the facts are placed; put your
+        own phrasing through it. And check every figure, Act and report before you write it in the
+        hall — they are drafted by a model whose knowledge has a cutoff, and wrong-and-confident
+        costs more marks than absent.
+      </Fold>
+
+      <DimensionStrip parts={answer.parts} />
 
       {(() => {
         const rendered = answer.parts.map((part, i) => {
           if (part.kind === "block") blockIndex += 1;
           return (
             <Part
-              key={`${part.kind}-${i}`}
+              key={`${part.kind}-${i}-${practice}`}
               part={part}
               index={part.kind === "block" ? blockIndex : null}
+              alts={
+                part.kind === "opening"
+                  ? (answer.altOpenings ?? [])
+                  : part.kind === "close"
+                    ? (answer.altCloses ?? [])
+                    : []
+              }
+              anchorId={
+                part.dimension && anchored.get(part.dimension) === i
+                  ? `dim-${part.dimension}`
+                  : undefined
+              }
+              practice={practice}
             />
           );
         });
@@ -912,6 +1396,7 @@ export function ModelAnswerView({
 
       <Diagram diagram={answer.diagram} />
 
+      <Fold title="Where to check this, and what the marks mean">
       <Sources books={books} />
 
       <p style={{ fontSize: 12.5, color: C.muted, margin: "20px 0 0", lineHeight: 1.65 }}>
@@ -929,8 +1414,11 @@ export function ModelAnswerView({
         met without — leave it out and it costs marks.{" "}
         <strong style={{ color: C.good }}>Your own</strong> marks where the idea has to appear
         but the example and the wording should be yours. Replacing those is the difference
-        between using this answer and copying it.
+        between using this answer and copying it.{" "}
+        <strong style={{ color: C.warn }}>Amber</strong> marks the evidence inside a sentence —
+        the Act, the figure, the round. A block with no amber in it is resting on nothing.
       </p>
+      </Fold>
 
       {answer.offSyllabus && answer.offSyllabus.length > 0 && (
         <p

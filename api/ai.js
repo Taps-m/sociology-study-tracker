@@ -178,7 +178,7 @@ const TOKEN_BUDGET = {
   evaluate: 3072, cheatsheet: 4096, drill: 1536,
   structure: 8192,
   // A full 900-1100 word answer, plus the model's thinking before it.
-  model: 16384,
+  model: 18432,
 };
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
@@ -519,6 +519,48 @@ The test for the whole thing: read it aloud. The frame should sound like an
 argument being made. The blocks should sound like a well-informed person
 explaining one idea at a time, never like a revision card being read out.
 
+SAY WHICH PHRASES ARE THE EVIDENCE. In every part, list under "evidence" the
+exact phrases from that part's own text that are the factual support rather than
+the claim: the named Act, the Census or survey round, the figure, the committee,
+the judgment. Give each phrase exactly as it appears in the text.
+
+It is a subset of what is there, not a second copy of "underline" — a part whose
+argument rests on nothing factual has an empty list, and that is the useful
+answer, because the screen colours these and a block with no colour in it is a
+block the candidate can see is unsupported. A scholar's name is not evidence
+here; it belongs in "thinker".
+
+AN OPENING IS A CHOICE FROM SIX, AND YOU SAY WHICH YOU MADE. Vision IAS's deck
+names six ways into an answer, each one a real script:
+
+  "definition"  — define the central idea and move.
+  "event"       — a recent incident that sets the tone.
+  "report"      — a study or report of national or international standing.
+  "data"        — a figure or statistic that substantiates the issue.
+  "background"  — the shape of the issue, with an example or two.
+  "summarise"   — the essence of the question, restated as your thesis.
+
+Pick the one this question actually rewards and put its name in "openingType"
+on the opening part. Then write the opening two more times, each in a different
+one of the six, and put those in "altOpenings" — same argument, same length,
+different way in. The candidate is not being given a paragraph; they are being
+shown that the paragraph was a choice.
+
+A CLOSE IS A CHOICE FROM THREE. "summarised" gathers what was argued;
+"balanced" holds the two sides and says which weighs more; "reformist" names
+what should change. Put the one you used in "closeType" on the close part, and
+write the other two into "altCloses". Never the same argument three times in
+different words — a reformist close ends somewhere a summarised one does not.
+
+WHICH FACE OF THE QUESTION EACH BLOCK ARGUES FROM. Against every body block put
+"dimension": one of social, economic, political, cultural, environmental — or
+empty where the block is definitional or methodological and belongs to none.
+
+Be honest rather than tidy: do not relabel three social blocks as three
+different dimensions to look complete. The candidate is shown which of the five
+the answer touched, and a truthful gap there is worth more than a full row,
+because the gap is what they will fix.
+
 MARK IT UP, AND MARK THREE KINDS OF THING. In every part, list under "underline"
 the exact phrases from that part's own text that should be underlined in the
 answer booklet. Give each phrase exactly as it appears in the text or it cannot
@@ -537,8 +579,8 @@ underlining everything is the same as underlining nothing.
 DRAW ONE THING, IN THE RIGHT SHAPE. Where a diagram would carry something
 faster than prose, give it: a label and three to five items, plus "shape".
 
-Five shapes, and they are the five that appear in real topper scripts rather
-than five a designer liked. Pick by what the content is:
+Six shapes, and they are the six that appear in real topper scripts rather than
+six a designer liked. Pick by what the content is:
 
   "flow"     — stages that lead to one another: a causal chain, a process, a
                sequence of consequences. Items go in the order they happen,
@@ -564,8 +606,17 @@ than five a designer liked. Pick by what the content is:
                sit side by side and the reader has to work out what is being
                compared. Traditional against modern, rural against urban,
                organised against unorganised.
+  "circular" — a loop that feeds itself: each stage causes the next and the last
+               returns to the first. Medha Anand, Rank 13, drew this twice.
+               Sociology is full of them and they are almost always written out
+               as lists instead — poverty, poor schooling, low skill, low wage,
+               poverty again; or dowry, son preference, skewed sex ratio, higher
+               dowry. Use it only where the loop genuinely closes, because a
+               circle drawn round a chain that does not close is a lie about the
+               argument. Items in the order they cause one another; three to
+               five, because a pen cannot close six.
   "branch"   — kinds or types of one thing, in no particular order, where none
-               of the four above is truer. The plainest shape, and the last
+               of the five above is truer. The plainest shape, and the last
                resort rather than the default.
 
 BEFORE CHOOSING "branch", TRY TO EARN A QUADRANT. Where you have three to five
@@ -755,15 +806,17 @@ near an exam.
 
 Reply with JSON and nothing else, in exactly this shape:
 
-{"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"must":"core"},
+{"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"evidence":["<exact phrase that is a fact>"],"must":"core","openingType":"definition|event|report|data|background|summarise"},
           {"kind":"signpost","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
-          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours"},
+          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"evidence":["<exact phrase that is a fact>"],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours","dimension":"social|economic|political|cultural|environmental|"},
           {"kind":"pivot","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
-          {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"must":"core"}],
+          {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"evidence":[],"must":"core","closeType":"summarised|balanced|reformist"}],
+ "altOpenings":[{"type":"<one of the six, not the one used>","text":"<the opening written that way>"}],
+ "altCloses":[{"type":"<one of the three, not the one used>","text":"<the close written that way>"}],
  "method":[{"step":"demand|define|flow|coreBody|example|thinker|conclusion","state":"used|notNeeded","where":"<at most 12 words>"}],
  "demands":[{"label":"<3-8 words>","minutes":0}],
  "independent":true,
- "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
+ "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare|circular","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
  "usedTopics":["<syllabus topic id>"],
  "words":0}
 
@@ -810,7 +863,7 @@ Reply with JSON and nothing else, in exactly this shape:
 {"must":[{"term":"<1-4 words>","line":"<what it means, at most 15 words>"}],
  "thinkers":[{"name":"...","for":"<what he is for here, at most 10 words>"}],
  "specifics":["<a named Act, figure, case or place>"],
- "diagram":{"label":"<2-4 words, or empty>","shape":"branch|flow|quadrant|pyramid|compare","items":[{"name":"...","note":"...","points":["<for quadrant and compare>"]}]},
+ "diagram":{"label":"<2-4 words, or empty>","shape":"branch|flow|quadrant|pyramid|compare|circular","items":[{"name":"...","note":"...","points":["<for quadrant and compare>"]}]},
  "trap":"<one line>",
  "askedAs":["<how this topic is typically worded in a question>"],
  "usedTopics":["<syllabus topic id>"]}
@@ -1020,7 +1073,7 @@ Reply with JSON and nothing else, in exactly this shape:
             "thinker":"<name, or empty>","specific":"<number, Act, place, case, or empty>",
             "depth":"full|brief"}],
  "pivot":"<the turning sentence, or empty if the question has one part>",
- "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
+ "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare|circular","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
  "insteadOfDiagram":"<one line, only when there is no diagram>",
  "close":{"type":"two-sided|concessive|forward|answers-demand","text":"<the actual closing lines>"},
  "minutes":[{"section":"<name>","minutes":0}]}

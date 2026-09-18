@@ -988,3 +988,20 @@ input[type="range"]::-moz-range-thumb {
     display: none;
   }
 }
+
+/*
+ * Folded apparatus.
+ *
+ * The answer is the answer; the sources, the legend and the standing caution
+ * are things to consult, and left open they ran on below the conclusion until
+ * the page ended in housekeeping. They fold now, and the marker is the app's
+ * own square rather than the browser's triangle so a shut fold reads as
+ * something to open rather than as a heading with a bullet.
+ */
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details[open] > summary > span[aria-hidden] { font-size: 0; }
+details[open] > summary > span[aria-hidden]::before {
+  content: "\2212";
+  font-size: 12px;
+}
