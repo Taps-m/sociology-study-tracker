@@ -9,10 +9,27 @@
  * knowledge with the chapters cited beside it, rather than out of the chapters
  * themselves. The app says so rather than letting anyone assume otherwise.
  */
+/*
+ * Sangwan is finished: all 547 pages, 17 Sep 2026. The old total of 445 was
+ * wrong — the PDF holds 547 pages, 535 of them printed, and that figure had
+ * been estimated rather than counted.
+ *
+ * It is a CamScanner photograph of a bound book, so this is OCR of curved
+ * pages, not a text layer, and the quality is uneven. Scored against a
+ * vocabulary built from the corpus itself: 18% of pages clean, 72% usable,
+ * 9% rough, 1% poor. Character recognition is good; what fails on the worst
+ * pages is line ORDER, because the lines bow away from the spine and the
+ * segmenter takes the end of one line as the start of another. A human reader
+ * trips on that. A model reading the page as context mostly does not, which is
+ * what this text is for.
+ *
+ * The weakest tenth was re-run through a deskew and kept only where it scored
+ * better — it won on 23 pages of 54 and was discarded on the rest.
+ */
 export const BOOK_SCAN = {
-  sangwan: { read: 7, total: 445 },
+  sangwan: { read: 547, total: 547 },
   haralambos: { read: 0, total: 368 },
-  updated: "2026-09-01",
+  updated: "2026-09-17",
 } as const;
 
 export function scanPagesRead(): number {
