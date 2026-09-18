@@ -94,13 +94,39 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.6;
 }
-main { max-width: 760px; margin: 0 auto; }
-/* The split layout is for a screen with a rail beside it; here it is one column. */
-.answer-split, .answer-main, .answer-aside { display: block; width: auto; max-width: none; }
+main { max-width: 1090px; margin: 0 auto; }
+/*
+ * The method checklist stays beside the answer here too, and sticks.
+ *
+ * It was one column, which put the seven steps a thousand words below the
+ * answer they describe — by the time you reached them you could no longer see
+ * what you were checking. The whole point of the list is to be held against
+ * the page while reading it, so on screen it is a column on the right that
+ * does not scroll away. The answer itself stays at its reading width; the
+ * page is widened only by what the rail takes.
+ */
+.answer-split {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  justify-content: center;
+}
+.answer-main { flex: 1 1 760px; max-width: 760px; min-width: 0; }
+.answer-aside { flex: 0 0 258px; position: sticky; top: 16px; }
 h1.sheet-title { font-size: 19px; line-height: 1.35; margin: 0 0 22px; }
+@media (max-width: 1000px) {
+  main { max-width: 760px; }
+  .answer-split { display: block; }
+  .answer-main, .answer-aside { max-width: none; }
+  .answer-aside { position: static; margin-top: 22px; }
+}
 @media print {
   body { padding: 0; background: #fff; color: #000; }
-  .answer-aside { break-before: page; }
+  main { max-width: none; }
+  /* Sticky and paper do not mix: on paper the list is a page of its own. */
+  .answer-split { display: block; }
+  .answer-main, .answer-aside { max-width: none; }
+  .answer-aside { position: static; break-before: page; }
   /* Keep a block and its heading together rather than breaking between them. */
   section, li { break-inside: avoid; }
 }
