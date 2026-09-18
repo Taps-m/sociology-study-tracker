@@ -215,11 +215,23 @@ function DimensionStrip({ parts }: { parts: ModelAnswerPart[] }) {
             <button
               key={d.id}
               disabled={!on}
-              onClick={() =>
-                document
-                  .getElementById(`dim-${d.id}`)
-                  ?.scrollIntoView({ behavior: "smooth", block: "center" })
-              }
+              onClick={() => {
+                /*
+                 * The block it points at may be inside a part that is folded
+                 * shut, and scrolling to something display:none does nothing
+                 * at all — a chip that looks live and is dead. So every fold
+                 * above it is opened first, and React is told, because each
+                 * <details> reports its own toggle back.
+                 */
+                const el = document.getElementById(`dim-${d.id}`);
+                if (!el) return;
+                let fold = el.closest("details");
+                while (fold) {
+                  fold.open = true;
+                  fold = fold.parentElement?.closest("details") ?? null;
+                }
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
               title={on ? "Jump to the block that argues this side" : "Nothing in this answer argues from this side"}
               style={{
                 minHeight: 28,
@@ -918,23 +930,45 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
  * The fold is for the second reading, when the wall of text is the problem
  * rather than the lesson.
  */
+/**
+ * One of the things the question asks, with the rest folded behind it.
+ *
+ * A question that asks two things gets a thousand words in one scroll, and the
+ * second half is read with the attention left over from the first. Only the
+ * first part opens; the others sit as one line each. What that line has to
+ * carry is the part's size, because the cost of hiding a part is losing the
+ * sense of proportion between them — and proportion is half of what the demand
+ * split teaches. So the minutes and the word count are on the shut line: you
+ * can see that part two is fifteen minutes and four hundred words without
+ * opening it, which is the thing you would otherwise have had to open it for.
+ *
+ * It is a <details> rather than a button and a flag, and that is not cosmetic.
+ * The copy that goes to a new tab or a printer opens every fold it finds; a
+ * part hidden behind React state would have been dropped from the PDF without
+ * a word, which is the worst way for an answer to lose half of itself.
+ */
 function Section({
   demand,
   index,
   total,
+  words,
   children,
 }: {
   demand: { label: string; minutes: number };
   index: number;
   total: number;
+  /** Words in this part, so its size is legible while it is shut. */
+  words: number;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(index === 0);
   return (
-    <section style={{ marginTop: index === 0 ? 18 : 22 }}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
+    <details
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+      style={{ marginTop: index === 0 ? 18 : 22 }}
+    >
+      <summary
         style={{
           display: "flex",
           alignItems: "center",
@@ -942,12 +976,12 @@ function Section({
           width: "100%",
           padding: "9px 12px",
           borderRadius: 9,
-          border: "none",
           background: C.accentSoft,
           color: C.text,
           font: "inherit",
           textAlign: "left",
           cursor: "pointer",
+          listStyle: "none",
         }}
       >
         <span
@@ -970,12 +1004,17 @@ function Section({
             {demand.minutes} min
           </span>
         )}
-        <span aria-hidden style={{ color: C.muted, flexShrink: 0 }}>
+        {words > 0 && (
+          <span className="num" style={{ fontSize: 12.5, color: C.muted, flexShrink: 0 }}>
+            {words} words
+          </span>
+        )}
+        <span aria-hidden style={{ color: C.muted, flexShrink: 0, fontSize: 13 }}>
           {open ? "−" : "+"}
         </span>
-      </button>
-      {open && <div>{children}</div>}
-    </section>
+      </summary>
+      <div>{children}</div>
+    </details>
   );
 }
 
@@ -1388,7 +1427,15 @@ export function ModelAnswerView({
         if (demands.length < 2) return <div style={{ marginTop: 18 }}>{rendered}</div>;
 
         return demands.map((demand, di) => (
-          <Section key={demand.label} demand={demand} index={di} total={demands.length}>
+          <Section
+            key={demand.label}
+            demand={demand}
+            index={di}
+            total={demands.length}
+            words={answer.parts
+              .filter((pt) => (pt.serves ?? 0) === di)
+              .reduce((n, pt) => n + pt.text.trim().split(/\s+/).length, 0)}
+          >
             {rendered.filter((_, i) => (answer.parts[i]?.serves ?? 0) === di)}
           </Section>
         ));
