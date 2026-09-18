@@ -519,16 +519,20 @@ The test for the whole thing: read it aloud. The frame should sound like an
 argument being made. The blocks should sound like a well-informed person
 explaining one idea at a time, never like a revision card being read out.
 
-SAY WHICH PHRASES ARE THE EVIDENCE. In every part, list under "evidence" the
-exact phrases from that part's own text that are the factual support rather than
-the claim: the named Act, the Census or survey round, the figure, the committee,
-the judgment. Give each phrase exactly as it appears in the text.
+SAY WHICH SENTENCE IS THE EVIDENCE. In every part, list under "evidence" the
+sentence — the whole sentence, copied exactly from that part's own text — that
+carries the factual support rather than the claim: the named Act, the Census or
+survey round, the figure, the committee, the judgment.
 
-It is a subset of what is there, not a second copy of "underline" — a part whose
-argument rests on nothing factual has an empty list, and that is the useful
-answer, because the screen colours these and a block with no colour in it is a
-block the candidate can see is unsupported. A scholar's name is not evidence
-here; it belongs in "thinker".
+The screen colours that sentence, so the candidate can see at a glance where the
+argument stops and the proof begins. That is why it must be a whole sentence and
+why it must be verbatim: a fragment colours a fragment, and a paraphrase colours
+nothing at all.
+
+At most one or two per block, and an empty list where the block argues from no
+fact — that is the useful answer, not a failure, because a block with no colour
+in it is one the candidate can see is unsupported. A scholar's name is not
+evidence here; it belongs in "thinker".
 
 AN OPENING IS A CHOICE FROM SIX, AND YOU SAY WHICH YOU MADE. Vision IAS's deck
 names six ways into an answer, each one a real script:
@@ -806,9 +810,9 @@ near an exam.
 
 Reply with JSON and nothing else, in exactly this shape:
 
-{"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"evidence":["<exact phrase that is a fact>"],"must":"core","openingType":"definition|event|report|data|background|summarise"},
+{"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"evidence":["<the whole sentence carrying the fact, verbatim>"],"must":"core","openingType":"definition|event|report|data|background|summarise"},
           {"kind":"signpost","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
-          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"evidence":["<exact phrase that is a fact>"],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours","dimension":"social|economic|political|cultural|environmental|"},
+          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"evidence":["<the whole sentence carrying the fact, verbatim>"],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours","dimension":"social|economic|political|cultural|environmental|"},
           {"kind":"pivot","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
           {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"evidence":[],"must":"core","closeType":"summarised|balanced|reformist"}],
  "altOpenings":[{"type":"<one of the six, not the one used>","text":"<the opening written that way>"}],

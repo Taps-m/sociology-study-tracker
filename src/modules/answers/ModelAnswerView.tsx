@@ -22,24 +22,42 @@ import { C } from "../../lib/theme";
  */
 
 /**
- * Underline the given phrases where they appear, longest first.
+ * Two marks, and they do different jobs.
  *
- * Two colours, because two different things are being marked. The accent marks
- * what to underline in the booklet: the concept the sentence turns on, the word
- * it lands on. The amber marks the evidence inside it — the Act, the Census
- * round, the figure — and that one is a screen aid rather than an instruction,
- * since a candidate has one pen. Its job is that the supporting fact can be
- * found without reading the paragraph, so a block resting on nothing is
- * visible as a block with no amber in it.
+ * The evidence is coloured a whole sentence at a time. Colouring the phrase
+ * alone — "the 2011 Census" — told you where the number was but not where the
+ * argument stopped and the proof began, and that boundary is the thing worth
+ * seeing: a block is a claim and the sentence that pays for it, and those
+ * should be separable at a glance without reading either. So the model names
+ * the fact and the sentence it sits in is taken whole.
+ *
+ * The underline is the other job entirely: it is an instruction for the pen,
+ * marking what to underline in the booklet. It is applied second, to whatever
+ * is left, because a candidate has one colour and the evidence already has it.
  */
 function marked(text: string, phrases: string[], evidence: string[] = []): ReactNode {
-  const facts = new Set(evidence.filter(Boolean));
-  const wanted = [...new Set([...phrases, ...evidence].filter(Boolean))].sort(
-    (a, b) => b.length - a.length,
-  );
+  /** Grow a match out to the sentence it sits in. */
+  function sentenceAround(hay: string, from: number, to: number): [number, number] {
+    let a = from;
+    while (a > 0 && !/[.!?]/.test(hay[a - 1]!)) a -= 1;
+    while (a < hay.length && /\s/.test(hay[a]!)) a += 1;
+    let b = to;
+    while (b < hay.length && !/[.!?]/.test(hay[b]!)) b += 1;
+    return [a, Math.min(hay.length, b + 1)];
+  }
+
+  /** The first place `needle` sits in `hay`, exactly or barring its casing. */
+  function find(hay: string, needle: string): number {
+    const exact = hay.indexOf(needle);
+    return exact === -1 ? hay.toLowerCase().indexOf(needle.toLowerCase()) : exact;
+  }
+
   let pieces: ReactNode[] = [text];
 
-  for (const phrase of wanted) {
+  /*
+   * The evidence first, longest first, so a sentence named twice is taken once.
+   */
+  for (const fact of [...new Set(evidence.filter(Boolean))].sort((a, b) => b.length - a.length)) {
     const next: ReactNode[] = [];
     let done = false;
     for (const piece of pieces) {
@@ -47,7 +65,62 @@ function marked(text: string, phrases: string[], evidence: string[] = []): React
         next.push(piece);
         continue;
       }
-      const at = piece.indexOf(phrase);
+      const at = find(piece, fact);
+      if (at === -1) {
+        next.push(piece);
+        continue;
+      }
+      const [a, b] = sentenceAround(piece, at, at + fact.length);
+      next.push(
+        piece.slice(0, a),
+        /*
+         * A line of its own, where there is something above it.
+         *
+         * Colour and a label both say "this is the evidence", and both still
+         * require the eye to travel the paragraph to find them. Starting the
+         * sentence on its own line means it is found without being looked for
+         * — which is the whole test — while keeping it inside the block, where
+         * it belongs, rather than back in a list at the end.
+         */
+        a > 0 ? <br key={`br-${a}`} /> : null,
+        <span
+          key={`fact-${a}`}
+          style={{
+            color: C.warn,
+            background: C.warnSoft,
+            borderRadius: 4,
+            padding: "1px 4px",
+            boxDecorationBreak: "clone",
+            WebkitBoxDecorationBreak: "clone",
+          }}
+        >
+          {/*
+            The word, not only the colour.
+            Colour alone says "this sentence is different" and leaves the
+            reader to work out how. The label says what it is, and it is the
+            word that goes in the booklet too — an examiner skimming for
+            substantiation finds "Example:" faster than he finds a shade.
+          */}
+          <span style={{ fontWeight: 700 }}>Present-day Indian example: </span>
+          {piece.slice(a, b)}
+        </span>,
+        piece.slice(b),
+      );
+      done = true;
+    }
+    pieces = next;
+  }
+
+  /* Then the pen marks, on what is left. */
+  for (const phrase of [...new Set(phrases.filter(Boolean))].sort((a, b) => b.length - a.length)) {
+    const next: ReactNode[] = [];
+    let done = false;
+    for (const piece of pieces) {
+      if (done || typeof piece !== "string") {
+        next.push(piece);
+        continue;
+      }
+      const at = find(piece, phrase);
       if (at === -1) {
         next.push(piece);
         continue;
@@ -55,34 +128,15 @@ function marked(text: string, phrases: string[], evidence: string[] = []): React
       next.push(
         piece.slice(0, at),
         <span
-          key={`${phrase}-${at}`}
-          style={
-            facts.has(phrase)
-              ? {
-                  /*
-                   * A wash of colour behind it, the way a marker pen leaves it.
-                   * Amber letters alone were not enough: at fifteen-point on a
-                   * warm page the difference between text and evidence was a
-                   * shade, and the whole point is that the eye finds the proof
-                   * without reading the paragraph.
-                   */
-                  background: C.warnSoft,
-                  color: C.warn,
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  padding: "1px 3px",
-                  boxDecorationBreak: "clone",
-                  WebkitBoxDecorationBreak: "clone",
-                }
-              : {
-                  textDecoration: "underline",
-                  textUnderlineOffset: 3,
-                  textDecorationColor: C.accent,
-                  textDecorationThickness: 1.5,
-                }
-          }
+          key={`mark-${at}`}
+          style={{
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+            textDecorationColor: C.accent,
+            textDecorationThickness: 1.5,
+          }}
         >
-          {phrase}
+          {piece.slice(at, at + phrase.length)}
         </span>,
         piece.slice(at + phrase.length),
       );
@@ -90,6 +144,7 @@ function marked(text: string, phrases: string[], evidence: string[] = []): React
     }
     pieces = next;
   }
+
   return pieces;
 }
 
@@ -969,14 +1024,18 @@ function Section({
   words: number;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(index === 0);
+  /*
+   * Uncontrolled on purpose.
+   *
+   * A <details open={state}> with an onToggle writing that state back is React
+   * and the browser both claiming the same attribute, and the first render lost
+   * the argument: the part said it was open and rendered nothing inside it. The
+   * element already keeps this state perfectly well by itself. React sets the
+   * starting position once and then leaves it alone, the marker is drawn by CSS
+   * off the open attribute, and nothing has to agree with anything.
+   */
   return (
-    <details
-      className="fold-part"
-      open={open}
-      onToggle={(e) => setOpen(e.currentTarget.open)}
-      style={{ marginTop: index === 0 ? 18 : 22 }}
-    >
+    <details className="fold-part" open={index === 0} style={{ marginTop: index === 0 ? 18 : 22 }}>
       <summary
         style={{
           display: "flex",
@@ -1018,9 +1077,7 @@ function Section({
             {words} words
           </span>
         )}
-        <span aria-hidden style={{ color: C.muted, flexShrink: 0, fontSize: 13 }}>
-          {open ? "−" : "+"}
-        </span>
+        <span className="fold-mark" aria-hidden style={{ color: C.muted, flexShrink: 0 }} />
       </summary>
       <div>{children}</div>
     </details>
@@ -1258,14 +1315,8 @@ function Fold({
   children: ReactNode;
 }) {
   const warn = tone === "warn";
-  const [open, setOpen] = useState(false);
   return (
-    <details
-      className="fold-aside"
-      open={open}
-      onToggle={(e) => setOpen(e.currentTarget.open)}
-      style={{ marginTop: warn ? 12 : 22 }}
-    >
+    <details className="fold-aside" style={{ marginTop: warn ? 12 : 22 }}>
       <summary
         style={{
           cursor: "pointer",
@@ -1287,6 +1338,7 @@ function Fold({
         }}
       >
         <span
+          className="fold-mark"
           aria-hidden
           style={{
             display: "inline-flex",
@@ -1296,13 +1348,10 @@ function Fold({
             height: 17,
             borderRadius: 5,
             border: `1px solid ${warn ? C.warn : C.line}`,
-            fontSize: 12,
             lineHeight: 1,
             flex: "0 0 auto",
           }}
-        >
-          {open ? "\u2212" : "+"}
-        </span>
+        />
         {title}
       </summary>
       <div style={warn ? { padding: "2px 13px 0", fontSize: 13, lineHeight: 1.7 } : undefined}>
@@ -1477,8 +1526,10 @@ export function ModelAnswerView({
         <strong style={{ color: C.good }}>Your own</strong> marks where the idea has to appear
         but the example and the wording should be yours. Replacing those is the difference
         between using this answer and copying it.{" "}
-        <strong style={{ color: C.warn }}>Amber</strong> marks the evidence inside a sentence —
-        the Act, the figure, the round. A block with no amber in it is resting on nothing.
+        <strong style={{ color: C.warn }}>Present-day Indian example:</strong> and the amber behind it mark the whole
+        sentence that carries the evidence — the Act, the figure, the round. Everything outside it
+        is the argument. Write the word in the booklet too; a block with no amber in it is resting
+        on nothing.
       </p>
       </Fold>
 

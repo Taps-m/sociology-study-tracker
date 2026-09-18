@@ -1001,3 +1001,13 @@ input[type="range"]::-moz-range-thumb {
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 
+/*
+ * The marker is drawn from the open attribute rather than from React state.
+ * The element is the only thing that reliably knows whether it is open — a
+ * copy of that in component state is a second opinion that can be wrong, and
+ * for one run of this it was: a part reported itself open and rendered empty.
+ */
+.fold-mark { font-size: 13px; }
+.fold-mark::before { content: "+"; }
+details[open] > summary .fold-mark::before { content: "\2212"; }
+
