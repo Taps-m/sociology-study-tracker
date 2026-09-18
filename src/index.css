@@ -1011,3 +1011,51 @@ details > summary::-webkit-details-marker { display: none; }
 .fold-mark::before { content: "+"; }
 details[open] > summary .fold-mark::before { content: "\2212"; }
 
+
+/*
+ * The quadrant: a central term with its groups around it.
+ *
+ * Four groups is the shape at its best and it has to be a two-by-two, or the
+ * term in the middle is in the middle of nothing. Anything else flows, with
+ * the term as a heading. Below 560px there is no room for two columns of
+ * boxes, so the grid collapses and the term becomes a heading again — which is
+ * why the label lives first in the markup and is moved by CSS rather than
+ * written twice.
+ */
+.quad {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.quad-4 {
+  grid-template-columns: 1fr 1fr;
+  gap: 58px 14px;
+}
+
+.quad-label {
+  text-align: center;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+
+@media (min-width: 561px) {
+  .quad-wrap > .quad-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    max-width: 190px;
+    padding: 6px 12px;
+    background: var(--panel);
+    z-index: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .quad-4 { grid-template-columns: 1fr; gap: 12px; }
+}

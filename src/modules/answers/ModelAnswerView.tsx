@@ -603,54 +603,29 @@ function Group({ item, tone }: { item: DiagramData["items"][number]; tone: strin
  * middle to sit in, so the label goes above and the groups run beneath.
  */
 function Quadrant({ diagram }: { diagram: DiagramData }) {
+  /*
+   * Four groups means a two-by-two, not "however many fit".
+   *
+   * It was auto-fit at a 190px minimum, which on a wide column fits three —
+   * so four groups came out three-then-one with the central term floating in
+   * the gap of a ragged grid, which is not the shape Medha Anand drew and not
+   * a shape anyone can copy with a pen. Four is now forced to two columns so
+   * the term sits in the cross where it belongs; three or five fall back to
+   * flowing, with the term as a heading above.
+   *
+   * On a phone the columns collapse to one and the term goes back to being a
+   * heading — the CSS moves it, so there is one label in the markup and no
+   * second copy to keep in step.
+   */
   const centred = diagram.items.length === 4;
   return (
-    <div style={{ position: "relative" }}>
-      {!centred && (
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 700,
-            color: C.accent,
-            textAlign: "center",
-            marginBottom: 10,
-          }}
-        >
-          {diagram.label}
-        </div>
-      )}
-      <div
-        className="quad"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-          gap: centred ? 54 : 12,
-        }}
-      >
+    <div className={centred ? "quad-wrap" : undefined} style={{ position: "relative" }}>
+      <div className="quad-label">{diagram.label}</div>
+      <div className={centred ? "quad quad-4" : "quad"}>
         {diagram.items.map((it) => (
           <Group key={it.name} item={it} tone={C.accent} />
         ))}
       </div>
-      {centred && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            padding: "6px 12px",
-            maxWidth: 190,
-            textAlign: "center",
-            background: C.panel,
-            color: C.accent,
-            fontSize: 13.5,
-            fontWeight: 700,
-            lineHeight: 1.3,
-          }}
-        >
-          {diagram.label}
-        </div>
-      )}
     </div>
   );
 }
