@@ -75,16 +75,19 @@ function themeVars(): string {
  */
 export function openInTab(node: HTMLElement, title: string): boolean {
   /*
-   * Folded sections open in the copy that leaves.
+   * The answer opens in the copy that leaves. The apparatus does not.
    *
-   * On screen the apparatus is collapsed so the answer is the answer. A tab
-   * that is about to become a PDF is the opposite case: nothing there can be
-   * clicked open later, so a fold that travelled shut would take the sources
-   * and the legend out of the printed copy silently. The clone is opened; the
-   * page on screen is untouched.
+   * Two kinds of fold, and they want opposite things here. A part of the
+   * answer folded shut would be dropped from the PDF without a word, which is
+   * the worst way for an answer to lose half of itself — so those are opened.
+   * The sources, the legend and the caution are not the answer, and the whole
+   * reason they fold is that the page should end on the conclusion; a tab is
+   * still a page, and it is still clickable, so they travel shut.
    */
   const copy = node.cloneNode(true) as HTMLElement;
-  for (const d of Array.from(copy.querySelectorAll("details"))) d.setAttribute("open", "");
+  for (const d of Array.from(copy.querySelectorAll("details.fold-part"))) {
+    d.setAttribute("open", "");
+  }
 
   const html = `<!doctype html>
 <html lang="en">

@@ -59,12 +59,20 @@ function marked(text: string, phrases: string[], evidence: string[] = []): React
           style={
             facts.has(phrase)
               ? {
-                  textDecoration: "underline",
-                  textUnderlineOffset: 3,
-                  textDecorationColor: C.warn,
-                  textDecorationThickness: 1.5,
+                  /*
+                   * A wash of colour behind it, the way a marker pen leaves it.
+                   * Amber letters alone were not enough: at fifteen-point on a
+                   * warm page the difference between text and evidence was a
+                   * shade, and the whole point is that the eye finds the proof
+                   * without reading the paragraph.
+                   */
+                  background: C.warnSoft,
                   color: C.warn,
                   fontWeight: 600,
+                  borderRadius: 3,
+                  padding: "1px 3px",
+                  boxDecorationBreak: "clone",
+                  WebkitBoxDecorationBreak: "clone",
                 }
               : {
                   textDecoration: "underline",
@@ -964,6 +972,7 @@ function Section({
   const [open, setOpen] = useState(index === 0);
   return (
     <details
+      className="fold-part"
       open={open}
       onToggle={(e) => setOpen(e.currentTarget.open)}
       style={{ marginTop: index === 0 ? 18 : 22 }}
@@ -1249,8 +1258,14 @@ function Fold({
   children: ReactNode;
 }) {
   const warn = tone === "warn";
+  const [open, setOpen] = useState(false);
   return (
-    <details style={{ marginTop: warn ? 12 : 22 }}>
+    <details
+      className="fold-aside"
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+      style={{ marginTop: warn ? 12 : 22 }}
+    >
       <summary
         style={{
           cursor: "pointer",
@@ -1286,7 +1301,7 @@ function Fold({
             flex: "0 0 auto",
           }}
         >
-          +
+          {open ? "\u2212" : "+"}
         </span>
         {title}
       </summary>

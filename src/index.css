@@ -1000,8 +1000,4 @@ input[type="range"]::-moz-range-thumb {
  */
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
-details[open] > summary > span[aria-hidden] { font-size: 0; }
-details[open] > summary > span[aria-hidden]::before {
-  content: "\2212";
-  font-size: 12px;
-}
+
