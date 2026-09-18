@@ -106,10 +106,16 @@ CLOSE THE LOOP. The conclusion answers the question directly and briefly — an
 overall assessment, a way forward, a balanced view, or the contemporary
 relevance. It never introduces a new argument and never trails off.
 
-AN EXAMPLE HAS TO PROVE THE POINT IT SITS UNDER. Not illustrate the topic —
-prove the claim of that particular block. If it would sit equally well under any
-other block, it is decoration and it earns nothing. A named Act, a figure, a
-case, a place, attached to the sentence it demonstrates.
+AN EXAMPLE HAS TO PROVE THE POINT IT SITS UNDER, AND IT IS WRITTEN INTO IT. Not
+illustrate the topic — prove the claim of that particular block. If it would sit
+equally well under any other block, it is decoration and it earns nothing.
+
+It goes inside the block's own sentences, in the running prose, the way it will
+be written in the booklet: "the 2011 Census counted 103 million Indians aged
+sixty and over, 8.6 per cent of the population". Never a list of facts set apart
+from the argument they belong to — a fact separated from its point is a fact the
+candidate has to find a home for under exam pressure, and most will not. Carry
+the year inside the sentence, so it can be checked.
 `;
 
 const SOURCES_RULE = `THE NOTES COME FIRST, WHERE THEY ARE THERE. If the context carries "notes",
@@ -362,7 +368,13 @@ Hard rules:
   congratulate anyone for a plan they have not started.
 - If the context does not support a claim, say so instead of guessing.
 - Be specific and brief. No encouragement, no filler, no restating the question.
-- British spelling.`;
+- British spelling.
+
+PLAIN ENGLISH. Short sentences, fifteen to twenty words, one idea each. The
+ordinary word wherever one will do: "weakens" not "attenuates", "shows" not
+"evinces", "takes the place of" not "supplants". Sociological terms stay — they
+are the marks — but each is explained in plain words the first time it appears.
+No sentence that has to be read twice.`;
 
 function buildPrompt(task, context) {
   const json = JSON.stringify(context, null, 2);
@@ -473,8 +485,9 @@ answer is continuous prose and the body of it is labelled blocks, and the two
 are written differently on purpose.
 
 The frame — the opening, the pivot and the close — is written as connected
-analytical paragraphs, three to five sentences each, in the register of a
-serious essay. Sentences join to one another and carry an argument forward.
+paragraphs, three to five sentences each. Sentences join to one another and
+carry an argument forward. Connected does not mean long: plain sentences that
+follow one another read as an argument, and long ones read as padding.
 The opening carries the shape of what follows and is never a textbook
 definition. The pivot turns the answer on its hinge and explains why it turns.
 The close takes a position and defends it in a sentence. Nothing in the frame
@@ -483,12 +496,24 @@ script read as the work of someone who can write, and a reader decides that in
 the first four lines.
 
 The body blocks stay labelled, because that is what an examiner skims and what
-earns the structure marks: a keyword, then the mechanism under it. But write
-each block in full analytical sentences, not in note form. "Ascriptive status
-fixes life chances at birth" is a sentence; "Ascription — birth, fixed, no
-mobility" is a note, and notes lose marks a paragraph would have earned.
-Blocks are deliberately unequal — the obvious one gets two sentences, the ones
-carrying the argument get five.
+earns the structure marks: a keyword, then the mechanism under it. Write each
+block in full sentences, not in note form. "Ascriptive status fixes life chances
+at birth" is a sentence; "Ascription — birth, fixed, no mobility" is a note, and
+notes lose marks a paragraph would have earned.
+
+ONE BLOCK MAKES ONE POINT, AND IT IS SHORT. Two to four sentences, sixty to
+seventy words at the outside, and inside them: the claim, the mechanism behind
+it, and the fact that proves it. Then stop and start the next block.
+
+The moment a block carries a second point it is two blocks, and splitting it
+earns more than keeping it: the examiner sees two labelled arguments instead of
+one long one, and the candidate can actually write it out in the hall. A block
+holding a law, a scheme, a thinker and a recommendation is four blocks badly
+glued — the commonest way a good answer reads as a bad one.
+
+So expect eight to twelve short blocks in a forty-mark answer rather than five
+long ones. They stay unequal — the obvious point gets two sentences, the ones
+carrying the argument get four — but none of them runs past four.
 
 The test for the whole thing: read it aloud. The frame should sound like an
 argument being made. The blocks should sound like a well-informed person
@@ -636,14 +661,11 @@ exception — those are the exam's own general-studies ground and are expected.
 If "books" is empty, say so in one line and build the answer only from the
 syllabus topics, without inventing a citation to fill the hole.
 
-PLAIN EXAM ENGLISH. Write the way a well-prepared candidate writes under time,
-not the way a journal article reads. Short sentences. Ordinary words for the
-joining and the explaining — "shows", "leads to", "breaks down", not
-"elucidates", "engenders", "problematises". Keep every technical term, every
-thinker and every concept: those are what earn the marks, and the sociological
-vocabulary is the content, not the decoration. Simplify the sentences around
-them, never the substance. Do not shorten anything to make it plainer — under
-pressure a candidate needs it graspable at first reading and complete.
+PLAIN EXAM ENGLISH, AND THE LINE IT DOES NOT CROSS. Write the way a well-prepared
+candidate writes under time, not the way a journal article reads. But keep every
+technical term, every thinker and every concept: those are what earn the marks,
+and the sociological vocabulary is the content, not the decoration. Simplify the
+sentences around them, never the substance. Plain and complete, not thin.
 
 MARK WHAT IS COMPULSORY. Against each part say whether it is "core" — the
 demand is not met without it, and leaving it out costs marks — or "yours",
@@ -711,24 +733,25 @@ Never mark a step "used" that is not actually there, and never mark one
 candidate can hold their own answer against it, and a list that lies teaches
 them to tick boxes rather than to check.
 
-CURRENT INDIAN MATERIAL, DATED AND CHECKABLE. Fill "examples" with two to four
-pieces of datable Indian material this topic can carry into an answer: an Act
-or amendment, a scheme, a Census or NSS or NFHS figure, a committee or
-commission report, a landmark judgment. Each gets "text" — the fact itself,
-one sentence, with its number or provision where it has one — "where", saying
-which part of the answer it belongs in and what it proves there, and "asOf",
-the year that fact belongs to.
+CURRENT INDIAN MATERIAL, DATED AND WRITTEN INTO THE ARGUMENT. Most blocks that
+touch Indian society carry one piece of datable material: an Act or amendment, a
+scheme, a Census or NSS or NFHS or LASI figure, a committee or commission report,
+a landmark judgment.
 
-Prefer things that are datable and citable over things that are merely topical:
-an Act with a year, a Census figure with its round. Give the year in "asOf"
-always. If you are not sure enough of a figure to date it, leave the example
-out — a wrong figure written confidently into an answer booklet costs more than
-no figure, and the candidate cannot tell which of yours are solid.
+It is written into that block's own sentences, with its year in the sentence, and
+it does work there — it proves the claim the block makes. Not appended, not
+listed, not "(e.g.)" hung off the end. Two to four across the whole answer is
+right; a fact in every block is a fact-sheet, not an answer.
+
+Prefer what is datable and citable over what is merely topical: an Act with a
+year, a Census figure with its round. If you are not sure enough of a figure to
+put a year on it, leave it out and make the point without it — a wrong figure
+written confidently into an answer booklet costs more than no figure, and the
+candidate cannot tell which of yours are solid.
 
 Say nothing about how recent these are. Your knowledge stops at a training
-cutoff; the candidate is told on screen to verify every one of these against a
-current source before it goes near an exam, and your job is to give them
-material worth checking, not to certify it.
+cutoff; the candidate is told on screen to verify every figure before it goes
+near an exam.
 
 Reply with JSON and nothing else, in exactly this shape:
 
@@ -741,7 +764,6 @@ Reply with JSON and nothing else, in exactly this shape:
  "demands":[{"label":"<3-8 words>","minutes":0}],
  "independent":true,
  "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
- "examples":[{"text":"<one sentence, with the number or provision>","where":"<which part it goes in and what it proves>","asOf":"<year>"}],
  "usedTopics":["<syllabus topic id>"],
  "words":0}
 

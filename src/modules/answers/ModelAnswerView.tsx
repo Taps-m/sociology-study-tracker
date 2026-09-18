@@ -724,73 +724,6 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
 }
 
 /**
- * Datable Indian material to carry in, and the warning that goes with it.
- *
- * This is the one section on the page whose contents the app does not stand
- * behind. Everything else comes out of the three books or out of the syllabus;
- * these come out of a model whose knowledge stopped at a training cutoff, so
- * "recent" here can mean a year stale, a repealed Act, or a figure from a
- * Census round that has since been superseded. A wrong figure written
- * confidently into a booklet costs more than no figure.
- *
- * So the year is set beside every one and the instruction to check is at the
- * top, not buried underneath. The section is styled as a draft to work on
- * rather than as a finding to trust.
- */
-function Examples({ examples }: { examples: NonNullable<ModelAnswer["examples"]> }) {
-  if (examples.length === 0) return null;
-  return (
-    <section style={{ marginTop: 26 }}>
-      <div
-        style={{
-          fontFamily: C.mono,
-          fontSize: 11,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: C.muted,
-          marginBottom: 8,
-        }}
-      >
-        Indian material to carry in
-      </div>
-
-      <p
-        style={{
-          fontSize: 12.5,
-          lineHeight: 1.65,
-          margin: "0 0 12px",
-          padding: "9px 12px",
-          borderRadius: 8,
-          background: C.warnSoft,
-          borderLeft: `2px solid ${C.warn}`,
-        }}
-      >
-        <strong>Check every one of these before it goes in an answer.</strong> They are drafted
-        by a model whose knowledge has a cutoff — an Act may have been amended, a scheme renamed,
-        a figure superseded by a later round. The year each belongs to is given so you can look
-        it up. Wrong-and-confident costs more marks than absent.
-      </p>
-
-      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gap: 12 }}>
-        {examples.map((e, i) => (
-          <li key={`${e.text}-${i}`} style={{ paddingLeft: 13, borderLeft: `2px solid ${C.line}` }}>
-            <p style={{ fontSize: 14.5, lineHeight: 1.7, margin: 0 }}>
-              {e.text}
-              {e.asOf && (
-                <span className="num" style={{ color: C.muted, fontSize: 12.5 }}> ({e.asOf})</span>
-              )}
-            </p>
-            <p style={{ fontSize: 12.5, color: C.muted, margin: "3px 0 0", lineHeight: 1.55 }}>
-              {e.where}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-/**
  * What this was built from, in one line, at the top where it is read.
  *
  * Two things that look identical on screen are not: a skeleton written out of
@@ -947,8 +880,9 @@ export function ModelAnswerView({
       >
         <strong>A model answer — change it.</strong> The question will be worded differently on
         the day, and an answer reproduced from memory reads like one. Take the shape, the
-        underlining and the way the examples are placed; put your own phrasing and your own
-        examples through it.
+        underlining and the way the facts are placed; put your own phrasing through it. And check
+        every figure, Act and report before you write it in the hall — they are drafted by a model
+        whose knowledge has a cutoff, and wrong-and-confident costs more marks than absent.
       </p>
 
       {(() => {
@@ -977,8 +911,6 @@ export function ModelAnswerView({
       })()}
 
       <Diagram diagram={answer.diagram} />
-
-      <Examples examples={answer.examples ?? []} />
 
       <Sources books={books} />
 
