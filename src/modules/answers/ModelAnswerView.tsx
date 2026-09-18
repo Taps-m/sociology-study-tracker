@@ -915,59 +915,10 @@ export function Diagram({ diagram }: { diagram: DiagramData | undefined }) {
         </div>
       )}
 
-      <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
-        {flow ? (
-          <>
-            <span className="num">{diagram.items.length}</span> stages, each arrow read as
-            "leads to". The order carries the argument, so draw them in it.
-          </>
-        ) : diagram.shape === "quadrant" ? (
-          <>
-            The term in the middle,{" "}
-            <span className="num">{diagram.items.length}</span> labelled groups around it — the
-            shape Medha Anand (Rank 13) used for factors affecting mental well-being.
-          </>
-        ) : diagram.shape === "pyramid" ? (
-          <>
-            <span className="num">{diagram.items.length}</span> levels, widest at the base. Draw
-            the base first and work up.
-          </>
-        ) : diagram.shape === "circular" ? (
-          <>
-            <span className="num">{diagram.items.length}</span> stages and the last arrow closes
-            back onto the first — the point is that it feeds itself. Draw the circle first, then
-            the boxes on it.
-          </>
-        ) : diagram.shape === "compare" ? (
-          <>
-            Rule the basis column first, then the two sides. The left column is what makes it a
-            comparison rather than two lists.
-          </>
-        ) : (
-          <>
-            One box, one spine, <span className="num">{diagram.items.length}</span> arrows.
-          </>
-        )}{" "}
-        Draw it where it falls in the answer, not at the end — a diagram after the conclusion
-        reads as an afterthought. Ninety seconds with a pen, and it does the work of a paragraph.
-      </p>
     </section>
   );
 }
 
-/**
- * One thing the question asks, with everything answering it.
- *
- * Open by default, deliberately. Collapsing the later parts would hide the one
- * thing a model answer exists to teach — the proportions of a whole answer, and
- * the fact that part one is a third of the page and not two thirds. Over-writing
- * the first part and rushing the last is the commonest way to lose marks on a
- * question like this, so the minutes are in the header where they can be seen
- * rather than worked out.
- *
- * The fold is for the second reading, when the wall of text is the problem
- * rather than the lesson.
- */
 /**
  * One of the things the question asks, with the rest folded behind it.
  *
@@ -1164,13 +1115,6 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
           );
         })}
       </ul>
-      <p style={{ fontSize: 12.5, color: C.muted, margin: "12px 0 0", lineHeight: 1.6 }}>
-        A dash is not a miss. Thinkers are value addition rather than foundation, and the flow and
-        the example are judged on the question — forcing any of the three in is what the examiner
-        notices. But the demand, the core body and the conclusion are never rightly absent: a dash
-        against one of those is a gap, not a judgement. Hold your own answer against this list;
-        that is the whole exercise.
-      </p>
     </section>
   );
 }
