@@ -106,8 +106,9 @@ CLOSE THE LOOP. The conclusion answers the question directly and briefly — an
 overall assessment, a way forward, a balanced view, or the contemporary
 relevance. It never introduces a new argument and never trails off.
 
-AN EXAMPLE HAS TO PROVE THE POINT IT SITS UNDER, AND IT IS WRITTEN INTO IT. Not
-illustrate the topic — prove the claim of that particular block. If it would sit
+AN EXAMPLE ANSWERS "SAYS WHO?" FOR THE BLOCK IT SITS IN. Not illustrate the
+topic — prove the claim of that particular block, and only where that block
+claims something about the world that could be false. If it would sit
 equally well under any other block, it is decoration and it earns nothing.
 
 It goes inside the block's own sentences, in the running prose, the way it will
@@ -501,9 +502,32 @@ block in full sentences, not in note form. "Ascriptive status fixes life chances
 at birth" is a sentence; "Ascription — birth, fixed, no mobility" is a note, and
 notes lose marks a paragraph would have earned.
 
-ONE BLOCK MAKES ONE POINT, AND IT IS SHORT. Two to four sentences, sixty to
-seventy words at the outside, and inside them: the claim, the mechanism behind
-it, and the fact that proves it. Then stop and start the next block.
+ONE BLOCK MAKES ONE POINT, AND IT IS SHORT. Three or four sentences, seventy
+words at the outside. Where the block needs an example it is the last of them,
+which leaves the argument two or three sentences to make its case, not five.
+
+WHERE THERE IS AN EXAMPLE IT COMES OUT OF THE BODY'S WORDS, NOT ON TOP OF THEM.
+The block does not grow to fit it — the explanation contracts to make room. That means: define
+the term in a clause rather than in a sentence of its own, never define two
+terms separately where one sentence carries both, and cut every sentence that
+restates the one before it in other words.
+
+  Bloated: "Anomic suicide stems from insufficient social regulation during
+  periods of rapid social change. Social regulation means the rules and moral
+  limits that society places on human desires. Anomie means a state of
+  normlessness where social rules lose their authority over behaviour. Sudden
+  economic booms or market crashes disrupt established moral orders and leave
+  personal desires unchecked. Without clear rules, individuals experience
+  intense frustration and disorientation."
+
+  Squeezed: "Anomic suicide follows the collapse of social regulation — the
+  moral limits society places on desire — during rapid change. When booms or
+  crashes dissolve those limits, desire loses its ceiling and frustration
+  follows. Present-day Indian example: suicides among Punjab's indebted farmers
+  rose through the crop-price collapses of the 2010s, where old agrarian
+  obligations no longer held and no new ones replaced them."
+
+Same sociology, one fewer sentence, and it now proves something.
 
 The moment a block carries a second point it is two blocks, and splitting it
 earns more than keeping it: the examiner sees two labelled arguments instead of
@@ -519,20 +543,32 @@ The test for the whole thing: read it aloud. The frame should sound like an
 argument being made. The blocks should sound like a well-informed person
 explaining one idea at a time, never like a revision card being read out.
 
-SAY WHICH SENTENCE IS THE EVIDENCE. In every part, list under "evidence" the
-sentence — the whole sentence, copied exactly from that part's own text — that
-carries the factual support rather than the claim: the named Act, the Census or
-survey round, the figure, the committee, the judgment.
+SAY WHICH SENTENCE SUBSTANTIATES, AND SAY WHAT KIND IT IS. In every part, list
+under "evidence" the sentence — the whole sentence, copied exactly from that
+part's own text — that substantiates rather than asserts, with "kind" naming
+what sort of substantiation it is:
+
+  "example" — a concrete instance or case: a place, a group, a happening.
+  "data"    — a figure with a source and a round: Census 2011, LASI 2020, NFHS-5.
+  "report"  — a committee, commission or survey's finding.
+  "law"     — a statute, section, constitutional provision or judgment.
+  "quote"   — a scholar's own words, in quotation marks, from the notes or books.
+
+These are not interchangeable and the label is not decoration: it is printed in
+front of the sentence, and the candidate writes it in the booklet. "Present-day
+Indian example: the 2011 Census counted 103 million" is a mislabel that teaches
+a candidate to call a statistic an example. A figure is data. A scholar's
+sentence is a quote. Judge by what the sentence actually is.
 
 The screen colours that sentence, so the candidate can see at a glance where the
 argument stops and the proof begins. That is why it must be a whole sentence and
 why it must be verbatim: a fragment colours a fragment, and a paraphrase colours
 nothing at all.
 
-At most one or two per block, and an empty list where the block argues from no
-fact — that is the useful answer, not a failure, because a block with no colour
-in it is one the candidate can see is unsupported. A scholar's name is not
-evidence here; it belongs in "thinker".
+At most one per block, and empty where the block rightly has none — a block that
+defines a term or sets out a typology asserts nothing that could be false, so it
+substantiates nothing. The opening, signpost, pivot and close normally carry none
+either. A scholar's name is not evidence here; it belongs in "thinker".
 
 AN OPENING IS A CHOICE FROM SIX, AND YOU SAY WHICH YOU MADE. Vision IAS's deck
 names six ways into an answer, each one a real script:
@@ -793,10 +829,33 @@ touch Indian society carry one piece of datable material: an Act or amendment, a
 scheme, a Census or NSS or NFHS or LASI figure, a committee or commission report,
 a landmark judgment.
 
-It is written into that block's own sentences, with its year in the sentence, and
-it does work there — it proves the claim the block makes. Not appended, not
-listed, not "(e.g.)" hung off the end. Two to four across the whole answer is
-right; a fact in every block is a fact-sheet, not an answer.
+THE TEST IS "SAYS WHO?", NOT A COUNT. Read each block back and ask whether a
+sceptical examiner could write "says who?" in the margin.
+
+He can, wherever the block asserts something about how the world actually is:
+that caste still fixes occupation, that families are nuclearising, that the aged
+are being abandoned, that a scheme is failing. Those are empirical claims, they
+can be false, and a claim that can be false and is not evidenced is an opinion.
+Those blocks carry an instance, in their own prose, and it is the datable thing
+where one exists — the Act with its year, the Census or LASI figure with its
+round, the judgment.
+
+He cannot, where the block explains what a term means, sets out a thinker's
+typology, or draws a conceptual distinction. Nothing about the world is being
+claimed, so there is nothing to substantiate, and an example bolted on is
+decoration that costs a sentence. A block explaining what anomie is does not
+need Punjab; a block claiming Indian farmers' suicides are anomic does.
+
+Which means, in practice, that most body blocks in a sociology answer carry one
+and some carry none — and the ones carrying none should be few, because a body
+block that asserts nothing about the world is usually a definition that belonged
+in the introduction. If a block turns out to need no example, check first that it
+should have been a block at all.
+
+Never write a sentence that is shaped like an example but proves nothing: "this
+can be seen in many societies", "several studies confirm this", "there are
+numerous instances in India". Those are worse than no example, because they cost
+the words and earn nothing.
 
 Prefer what is datable and citable over what is merely topical: an Act with a
 year, a Census figure with its round. If you are not sure enough of a figure to
@@ -810,9 +869,9 @@ near an exam.
 
 Reply with JSON and nothing else, in exactly this shape:
 
-{"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"evidence":["<the whole sentence carrying the fact, verbatim>"],"must":"core","openingType":"definition|event|report|data|background|summarise"},
+{"parts":[{"kind":"opening","serves":0,"keyword":"","text":"<the actual sentences>","underline":["<exact phrase>"],"evidence":[{"kind":"example|data|report|law|quote","text":"<the whole sentence, verbatim>"}],"must":"core","openingType":"definition|event|report|data|background|summarise"},
           {"kind":"signpost","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
-          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"evidence":["<the whole sentence carrying the fact, verbatim>"],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours","dimension":"social|economic|political|cultural|environmental|"},
+          {"kind":"block","serves":0,"keyword":"<2-4 words>","text":"...","underline":["..."],"evidence":[{"kind":"example|data|report|law|quote","text":"<the whole sentence, verbatim>"}],"thinker":"<usually empty — only where he does work>","specific":"<or empty>","must":"core|yours","dimension":"social|economic|political|cultural|environmental|"},
           {"kind":"pivot","serves":0,"keyword":"","text":"...","underline":[],"must":"core"},
           {"kind":"close","serves":0,"keyword":"","text":"...","underline":["..."],"evidence":[],"must":"core","closeType":"summarised|balanced|reformist"}],
  "altOpenings":[{"type":"<one of the six, not the one used>","text":"<the opening written that way>"}],

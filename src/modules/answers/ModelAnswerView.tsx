@@ -5,6 +5,7 @@ import type {
   CloseType,
   Diagram as DiagramData,
   Dimension,
+  EvidenceKind,
   MethodStep,
   ModelAnswer,
   ModelAnswerPart,
@@ -35,7 +36,19 @@ import { C } from "../../lib/theme";
  * marking what to underline in the booklet. It is applied second, to whatever
  * is left, because a candidate has one colour and the evidence already has it.
  */
-function marked(text: string, phrases: string[], evidence: string[] = []): ReactNode {
+const EVIDENCE_LABELS: Record<EvidenceKind, string> = {
+  example: "Present-day Indian example:",
+  data: "Data:",
+  report: "Report:",
+  law: "Law:",
+  quote: "Quote:",
+};
+
+function marked(
+  text: string,
+  phrases: string[],
+  evidence: { kind: EvidenceKind; text: string }[] = [],
+): ReactNode {
   /** Grow a match out to the sentence it sits in. */
   function sentenceAround(hay: string, from: number, to: number): [number, number] {
     let a = from;
@@ -57,7 +70,9 @@ function marked(text: string, phrases: string[], evidence: string[] = []): React
   /*
    * The evidence first, longest first, so a sentence named twice is taken once.
    */
-  for (const fact of [...new Set(evidence.filter(Boolean))].sort((a, b) => b.length - a.length)) {
+  for (const fact of [...evidence]
+    .filter((e) => e && e.text)
+    .sort((a, b) => b.text.length - a.text.length)) {
     const next: ReactNode[] = [];
     let done = false;
     for (const piece of pieces) {
@@ -65,12 +80,12 @@ function marked(text: string, phrases: string[], evidence: string[] = []): React
         next.push(piece);
         continue;
       }
-      const at = find(piece, fact);
+      const at = find(piece, fact.text);
       if (at === -1) {
         next.push(piece);
         continue;
       }
-      const [a, b] = sentenceAround(piece, at, at + fact.length);
+      const [a, b] = sentenceAround(piece, at, at + fact.text.length);
       next.push(
         piece.slice(0, a),
         /*
@@ -101,7 +116,7 @@ function marked(text: string, phrases: string[], evidence: string[] = []): React
             word that goes in the booklet too — an examiner skimming for
             substantiation finds "Example:" faster than he finds a shade.
           */}
-          <span style={{ fontWeight: 700 }}>Present-day Indian example: </span>
+          <span style={{ fontWeight: 700 }}>{EVIDENCE_LABELS[fact.kind]} </span>
           {piece.slice(a, b)}
         </span>,
         piece.slice(b),
@@ -1445,10 +1460,13 @@ export function ModelAnswerView({
         <strong style={{ color: C.good }}>Your own</strong> marks where the idea has to appear
         but the example and the wording should be yours. Replacing those is the difference
         between using this answer and copying it.{" "}
-        <strong style={{ color: C.warn }}>Present-day Indian example:</strong> and the amber behind it mark the whole
-        sentence that carries the evidence — the Act, the figure, the round. Everything outside it
-        is the argument. Write the word in the booklet too; a block with no amber in it is resting
-        on nothing.
+The amber sentence is what substantiates the block, and its label says which kind it is —{" "}
+        <strong style={{ color: C.warn }}>Data</strong>,{" "}
+        <strong style={{ color: C.warn }}>Report</strong>,{" "}
+        <strong style={{ color: C.warn }}>Law</strong>,{" "}
+        <strong style={{ color: C.warn }}>Quote</strong> or a{" "}
+        <strong style={{ color: C.warn }}>Present-day Indian example</strong>. Everything outside
+        it is the argument. Write the label in the booklet too.
       </p>
       </Fold>
 

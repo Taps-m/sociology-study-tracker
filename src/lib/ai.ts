@@ -345,14 +345,16 @@ export interface ModelAnswerPart {
    * and a candidate who only ever writes the definition one has not made it.
    */
   /**
-   * The phrases inside this part that are the factual support, not the claim.
+   * The sentences in this part that substantiate rather than assert, each
+   * labelled with what kind of substantiation it is.
    *
-   * A subset of what the answer says, marked apart so the screen can colour it:
-   * the Act, the Census round, the figure, the report. Underlining already
-   * marks what to underline on paper; this marks where the proof is, which is
-   * the thing a candidate cannot see when every sentence is the same colour.
+   * The kind matters on the page. "Present-day Indian example:" in front of a
+   * Census figure is a mislabel, and a candidate who copies the label copies
+   * the mislabel into a booklet. A figure is data, a scholar's words are a
+   * quote, a commission's finding is a report, a statute is law — and an
+   * examiner skimming for substantiation is looking for exactly those words.
    */
-  evidence?: string[];
+  evidence?: { kind: EvidenceKind; text: string }[];
   openingType?: OpeningType;
   /** Which of the three closes this is, where the part is the close. */
   closeType?: CloseType;
@@ -376,6 +378,15 @@ export type OpeningType =
   | "summarise";
 
 export type CloseType = "summarised" | "balanced" | "reformist";
+
+/**
+ * What a piece of substantiation actually is.
+ *
+ * Five, because these are the five things a sociology answer substantiates
+ * with and they are not interchangeable: an instance is not a statistic, and a
+ * scholar's sentence is not a commission's finding.
+ */
+export type EvidenceKind = "example" | "data" | "report" | "law" | "quote";
 
 export type Dimension =
   | "social"
@@ -842,6 +853,28 @@ export async function modelAnswer(
     }
     parsed.altOpenings = alts<{ type: OpeningType; text: string }>(parsed.altOpenings);
     parsed.altCloses = alts<{ type: CloseType; text: string }>(parsed.altCloses);
+
+    /*
+     * Evidence, normalised. Answers cached before the kinds existed carry bare
+     * strings; those become examples, which is what they were being labelled
+     * as anyway, rather than being thrown away.
+     */
+    const KINDS = new Set(["example", "data", "report", "law", "quote"]);
+    for (const part of parsed.parts) {
+      const raw: unknown = part.evidence;
+      part.evidence = (Array.isArray(raw) ? raw : [])
+        .map((e): { kind: EvidenceKind; text: string } | null => {
+          if (typeof e === "string") return e.trim() ? { kind: "example", text: e } : null;
+          if (!e || typeof e !== "object") return null;
+          const { kind, text } = e as { kind?: unknown; text?: unknown };
+          if (typeof text !== "string" || !text.trim()) return null;
+          return {
+            kind: (typeof kind === "string" && KINDS.has(kind) ? kind : "example") as EvidenceKind,
+            text,
+          };
+        })
+        .filter((e): e is { kind: EvidenceKind; text: string } => e !== null);
+    }
 
     if (!Array.isArray(parsed.demands)) parsed.demands = [];
     parsed.demands = parsed.demands.filter((x) => x && typeof x.label === "string" && x.label);
