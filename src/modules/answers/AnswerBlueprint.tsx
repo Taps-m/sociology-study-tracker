@@ -53,7 +53,7 @@ function MapSource({
 
   useEffect(() => {
     let live = true;
-    void notesOutlineFor(topicId).then((hit) => {
+    void notesOutlineFor(topicId, question).then((hit) => {
       if (!live) return;
       if (hit) onFound(hit.outline);
       setChecked(true);
@@ -155,9 +155,9 @@ function SourceSwitch({
  * Sleepy leads because it is the newer material and the material actually
  * revised from. Sangwan is the second opinion, asked for deliberately.
  */
-async function notesContext(topicId: string, source: AnswerSource = "default") {
+async function notesContext(topicId: string, question: string, source: AnswerSource = "default") {
   const [slice, book] = await Promise.all([
-    source === "sangwan" ? Promise.resolve(null) : notesSliceFor(topicId),
+    source === "sangwan" ? Promise.resolve(null) : notesSliceFor(topicId, question),
     source === "sangwan" ? sangwanSliceFor(topicId) : Promise.resolve(null),
   ]);
 
@@ -366,7 +366,7 @@ export function AnswerBlueprint({
         ...gapContext,
         syllabusTopics: paperTopics.map((t) => ({ id: t.id, unit: t.unit, name: t.name })),
         books,
-        ...(await notesContext(topicId, want)),
+        ...(await notesContext(topicId, question, want)),
         // The skeleton has already told the candidate what to draw. Send it, so
         // the written answer draws that and not a second, different picture.
         diagram: structure?.diagram?.label ? structure.diagram : undefined,
@@ -405,7 +405,7 @@ export function AnswerBlueprint({
       minutes: 35,
       ...gapContext,
       books,
-      ...(await notesContext(topicId)),
+      ...(await notesContext(topicId, question)),
     });
     setBusy(false);
     if (res.result) {

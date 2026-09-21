@@ -1,4 +1,6 @@
-import { notePagesFor, type NoteSection } from "../data/notes";
+import { NOTE_SECTIONS, notePagesFor, type NoteSection } from "../data/notes";
+import { KEYWORDS } from "../data/keywords";
+import { TOPICS } from "../data/syllabus";
 import { pdfPageOf, standardReadingsFor, stdChapter } from "../data/standardBooks";
 import { outlineFromPages, type OutlineNode } from "./notesOutline";
 
@@ -87,6 +89,125 @@ export async function notesStatus(key: SourceId = KEY): Promise<{ loaded: boolea
   return { loaded: true, pages: Object.values(b).reduce((n, p) => n + p.length, 0) };
 }
 
+/*
+ * Finding the pages, rather than being told them.
+ *
+ * There was a hand-written index from syllabus topic to notes section, and for
+ * a while that was the whole mechanism: a topic not in it got "built without
+ * your notes", however plainly the notes covered it. That is a bad way to fail.
+ * The material was on the device, the candidate could see the chapter, and the
+ * app's answer amounted to "nobody has typed this in yet".
+ *
+ * So the pages are searched for instead, using the question's own words. The
+ * index has not gone — a hand-checked section is worth more than a guess, and
+ * pages inside one are scored up — but it is a thumb on the scale now rather
+ * than a gate. A topic nobody has mapped still finds its chapter, and a
+ * question about the second half of a topic finds the second half.
+ *
+ * Scoring, and why it is this crude: a stem of six characters catches
+ * "stratification" from "stratified" without a stemmer; a term in the first
+ * line of a page is almost always a heading and counts triple; and a single
+ * page cannot run away with the window by repeating one word forty times,
+ * which is what the cap of six does. The whole thing is a few milliseconds
+ * over seven hundred pages, so there is nothing to be gained by being cleverer.
+ */
+
+/** Words too common in a syllabus or a question to tell two pages apart. */
+const STOP = new Set(
+  ("the and for with that this from what which them they their there where when your you are was" +
+    " were has have had will would can could should does did not but its into out over under" +
+    " about more most some such than then also may might must one two three how why who whom" +
+    " whose discuss examine explain comment critically analyse justify answer examples example" +
+    " india indian society social sociology")
+    .split(" "),
+);
+
+function stems(text: string, weight: number, into: Map<string, number>): void {
+  for (const word of text.toLowerCase().match(/[a-z]+/g) ?? []) {
+    if (word.length < 4 || STOP.has(word)) continue;
+    const stem = word.slice(0, 6);
+    into.set(stem, Math.max(into.get(stem) ?? 0, weight));
+  }
+}
+
+/** The heading the index gives this page, where it gives one. */
+function headingAt(paper: number, page: number): string | null {
+  const hit = NOTE_SECTIONS.find((s) => s.paper === paper && s.from <= page && page <= s.to);
+  return hit?.heading ?? null;
+}
+
+/**
+ * The best run of pages in the notes for this question, or nothing.
+ *
+ * Nothing is a real answer: a topic the notes do not cover should say so
+ * rather than send the seven pages that happened to score least badly. The
+ * floor is set where it is because a question whose subject is genuinely in
+ * the notes scores two hundred and upward, and one whose subject is absent
+ * scores under fifty.
+ */
+function searchFor(
+  topicId: string,
+  question: string,
+  bundle: NotesBundle,
+  window = 7,
+): NoteSection | null {
+  const topic = TOPICS.find((t) => t.id === topicId);
+  if (!topic) return null;
+  const pages = bundle[String(topic.paper)];
+  if (!pages || pages.length === 0) return null;
+
+  const terms = new Map<string, number>();
+  stems(question, 3, terms);
+  stems(topic.name, 2, terms);
+  for (const k of KEYWORDS[topicId] ?? []) stems(k, 2, terms);
+  if (terms.size === 0) return null;
+
+  const mapped = new Set<number>();
+  for (const s of NOTES_FOR_SECTIONS(topicId)) {
+    for (let n = s.from; n <= s.to; n += 1) mapped.add(n);
+  }
+
+  const scores = pages.map((page, i) => {
+    const low = page.toLowerCase();
+    const head = low.slice(0, 120);
+    let score = 0;
+    for (const [stem, weight] of terms) {
+      const hits = low.split(stem).length - 1;
+      if (hits > 0) score += weight * Math.min(hits, 6);
+      if (head.includes(stem)) score += 3 * weight;
+    }
+    return mapped.has(i + 1) ? Math.round(score * 1.6) + 6 : score;
+  });
+
+  const span = Math.min(window, scores.length);
+  let best = -1;
+  let at = 0;
+  let running = scores.slice(0, span).reduce((a, b) => a + b, 0);
+  best = running;
+  for (let i = 1; i + span <= scores.length; i += 1) {
+    running += scores[i + span - 1]! - scores[i - 1]!;
+    if (running > best) {
+      best = running;
+      at = i;
+    }
+  }
+  if (best < 90) return null;
+
+  const from = at + 1;
+  const to = at + span;
+  return {
+    paper: topic.paper,
+    heading: headingAt(topic.paper, from) ?? headingAt(topic.paper, to) ?? topic.name,
+    from,
+    to,
+  };
+}
+
+/** The hand-checked sections for a topic, if it has any. */
+function NOTES_FOR_SECTIONS(topicId: string): NoteSection[] {
+  return notePagesFor(topicId, 99);
+}
+
 /**
  * The passage a topic needs, ready to travel with a request.
  *
@@ -96,14 +217,21 @@ export async function notesStatus(key: SourceId = KEY): Promise<{ loaded: boolea
  */
 export async function notesSliceFor(
   topicId: string,
+  question = "",
   maxChars = 22_000,
 ): Promise<{ text: string; cite: NoteSection } | null> {
-  const want = notePagesFor(topicId);
-  if (want.length === 0) return null;
   const bundle = await loadNotes();
   if (!bundle) return null;
 
-  const cite = want[0]!;
+  /*
+   * The question's own words decide, with the hand-checked index weighing in.
+   * Where there is no question — a cheat sheet, a map — the topic's name and
+   * keywords carry the search on their own, which is weaker but still finds
+   * the chapter.
+   */
+  const found = searchFor(topicId, question, bundle);
+  const cite = found ?? notePagesFor(topicId)[0];
+  if (!cite) return null;
   const pages = bundle[String(cite.paper)];
   if (!pages) return null;
 
@@ -177,13 +305,13 @@ export async function sangwanSliceFor(
  */
 export async function notesOutlineFor(
   topicId: string,
+  question = "",
 ): Promise<{ outline: OutlineNode; cite: NoteSection } | null> {
-  const want = notePagesFor(topicId, 10);
-  if (want.length === 0) return null;
   const bundle = await loadNotes();
   if (!bundle) return null;
 
-  const cite = want[0]!;
+  const cite = searchFor(topicId, question, bundle, 10) ?? notePagesFor(topicId, 10)[0];
+  if (!cite) return null;
   const pages = bundle[String(cite.paper)]?.slice(cite.from - 1, cite.to);
   if (!pages || pages.length === 0) return null;
 
