@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
-import { openInTab } from "../../lib/printable";
+import { openInTab, printToPdf } from "../../lib/printable";
 import type {
   CloseType,
   Diagram as DiagramData,
@@ -1494,6 +1494,25 @@ export function ModelAnswerView({
           }}
         >
           {practice ? "Showing keywords only" : "Practice mode"}
+        </button>
+        <button
+          onClick={() => {
+            if (sheet.current) setBlocked(!printToPdf(sheet.current, question));
+          }}
+          title="Save this answer as a PDF. Opens your browser's print dialog — choose Save as PDF."
+          style={{
+            minHeight: 34,
+            padding: "0 13px",
+            borderRadius: 8,
+            border: `1px solid ${C.line}`,
+            background: C.raised,
+            color: C.text,
+            font: "inherit",
+            fontSize: 13,
+            cursor: "pointer",
+          }}
+        >
+          Download PDF
         </button>
         <button
           onClick={() => {

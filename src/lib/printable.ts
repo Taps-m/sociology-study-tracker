@@ -67,13 +67,8 @@ function themeVars(): string {
   return VARS.map((v) => `${v}: ${style.getPropertyValue(v).trim()};`).join("\n  ");
 }
 
-/**
- * Open `node` in a new tab, styled as it is here.
- *
- * Returns false when the browser blocked the window, so the caller can say so
- * instead of leaving a button that silently does nothing.
- */
-export function openInTab(node: HTMLElement, title: string): boolean {
+/** The whole page as one self-contained HTML document. */
+function sheetHtml(node: HTMLElement, title: string): string {
   /*
    * The answer opens in the copy that leaves. The apparatus does not.
    *
@@ -158,9 +153,53 @@ ${copy.outerHTML}
 </body>
 </html>`;
 
-  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  return html;
+}
+
+/**
+ * Open `node` in a new tab, styled as it is here.
+ *
+ * Returns false when the browser blocked the window, so the caller can say so
+ * instead of leaving a button that silently does nothing.
+ */
+export function openInTab(node: HTMLElement, title: string): boolean {
+  const url = URL.createObjectURL(new Blob([sheetHtml(node, title)], { type: "text/html" }));
   const win = window.open(url, "_blank", "noopener");
   // Give the new tab time to load before the URL stops meaning anything.
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  return Boolean(win);
+}
+
+/**
+ * The same page, as a PDF, using the browser's own print engine.
+ *
+ * No library. The two ways to make a PDF in a browser are to ship one —
+ * html2pdf and its kind are a couple of hundred kilobytes and produce a
+ * screenshot of the page, with the text no longer text and the diagrams
+ * blurred at any zoom — or to hand the page to the print engine that is
+ * already there. The second gives a real PDF: selectable text, vector rules,
+ * proper page breaks, and the print stylesheet above already tells it where
+ * to break and what to leave out.
+ *
+ * The cost is one dialog: Chrome asks where to send it, and the destination
+ * is "Save as PDF". The document's title becomes the suggested filename, so
+ * the question is the name of the file without anyone typing it.
+ */
+export function printToPdf(node: HTMLElement, title: string): boolean {
+  const html = sheetHtml(node, title).replace(
+    "</body>",
+    /*
+     * Printed once the page has settled. Calling print() before layout is
+     * finished produces a first page of half-drawn boxes, and the diagram
+     * animation is still running for a third of a second after load — the
+     * print stylesheet disables it, but the wait costs nothing and removes
+     * the whole class of "the PDF came out wrong the first time".
+     */
+    "<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},400);});<\/script></body>",
+  );
+
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  const win = window.open(url, "_blank");
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
   return Boolean(win);
 }
