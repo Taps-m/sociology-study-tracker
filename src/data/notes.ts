@@ -315,6 +315,22 @@ export const NOTE_SECTIONS: NoteSection[] = [
 
 /** The sections that answer each topic, best first. Absent means none does. */
 export const NOTES_FOR: Record<string, NoteSection[]> = {
+  p1u3t3: [{ paper: 1, heading: "Deviance", from: 170, to: 172 }],
+  p1u3t7: [{ paper: 1, heading: "Theories of Power", from: 253, to: 258 }],
+  p1u3t8: [{ paper: 1, heading: "Origin of Religion", from: 304, to: 311 }],
+  p1u4t1: [{ paper: 1, heading: "Stratification & Mobility", from: 183, to: 192 }, { paper: 1, heading: "Stratification and Mobility", from: 200, to: 207 }],
+  p1u7t4: [{ paper: 1, heading: "Pluralist Theory of Power", from: 259, to: 259 }],
+  p1u10t3: [{ paper: 1, heading: "Education & Social Change", from: 356, to: 360 }],
+  p2u2t1: [{ paper: 2, heading: "Religious Minorities & Their Problems", from: 143, to: 151 }],
+  p2u2t2: [{ paper: 2, heading: "Regionalism", from: 259, to: 263 }],
+  p2u2t3: [{ paper: 2, heading: "The Concept of Tribes", from: 83, to: 87 }],
+  p2u4t1: [{ paper: 2, heading: "Poverty, Deprivation, And Inequality", from: 346, to: 348 }],
+  p2u4t2: [{ paper: 2, heading: "Caste System", from: 61, to: 68 }, { paper: 2, heading: "Perspectives on the study of Caste Systems", from: 68, to: 68 }],
+  p2u4t5: [{ paper: 2, heading: "Education and Social Change", from: 161, to: 163 }],
+  p2u6t4: [{ paper: 2, heading: "Child Labour", from: 217, to: 218 }],
+  p2u8t7: [{ paper: 2, heading: "Population Size, Growth, Composition And Distribution", from: 302, to: 311 }],
+  p2u8t8: [{ paper: 2, heading: "Illiteracy and disparity in Education", from: 360, to: 360 }],
+  p2u8t9: [{ paper: 2, heading: "Violence Against Women", from: 349, to: 352 }],
   p1u10t1: [{ paper: 1, heading: "Development & Dependency", from: 361, to: 364 }],
   p1u10t2: [{ paper: 1, heading: "Bottomer’s perspective on Agents of Social Change", from: 373, to: 376 }, { paper: 1, heading: "Agents of Social Change", from: 370, to: 372 }],
   p1u1t1: [{ paper: 1, heading: "Social Change in Modern Society", from: 346, to: 346 }],
@@ -359,6 +375,21 @@ export const NOTES_FOR: Record<string, NoteSection[]> = {
 export function notePagesFor(topicId: string, maxPages = 8): NoteSection[] {
   const hit = NOTES_FOR[topicId];
   if (!hit || hit.length === 0) return [];
-  const first = hit[0]!;
-  return [{ ...first, to: Math.min(first.to, first.from + maxPages - 1) }];
+
+  /*
+   * Up to two sections, sharing the page budget.
+   *
+   * One was too few. A syllabus topic is rarely one run of pages: "equality,
+   * inequality, hierarchy, exclusion, poverty and deprivation" is the opening
+   * of the stratification chapter, and the theories that answer "is
+   * stratification universal" are eight pages further on. Sending only the
+   * first meant a question about the second half of a topic was answered from
+   * the first half, which reads like the notes were not used at all.
+   *
+   * Two, and no more: the budget is what one request can carry, and three
+   * thin slices teach less than two whole ones.
+   */
+  const take = hit.slice(0, 2);
+  const each = take.length > 1 ? Math.max(3, Math.floor(maxPages / take.length)) : maxPages;
+  return take.map((s) => ({ ...s, to: Math.min(s.to, s.from + each - 1) }));
 }
