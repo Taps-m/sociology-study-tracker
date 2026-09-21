@@ -797,7 +797,15 @@ function Overlay({
         style={{
           position: "relative",
           width: "100%",
-          maxWidth: 720,
+          /*
+           * Wide enough for the answer and the method rail beside it.
+           *
+           * It was 720, which is a reading column and nothing else — so a
+           * thousand-word answer with a 244px checklist next to it had about
+           * 450px left for prose, and on a wide monitor the whole thing sat in
+           * a strip down the middle with the screen empty either side.
+           */
+          maxWidth: 1180,
           background: C.surface,
           border: `1px solid ${C.line}`,
           borderRadius: 14,

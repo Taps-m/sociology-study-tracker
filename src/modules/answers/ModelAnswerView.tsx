@@ -1463,26 +1463,6 @@ export function ModelAnswerView({
 
   return (
     <div className="answer-split" id="answer-top" ref={sheet}>
-      {/*
-        Back to the question, from anywhere in a thousand words.
-
-        An anchor rather than a button, and that is the whole trick: the new
-        tab is a clone of this markup with no JavaScript behind it, so a
-        button there would look like a control and do nothing. An href works
-        in both. React intercepts it here to scroll smoothly and leave the
-        address bar alone; the clone falls back to the plain jump.
-      */}
-      <a
-        className="to-top"
-        href="#answer-top"
-        title="Back to the question"
-        onClick={(e) => {
-          e.preventDefault();
-          document.getElementById("answer-top")?.scrollIntoView({ behavior: "smooth" });
-        }}
-      >
-        ↑ Top
-      </a>
       {map && (
         <aside className="answer-map">
           <AnswerMap parts={answer.parts} demands={answer.demands ?? []} />
@@ -1727,6 +1707,36 @@ The amber sentence is what substantiates the block, and its label says which kin
           something WBCS cannot ask is time lost.
         </p>
       )}
+      {/*
+        Back to the question, from anywhere in a thousand words.
+
+        Sticky at the end of the column rather than fixed to the screen. Fixed
+        looked right and did nothing: this answer opens inside a panel that
+        carries a backdrop filter, and a backdrop filter makes that panel the
+        containing block for everything fixed inside it — so the pill was
+        anchored to a box that scrolls, which is a long way of saying it
+        scrolled. Sticky is measured against whatever is actually scrolling,
+        so it holds in the panel, in the new tab, and on a phone alike.
+
+        An anchor rather than a button, too: the new tab is a clone of this
+        markup with no JavaScript behind it, so a button there would look like
+        a control and do nothing. React intercepts the href here to scroll
+        smoothly and leave the address bar alone; the clone falls back to the
+        plain jump.
+      */}
+      <div className="to-top-rail">
+        <a
+          className="to-top"
+          href="#answer-top"
+          title="Back to the question"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById("answer-top")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          ↑ Top
+        </a>
+      </div>
       </div>
 
       {answer.method && answer.method.length > 0 && (
