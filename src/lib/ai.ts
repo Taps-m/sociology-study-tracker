@@ -451,6 +451,16 @@ export interface ModelAnswer {
   altOpenings?: { type: OpeningType; text: string }[];
   /** The same, for the close: summarised, balanced, reformist. */
   altCloses?: { type: CloseType; text: string }[];
+  /**
+   * How many evidence sentences the model offered that the guard refused.
+   *
+   * Not decoration: an answer with no colour in it has two possible causes —
+   * the model substantiated nothing, or it substantiated and every sentence
+   * failed the test that a quote carries quotation marks and data carries a
+   * number. Those need opposite fixes and look identical on the page, so the
+   * count is kept and shown rather than left to be guessed at.
+   */
+  evidenceDropped?: number;
   usedTopics: string[];
   words: number;
   /** Ids the model claimed that are not in the syllabus. Shown, never hidden. */
@@ -882,6 +892,8 @@ export async function modelAnswer(
      * strings; those become examples, which is what they were being labelled
      * as anyway, rather than being thrown away.
      */
+    let offered = 0;
+    let kept = 0;
     const KINDS = new Set(["example", "data", "report", "law", "quote"]);
 
     /*
@@ -927,10 +939,15 @@ export async function modelAnswer(
           const { kind, text } = e as { kind?: unknown; text?: unknown };
           if (typeof text !== "string" || !text.trim()) return null;
           const k = (typeof kind === "string" && KINDS.has(kind) ? kind : "example") as EvidenceKind;
-          return earned(k, text) ? { kind: k, text } : null;
+          offered += 1;
+          if (!earned(k, text)) return null;
+          kept += 1;
+          return { kind: k, text };
         })
         .filter((e): e is { kind: EvidenceKind; text: string } => e !== null);
     }
+
+    parsed.evidenceDropped = offered - kept;
 
     if (!Array.isArray(parsed.demands)) parsed.demands = [];
     parsed.demands = parsed.demands.filter((x) => x && typeof x.label === "string" && x.label);

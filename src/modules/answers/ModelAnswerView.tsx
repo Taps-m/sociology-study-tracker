@@ -1843,6 +1843,16 @@ export function ModelAnswerView({
         Underlined phrases are what to underline in the booklet: technical terms, named Acts,
         figures. Underlining everything is the same as underlining nothing. Check any figure
         before you write it in the hall — the model's knowledge has a cutoff.
+        {(answer.evidenceDropped ?? 0) > 0 && (
+          <>
+            {" "}
+            <span style={{ color: C.warn }}>
+              <span className="num">{answer.evidenceDropped}</span>{" "}
+              {answer.evidenceDropped === 1 ? "sentence was" : "sentences were"} offered as
+              evidence and refused — a quote with no quotation marks, or data with no number.
+            </span>
+          </>
+        )}
       </p>
       <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.65 }}>
         <strong style={{ color: C.warn }}>Must include</strong> marks what the demand cannot be
