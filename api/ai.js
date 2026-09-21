@@ -645,6 +645,21 @@ STEP 5, EXAMPLE → "evidence", on the part that carries it.
   fragment and a paraphrase colours nothing. At most one per block, empty where
   the block rightly has none.
 
+  THE FLOOR, RESTATED HERE BECAUSE THIS IS WHERE YOU DECIDE IT. Step 5 above
+  says a question touching Indian society needs two or three substantiated body
+  blocks. That obligation is discharged in this field and nowhere else, so
+  before you reply, count the parts whose "evidence" is non-empty.
+
+  If the question touches India and that count is zero, the answer is not
+  finished. You have written a theory essay: named scholars, no Act, no figure,
+  no scheme, nothing an examiner could check. Go back into the body, find the
+  two or three blocks that were making claims about the world, and give each
+  one the sentence that proves it.
+
+  An answer on caste that cites Dumont, Lenski and Sen and carries no Census
+  round, no Article 17, no NCRB figure has this fault. It reads well. It is
+  marked thin.
+
 STEP 6, THINKER → "thinker", and "specific" for the hard detail beside it.
   Usually empty. Only where he does work.
 
