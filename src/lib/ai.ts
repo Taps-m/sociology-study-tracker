@@ -883,6 +883,41 @@ export async function modelAnswer(
      * as anyway, rather than being thrown away.
      */
     const KINDS = new Set(["example", "data", "report", "law", "quote"]);
+
+    /*
+     * A label has to be earned, and a wrong one is worse than none.
+     *
+     * The model will fill a field because the field is there. Asked which
+     * sentence substantiates a block, it answered "Finally, the system
+     * establishes rewarding by distributing advantages unequally" and called
+     * it a present-day Indian example; it called two paraphrases quotes. That
+     * is not a cosmetic error — the label is printed on the page and copied
+     * into a booklet, so it teaches a candidate to call a definition an
+     * example, which is exactly the habit that loses the marks.
+     *
+     * So each kind must show the thing it claims to be. A quote has quotation
+     * marks in it. Data has a number. A law names a provision. Anything that
+     * cannot show it is dropped and the sentence renders as ordinary prose,
+     * which is what it was.
+     */
+    const earned = (kind: string, text: string): boolean => {
+      if (text.trim().length < 25) return false;
+      const digits = /\d/.test(text);
+      // A proper noun, ignoring the first word — every sentence starts capitalised.
+      const named = /[A-Z][a-z]{2,}/.test(text.trim().split(/\s+/).slice(1).join(" "));
+      switch (kind) {
+        case "quote":
+          return /["“”'‘’]/.test(text);
+        case "data":
+          return digits;
+        case "law":
+          return digits || /\b(Act|Article|Section|Constitution|Amendment|Judgment|Rules)\b/.test(text);
+        case "report":
+          return digits || /\b(Committee|Commission|Report|Survey|Census|NSS|NFHS|LASI|NCRB)\b/.test(text);
+        default:
+          return digits || named;
+      }
+    };
     for (const part of parsed.parts) {
       const raw: unknown = part.evidence;
       part.evidence = (Array.isArray(raw) ? raw : [])
@@ -891,10 +926,8 @@ export async function modelAnswer(
           if (!e || typeof e !== "object") return null;
           const { kind, text } = e as { kind?: unknown; text?: unknown };
           if (typeof text !== "string" || !text.trim()) return null;
-          return {
-            kind: (typeof kind === "string" && KINDS.has(kind) ? kind : "example") as EvidenceKind,
-            text,
-          };
+          const k = (typeof kind === "string" && KINDS.has(kind) ? kind : "example") as EvidenceKind;
+          return earned(k, text) ? { kind: k, text } : null;
         })
         .filter((e): e is { kind: EvidenceKind; text: string } => e !== null);
     }

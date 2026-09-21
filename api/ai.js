@@ -548,11 +548,24 @@ under "evidence" the sentence — the whole sentence, copied exactly from that
 part's own text — that substantiates rather than asserts, with "kind" naming
 what sort of substantiation it is:
 
-  "example" — a concrete instance or case: a place, a group, a happening.
-  "data"    — a figure with a source and a round: Census 2011, LASI 2020, NFHS-5.
-  "report"  — a committee, commission or survey's finding.
-  "law"     — a statute, section, constitutional provision or judgment.
-  "quote"   — a scholar's own words, in quotation marks, from the notes or books.
+  "example" — a concrete instance or case: a place, a group, a happening. It
+              must name something — a state, a community, a scheme, an event.
+  "data"    — a figure with a source and a round: Census 2011, LASI 2020,
+              NFHS-5. It must contain an actual number.
+  "report"  — a committee, commission or survey's finding, named.
+  "law"     — a statute, section, constitutional provision or judgment, named:
+              "Article 17", "Section 125 CrPC", "the 1989 Atrocities Act".
+  "quote"   — a scholar's own words INSIDE QUOTATION MARKS. A sentence saying
+              what a scholar argued is not a quote; it is ordinary prose and
+              belongs in the block unlabelled.
+
+THE TEST FOR EVERY ONE: a labelled sentence must contain a name, a number or
+quoted words. "Finally, the system establishes rewarding by distributing
+advantages unequally" is the fourth step of a definition and is not an example
+of anything. "This economic inequality generates alienation" is not a quote.
+Both of those were labelled by a model that filled the field because the field
+was there. If a block substantiates nothing, leave its list empty — that is the
+honest answer and the screen is built to show it.
 
 These are not interchangeable and the label is not decoration: it is printed in
 front of the sentence, and the candidate writes it in the booklet. "Present-day
