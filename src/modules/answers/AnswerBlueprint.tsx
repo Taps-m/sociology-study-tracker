@@ -44,9 +44,12 @@ import { Card } from "../../app/Shell";
  */
 function MapSource({
   topicId,
+  question,
   onFound,
 }: {
   topicId: string;
+  /** The question's own words, which is what the notes are searched with. */
+  question: string;
   onFound: (o: OutlineNode) => void;
 }) {
   const [checked, setChecked] = useState(false);
@@ -536,7 +539,7 @@ export function AnswerBlueprint({
               ))}
               {/* Pull the outline the first time the map is asked for. */}
               {view === "map" && !outline && (
-                <MapSource topicId={topicId} onFound={setOutline} />
+                <MapSource topicId={topicId} question={question} onFound={setOutline} />
               )}
 
               {/*
