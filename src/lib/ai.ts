@@ -444,6 +444,8 @@ export interface ModelAnswer {
   offSyllabus?: string[];
   /** The notes pages this was written from. See AnswerStructure.notesFrom. */
   notesFrom?: string;
+  /** Why no notes pages were found, where none were. Shown, not hidden. */
+  notesMiss?: string;
 }
 
 /*
@@ -551,6 +553,8 @@ export async function answerStructure(
 
     // Stamp what it was actually built from, before it is cached.
     parsed.notesFrom = citationOf(context);
+    const miss = (context as { notesMiss?: unknown } | null)?.notesMiss;
+    parsed.notesMiss = typeof miss === "string" ? miss : undefined;
 
     // An older reply, or an older cache, carried `diagram` as a sentence. Take
     // it as a label rather than letting a string reach a renderer expecting an

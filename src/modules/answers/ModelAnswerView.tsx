@@ -1270,7 +1270,7 @@ function MethodAudit({ method }: { method: NonNullable<ModelAnswer["method"]> })
  * no way to tell them apart, which made the whole point of loading the notes
  * unverifiable — and an unverifiable improvement is one nobody trusts.
  */
-export function BuiltFrom({ from }: { from?: string }) {
+export function BuiltFrom({ from, miss }: { from?: string; miss?: string }) {
   const grounded = Boolean(from);
   return (
     <p
@@ -1291,8 +1291,24 @@ export function BuiltFrom({ from }: { from?: string }) {
         </>
       ) : (
         <>
-          <strong>Built without your notes.</strong> Either they were not loaded when this was
-          written, or this topic has no section in them. Rebuild to use them.
+          <strong>Built without your notes.</strong>{" "}
+          {miss ? (
+            /*
+             * The reason, not a list of possible reasons.
+             *
+             * This line used to name two causes and leave the reader to work
+             * out which, which meant every failure cost a round of checking
+             * whether the bundle was loaded, whether the topic was mapped and
+             * whether the deployed code was current. The search knows which of
+             * those it hit, so it says so.
+             */
+            <>{miss}.</>
+          ) : (
+            <>
+              Either they were not loaded when this was written, or this topic has no section in
+              them. Rebuild to use them.
+            </>
+          )}
         </>
       )}
     </p>
@@ -1516,7 +1532,7 @@ export function ModelAnswerView({
         </p>
       )}
 
-      <BuiltFrom from={answer.notesFrom} />
+      <BuiltFrom from={answer.notesFrom} miss={answer.notesMiss} />
       {/*
         The caution folds, because it does not change.
         It was five lines of the same warning above every answer ever opened,

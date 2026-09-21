@@ -246,6 +246,55 @@ export async function notesSliceFor(
 }
 
 /**
+ * Why no pages were found, in words, for the screen to show.
+ *
+ * "Built without your notes" was a dead end: it named two possible causes and
+ * gave no way to tell which, so every failure cost a round of guessing —
+ * whether the bundle was loaded, whether the topic was mapped, whether the
+ * deployed code was current. None of that was visible from the message.
+ *
+ * This is computed only when the search has already failed, so it costs
+ * nothing in the normal case, and it says the three things that actually
+ * distinguish the causes: which paper was searched, what the best run of
+ * pages scored against the floor, and whether the topic is known at all.
+ */
+export async function notesMiss(topicId: string, question: string): Promise<string> {
+  const bundle = await loadNotes();
+  if (!bundle) return "the notes are not loaded on this device";
+
+  const topic = TOPICS.find((t) => t.id === topicId);
+  if (!topic) return `topic ${topicId} is not in the syllabus list`;
+
+  const pages = bundle[String(topic.paper)];
+  if (!pages || pages.length === 0) {
+    return `the notes hold no pages for Paper ${topic.paper}`;
+  }
+
+  const terms = new Map<string, number>();
+  stems(question, 3, terms);
+  stems(topic.name, 2, terms);
+  for (const k of KEYWORDS[topicId] ?? []) stems(k, 2, terms);
+  if (terms.size === 0) return "the question gave nothing distinctive to search for";
+
+  let best = 0;
+  const scores = pages.map((page) => {
+    const low = page.toLowerCase();
+    let score = 0;
+    for (const [stem, weight] of terms) {
+      const hits = low.split(stem).length - 1;
+      if (hits > 0) score += weight * Math.min(hits, 6);
+    }
+    return score;
+  });
+  for (let i = 0; i + 7 <= scores.length; i += 1) {
+    const run = scores.slice(i, i + 7).reduce((a, b) => a + b, 0);
+    if (run > best) best = run;
+  }
+
+  return `searched Paper ${topic.paper} for ${topicId} with ${terms.size} terms — best run scored ${best}, and 90 is the floor`;
+}
+
+/**
  * The pages of Sangwan that cover this topic.
  *
  * The chapter map in standardBooks.ts already says which printed pages answer

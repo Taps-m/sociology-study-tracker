@@ -16,7 +16,7 @@ import { standardReadingsFor, stdLine } from "../../data/standardBooks";
 import { BOOK_SCAN, scanPagesRead, scanPagesTotal, scanPending } from "../../data/bookScan";
 import { BuiltFrom, Diagram, ModelAnswerView } from "./ModelAnswerView";
 import { QuestionMap, treeFromOutline, treeFromStructure } from "../mindmap/QuestionMap";
-import { notesOutlineFor, notesSliceFor, sangwanSliceFor } from "../../lib/notesStore";
+import { notesMiss, notesOutlineFor, notesSliceFor, sangwanSliceFor } from "../../lib/notesStore";
 import type { OutlineNode } from "../../lib/notesOutline";
 import { DRILL, type Dimension } from "../../lib/drill";
 import { C } from "../../lib/theme";
@@ -167,6 +167,11 @@ async function notesContext(topicId: string, question: string, source: AnswerSou
   const cited: string[] = [];
   const out: Record<string, string> = {};
 
+  if (!slice && source !== "sangwan") {
+    // Only on failure, and only to be shown: the search is cheap, the
+    // explanation is cheaper than another round of guessing.
+    out.notesMiss = await notesMiss(topicId, question);
+  }
   if (slice) {
     out.notes = slice.text;
     out.notesCitation = `Sleepy Classes Paper ${slice.cite.paper}, “${slice.cite.heading}”, pp. ${slice.cite.from}–${slice.cite.to}`;
