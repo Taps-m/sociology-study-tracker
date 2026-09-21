@@ -35,88 +35,202 @@
 
 /** Output ceilings, per task. See the note where this is used. */
 const METHOD_RULES = `
+THE METHOD IS THE SPEC. It has seven steps, in the order an answer is built:
+demand, define, flow, core body, example, thinker, conclusion. Every rule below
+belongs to exactly one of them and appears under that one. There are no rules
+that float free of the seven, and no subject is ruled on twice.
+
 LAST TIME'S GAP IS THIS TIME'S BRIEF. Where the context carries "lostLastTime",
 this candidate has already written this question or this topic and been marked,
 and those are the criteria that cost them the most marks — with "adviceLastTime"
-being what they were told to do about it. This is not background. Whatever you
-produce must visibly supply the thing that was missing: if they lost marks on
-thinkers, the thinkers are named here and given a job; if on examples, the Act,
-the figure, the place are written out rather than left as "give an example". Put
-those parts first among equals and make them the fullest, and do not let a
-second general point crowd out the specific one they have already proved they
-will not think of unaided. Say nothing about their past marks — they can see
-those; just make sure the gap is filled.
+being what they were told to do about it. Whatever you produce must visibly
+supply the thing that was missing, under whichever step owns it. Put those parts
+first among equals and make them the fullest. Say nothing about their past
+marks — they can see those.
 
-WHAT, THEN WHY, THEN HOW. Inside a block that carries argument, move through the
-three: what the thing is, why it happens or matters, how it works out in
-practice. Not as headings — as the movement of the three lines. A block that
-only says what something is has stopped at the first of the three and reads like
-a definition, which is where most answers lose their marks.
 
-SUBHEADINGS COME FROM THE DEMAND, NOT THE TOPIC, AND THEY COUNT. The signpost
-and any section headings restate what the question obliges. A heading naming the
-topic tells the examiner you know the topic; a heading naming the demand tells
-him you read the question.
+1. DEMAND — where the marks are actually lost.
 
-Where a heading introduces a set, put the number in it: "Four structural causes
-of old-age dependency", not "Causes of old-age dependency". The number tells the
-examiner what is coming and commits you to delivering it, which is why it reads
-as planned rather than as whatever occurred to you. Only where the number is
-real — a heading promising five and delivering three is worse than one that
+Ninety per cent of candidates fail at the first step, not the seventh: they
+answer the topic rather than the question. Before anything else, name the task
+the command word sets and the key words that fix its scope, and let every later
+part serve that. An answer that is excellent about the topic and silent on the
+demand is a bad answer.
+
+Where the question obliges more than one thing, each is a separate demand with
+its own share of the thirty-five minutes, and each must end up with body of its
+own. If everything you have written serves one of them, you have not answered
+the other — that is a content failure, not a numbering one, and the fix is to go
+back and write the missing body.
+
+Headings come from the demand, not from the topic. A heading naming the topic
+tells the examiner you know the topic; a heading naming the demand tells him you
+read the question. Where a heading introduces a set, put the number in it —
+"Four structural causes of old-age dependency" — and only where the number is
+real. A heading promising five and delivering three is worse than one that
 promised nothing.
 
-ATTRIBUTE, DO NOT ASSERT. An opinion in your own voice is a candidate's opinion.
-The same point carried by a named source is evidence: "the 2011 Census records",
-"the National Policy on Older Persons holds", "as Tibbitts defines it". Prefer
-the attributed form wherever a source genuinely says it.
 
-The guard, and it is absolute: name only committees, reports, commissions,
-surveys and scholars that appear in the notes or the books you were given, or
-that you are certain of. Never invent a report number, a commission's number, a
-year or a page to make a sentence sound authoritative. A fabricated "Law
-Commission 267th Report" is worse than the plain sentence it replaced — it will
-be repeated in an exam hall by someone who cannot check it.
+2. DEFINE AND INTRODUCE — the gateway.
 
-A THINKER ONLY WHERE HE DOES WORK. Most blocks have none, and that is correct —
-one real answer at ten marks cites nobody at all. Name a thinker only where the
-block cannot make its point without him, and where you can say in the same
-breath what he is for. A forced scholar is worse than no scholar: it costs a
-line, it shows the answer was assembled rather than argued, and every examiner
-has read a hundred of them. Never reach for a name to fill the field.
+Define precisely, set the context, and stop. An introduction that runs long has
+spent the body's minutes proving nothing.
 
-CRITICISM LIVES IN THE BODY, AND ONLY WHERE IT IS DEMANDED. It is not a step of
-its own — the core body is written as per the demand, so criticism belongs in it
-when the demand asks and nowhere at all when it does not. "Critically examine",
-"evaluate" and "comment on" ask for it. "Discuss", "examine", "describe" and
-"analyse" do not, and a limitations paragraph bolted onto them answers a
-question nobody set while spending the minutes the real demand needed. When the
-command word does ask, criticism is part of the argument, not an appendix.
+The way in is a choice from six, and most candidates never learn that because
+they have only ever written the first: define the central idea; a recent event
+that sets the tone; a report of standing; a figure that substantiates the issue;
+the background of the issue with an instance or two; or the essence of the
+question restated as your thesis. Pick the one this question rewards.
 
-THE DEMAND IS WHERE THE MARKS ARE LOST. Ninety per cent of candidates fail at
-the first step, not the seventh: they answer the topic rather than the question.
-Before anything else, name the task the command word sets and the key words that
-fix its scope, and let every later part serve that. An answer that is excellent
-about the topic and silent on the demand is a bad answer.
 
-KEEP THE INTRODUCTION SHORT AND RELEVANT. Define precisely, set the context, name
-a thinker only if one genuinely belongs there, and stop. An introduction that
-runs long has spent the body's minutes proving nothing.
+3. FLOW — what, then why, then how.
 
-CLOSE THE LOOP. The conclusion answers the question directly and briefly — an
-overall assessment, a way forward, a balanced view, or the contemporary
-relevance. It never introduces a new argument and never trails off.
+Inside a block that carries argument, move through the three: what the thing is,
+why it happens or matters, how it works out in practice. Not as headings — as
+the movement of the three lines. A block that only says what something is has
+stopped at the first of the three and reads like a definition, which is where
+most answers lose their marks.
 
-AN EXAMPLE ANSWERS "SAYS WHO?" FOR THE BLOCK IT SITS IN. Not illustrate the
-topic — prove the claim of that particular block, and only where that block
-claims something about the world that could be false. If it would sit
-equally well under any other block, it is decoration and it earns nothing.
+It is a manner of writing rather than a section, and it does not fit every
+question. Where the logic is comparative, or a straight enumeration, forcing
+what-why-how onto it distorts the argument.
 
-It goes inside the block's own sentences, in the running prose, the way it will
-be written in the booklet: "the 2011 Census counted 103 million Indians aged
-sixty and over, 8.6 per cent of the population". Never a list of facts set apart
-from the argument they belong to — a fact separated from its point is a fact the
-candidate has to find a home for under exam pressure, and most will not. Carry
-the year inside the sentence, so it can be checked.
+
+4. CORE BODY — the answer itself.
+
+The frame is prose and the body is labelled, and the two are written
+differently on purpose. The opening, the pivot and the close are connected
+paragraphs of three to five sentences that carry an argument forward; connected
+does not mean long, and a plain sentence following another reads as argument
+where a long one reads as padding. The body blocks stay labelled, because that
+is what an examiner skims and what earns the structure marks: a keyword, then
+the mechanism under it, in full sentences. "Ascriptive status fixes life chances
+at birth" is a sentence; "Ascription — birth, fixed, no mobility" is a note, and
+notes lose marks a paragraph would have earned.
+
+ONE BLOCK MAKES ONE POINT AND IT IS SHORT. Three or four sentences, seventy
+words at the outside. The moment a block carries a second point it is two
+blocks, and splitting earns more than keeping: the examiner sees two labelled
+arguments instead of one long one, and the candidate can actually write it in
+the hall. A block holding a law, a scheme, a thinker and a recommendation is
+four blocks badly glued — the commonest way a good answer reads as a bad one.
+So expect eight to twelve short blocks in a forty-mark answer rather than five
+long ones, unequal in weight but none running past four sentences.
+
+CRITICISM IS PART OF THE BODY, AND ONLY WHERE IT IS DEMANDED. It is not a step
+of its own. "Critically examine", "evaluate" and "comment on" ask for it;
+"discuss", "examine", "describe" and "analyse" do not, and a limitations
+paragraph bolted onto those answers a question nobody set while spending the
+minutes the real demand needed.
+
+COVER THE FACES OF THE QUESTION. Social, economic, political, cultural,
+environmental. Not every question has all five, and relabelling three social
+blocks as three different dimensions to look complete is worse than a truthful
+gap — the gap is the thing the candidate can fix.
+
+
+5. EXAMPLE — the answer to "says who?".
+
+Read each block back and ask whether a sceptical examiner could write "says
+who?" in the margin.
+
+He can wherever the block asserts something about how the world actually is:
+that caste still fixes occupation, that families are nuclearising, that a scheme
+is failing. Those are empirical claims, they can be false, and a claim that can
+be false and is not evidenced is an opinion. Those blocks substantiate.
+
+He cannot where the block explains what a term means, sets out a typology, or
+draws a conceptual distinction. Nothing about the world is being claimed, so
+there is nothing to substantiate, and an example bolted on is decoration that
+costs a sentence. A block explaining what anomie is does not need Punjab; a
+block claiming Indian farmers' suicides are anomic does.
+
+BUT THE ANSWER AS A WHOLE MUST SUBSTANTIATE. Applied only block by block that
+test has a failure mode: every block honestly claims to be conceptual and the
+answer arrives with no fact in a thousand words. An answer on the underclass
+naming Levitas and Murray and no Indian figure, no scheme, no Act, is a theory
+essay — it reads well and is marked thin. Where the question touches Indian
+society, two or three body blocks must be the empirical ones. If your draft has
+none, you have written around the question rather than at it.
+
+FIVE KINDS, AND EACH MUST SHOW WHAT IT CLAIMS TO BE:
+
+  an instance — a place, a community, a scheme, an event, named;
+  a figure    — with its source and round: Census 2011, LASI 2020, NFHS-5;
+  a report    — a committee, commission or survey, named;
+  a law       — a provision, named: Article 17, Section 125 CrPC, the 1989 Act;
+  a quotation — a scholar's own words inside quotation marks. A sentence saying
+                what a scholar argued is not a quotation.
+
+A sentence that is shaped like evidence and proves nothing is worse than none:
+"this can be seen in many societies", "several studies confirm this". Those cost
+the words and earn nothing. Prefer the datable over the merely topical, and if
+you are not sure enough of a figure to put a year on it, make the point without
+it — a wrong figure written confidently into a booklet costs more than no figure,
+and the candidate cannot tell which of yours are solid.
+
+IT IS WRITTEN INTO THE BLOCK, AND THE BLOCK DOES NOT GROW TO FIT IT. The
+explanation contracts instead: define the term in a clause rather than a
+sentence of its own, never define two terms separately where one sentence
+carries both, and cut every sentence that restates the one before it.
+
+  Bloated: "Anomic suicide stems from insufficient social regulation during
+  periods of rapid social change. Social regulation means the rules and moral
+  limits that society places on human desires. Anomie means a state of
+  normlessness where social rules lose their authority over behaviour. Sudden
+  economic booms or market crashes disrupt established moral orders and leave
+  personal desires unchecked. Without clear rules, individuals experience
+  intense frustration and disorientation."
+
+  Squeezed: "Anomic suicide follows the collapse of social regulation — the
+  moral limits society places on desire — during rapid change. When booms or
+  crashes dissolve those limits, desire loses its ceiling and frustration
+  follows. Present-day Indian example: suicides among Punjab's indebted farmers
+  rose through the crop-price collapses of the 2010s, where old agrarian
+  obligations no longer held and no new ones replaced them."
+
+Same sociology, one fewer sentence, and it now proves something.
+
+
+6. THINKER — only where he does work.
+
+Most blocks have none, and that is correct; one real answer at ten marks cites
+nobody at all. Name a thinker only where the block cannot make its point without
+him and where you can say in the same breath what he is for. A forced scholar
+costs a line, shows the answer was assembled rather than argued, and every
+examiner has read a hundred of them.
+
+ATTRIBUTE, DO NOT ASSERT. An opinion in your own voice is a candidate's opinion;
+the same point carried by a named source is evidence — "the 2011 Census
+records", "the National Policy on Older Persons holds", "as Tibbitts defines
+it".
+
+The guard is absolute: name only committees, reports, commissions, surveys and
+scholars that appear in the material you were given, or that you are certain of.
+Never invent a report number, a commission's number, a year or a page to make a
+sentence sound authoritative. A fabricated "Law Commission 267th Report" is
+worse than the plain sentence it replaced — it will be repeated in an exam hall
+by someone who cannot check it.
+
+
+7. CONCLUSION — close the loop.
+
+Answer the question directly and briefly. Never introduce a new argument, never
+trail off. An answer that stops rather than closes loses the easiest marks on
+the page.
+
+Three ways out, and they end in different places: gather what was argued; hold
+the two sides and say which weighs more; or name what should change. Choose by
+what the question asked for, not by habit.
+
+
+ACROSS ALL SEVEN — HOW IT IS WRITTEN.
+
+Plain exam English: the way a well-prepared candidate writes under time, not the
+way a journal article reads. But keep every technical term, every thinker and
+every concept — those are what earn the marks, and the sociological vocabulary
+is the content, not the decoration. Simplify the sentences around them, never
+the substance. Plain and complete, not thin.
 `;
 
 const SOURCES_RULE = `THE NOTES COME FIRST, WHERE THEY ARE THERE. If the context carries "notes",
@@ -474,172 +588,88 @@ Write a full 40-mark WBCS answer to this question, as a model the candidate
 will adapt rather than copy:
 ${json}
 
-STAY INSIDE THE SYLLABUS. The context carries syllabusTopics: every topic this
-paper can examine, with its id. Every concept, thinker and debate you use must
-belong to one of them. Do not reach for a fashionable idea from outside the
-list because it would impress — in the hall it earns nothing, and a candidate
-who learns it from you has spent time on something that cannot be asked. List
-in usedTopics the ids you actually drew on, and use nothing you cannot name.
+${METHOD_RULES}
+${SOURCES_RULE}
 
-WRITE IT THE WAY THE SCRIPTS DO — PROSE FRAME, LABELLED BODY. The frame of the
-answer is continuous prose and the body of it is labelled blocks, and the two
-are written differently on purpose.
+HOW THE SEVEN STEPS BECOME THIS REPLY.
 
-The frame — the opening, the pivot and the close — is written as connected
-paragraphs, three to five sentences each. Sentences join to one another and
-carry an argument forward. Connected does not mean long: plain sentences that
-follow one another read as an argument, and long ones read as padding.
-The opening carries the shape of what follows and is never a textbook
-definition. The pivot turns the answer on its hinge and explains why it turns.
-The close takes a position and defends it in a sentence. Nothing in the frame
-is telegraphic and nothing in it is a fragment — these three are what makes the
-script read as the work of someone who can write, and a reader decides that in
-the first four lines.
+The method above says what to write and how. This says only which field carries
+which step. Nothing here restates a rule from above; where you need to know how
+to do something, it is up there, under its step.
 
-The body blocks stay labelled, because that is what an examiner skims and what
-earns the structure marks: a keyword, then the mechanism under it. Write each
-block in full sentences, not in note form. "Ascriptive status fixes life chances
-at birth" is a sentence; "Ascription — birth, fixed, no mobility" is a note, and
-notes lose marks a paragraph would have earned.
+STEP 1, DEMAND → "demands", "serves", "usedTopics".
+  List in "demands" each separate thing the question obliges — three to eight
+  words each, in the order they should be answered, with the minutes each
+  deserves out of the thirty-five. One demand is the common case; do not
+  manufacture parts that are not there.
 
-ONE BLOCK MAKES ONE POINT, AND IT IS SHORT. Three or four sentences, seventy
-words at the outside. Where the block needs an example it is the last of them,
-which leaves the argument two or three sentences to make its case, not five.
+  Then tag every part with "serves", the index of the demand it answers. A
+  block serves the demand it argues: a block on Davis and Moore explaining why
+  stratification is functionally necessary serves the demand about
+  universality, not the one about caste, however much caste it mentions. The
+  opening, the signpost and the close belong to the whole answer rather than to
+  any demand, so set "serves" to 0 on them.
 
-WHERE THERE IS AN EXAMPLE IT COMES OUT OF THE BODY'S WORDS, NOT ON TOP OF THEM.
-The block does not grow to fit it — the explanation contracts to make room. That means: define
-the term in a clause rather than in a sentence of its own, never define two
-terms separately where one sentence carries both, and cut every sentence that
-restates the one before it in other words.
+  Say in "independent" whether the demands can be read separately or run as one
+  argument.
 
-  Bloated: "Anomic suicide stems from insufficient social regulation during
-  periods of rapid social change. Social regulation means the rules and moral
-  limits that society places on human desires. Anomie means a state of
-  normlessness where social rules lose their authority over behaviour. Sudden
-  economic booms or market crashes disrupt established moral orders and leave
-  personal desires unchecked. Without clear rules, individuals experience
-  intense frustration and disorientation."
+  "usedTopics" is the syllabus ids you actually drew on. The context carries
+  syllabusTopics: every topic this paper can examine. Every concept, thinker and
+  debate you use must belong to one of them — a fashionable idea from outside
+  the list earns nothing in the hall, and a candidate who learns it from you has
+  spent time on something that cannot be asked.
 
-  Squeezed: "Anomic suicide follows the collapse of social regulation — the
-  moral limits society places on desire — during rapid change. When booms or
-  crashes dissolve those limits, desire loses its ceiling and frustration
-  follows. Present-day Indian example: suicides among Punjab's indebted farmers
-  rose through the crop-price collapses of the 2010s, where old agrarian
-  obligations no longer held and no new ones replaced them."
+STEP 2, DEFINE → the "opening" part, plus "openingType" and "altOpenings".
+  Put the name of the way in you chose in "openingType", then write the opening
+  twice more in two other ways and put those in "altOpenings" — same argument,
+  same length, different way in. The candidate is not being given a paragraph;
+  they are being shown that the paragraph was a choice.
 
-Same sociology, one fewer sentence, and it now proves something.
+STEP 3, FLOW → the movement inside each block's "text". No field of its own.
 
-The moment a block carries a second point it is two blocks, and splitting it
-earns more than keeping it: the examiner sees two labelled arguments instead of
-one long one, and the candidate can actually write it out in the hall. A block
-holding a law, a scheme, a thinker and a recommendation is four blocks badly
-glued — the commonest way a good answer reads as a bad one.
+STEP 4, CORE BODY → the "block" parts, with "keyword", "dimension" and "must".
+  "keyword" is the two-to-four word label the examiner skims.
+  "dimension" is which face of the question the block argues from: social,
+  economic, political, cultural, environmental — or empty where the block is
+  definitional and belongs to none.
+  "must" is "core" where the demand is not met without the part, or "yours"
+  where the idea must appear but the wording and the instance should be the
+  candidate's own. Marking everything core tells nobody anything.
 
-So expect eight to twelve short blocks in a forty-mark answer rather than five
-long ones. They stay unequal — the obvious point gets two sentences, the ones
-carrying the argument get four — but none of them runs past four.
+STEP 5, EXAMPLE → "evidence", on the part that carries it.
+  The whole sentence, copied exactly from that part's own text, with "kind"
+  naming which of the five it is: example, data, report, law, quote. The screen
+  colours that sentence and prints the kind in front of it, and the candidate
+  copies the label into a booklet — so a figure called an example teaches them
+  to call a statistic an example. Verbatim, because a fragment colours a
+  fragment and a paraphrase colours nothing. At most one per block, empty where
+  the block rightly has none.
 
-The test for the whole thing: read it aloud. The frame should sound like an
-argument being made. The blocks should sound like a well-informed person
-explaining one idea at a time, never like a revision card being read out.
+STEP 6, THINKER → "thinker", and "specific" for the hard detail beside it.
+  Usually empty. Only where he does work.
 
-SAY WHICH SENTENCE SUBSTANTIATES, AND SAY WHAT KIND IT IS. In every part, list
-under "evidence" the sentence — the whole sentence, copied exactly from that
-part's own text — that substantiates rather than asserts, with "kind" naming
-what sort of substantiation it is:
+STEP 7, CONCLUSION → the "close" part, plus "closeType" and "altCloses".
+  Name the way out you took, and write the other two into "altCloses". Never
+  the same argument three times in different words — a close that names what
+  should change ends somewhere a close that gathers does not.
 
-  "example" — a concrete instance or case: a place, a group, a happening. It
-              must name something — a state, a community, a scheme, an event.
-  "data"    — a figure with a source and a round: Census 2011, LASI 2020,
-              NFHS-5. It must contain an actual number.
-  "report"  — a committee, commission or survey's finding, named.
-  "law"     — a statute, section, constitutional provision or judgment, named:
-              "Article 17", "Section 125 CrPC", "the 1989 Atrocities Act".
-  "quote"   — a scholar's own words INSIDE QUOTATION MARKS. A sentence saying
-              what a scholar argued is not a quote; it is ordinary prose and
-              belongs in the block unlabelled.
+MARKING UP FOR THE PEN → "underline".
+  In every part, list the exact phrases from that part's own text that should be
+  underlined in the booklet. Give each exactly as it appears or it cannot be
+  marked. Aim at one of each kind rather than a count: the CONCEPT the part
+  turns on, the EVIDENCE that proves it, and the CONSEQUENCE it lands on — the
+  impact word, "erodes", "displaces", "reproduces inequality". Three marks of
+  three kinds tell an examiner skimming the page what the paragraph argued;
+  five marks on five nouns tell him nothing. Two to five per part, never every
+  other word.
 
-THE TEST FOR EVERY ONE: a labelled sentence must contain a name, a number or
-quoted words. "Finally, the system establishes rewarding by distributing
-advantages unequally" is the fourth step of a definition and is not an example
-of anything. "This economic inequality generates alienation" is not a quote.
-Both of those were labelled by a model that filled the field because the field
-was there. If a block substantiates nothing, leave its list empty — that is the
-honest answer and the screen is built to show it.
-
-These are not interchangeable and the label is not decoration: it is printed in
-front of the sentence, and the candidate writes it in the booklet. "Present-day
-Indian example: the 2011 Census counted 103 million" is a mislabel that teaches
-a candidate to call a statistic an example. A figure is data. A scholar's
-sentence is a quote. Judge by what the sentence actually is.
-
-The screen colours that sentence, so the candidate can see at a glance where the
-argument stops and the proof begins. That is why it must be a whole sentence and
-why it must be verbatim: a fragment colours a fragment, and a paraphrase colours
-nothing at all.
-
-At most one per block, empty where the block rightly has none, and never empty
-across the whole answer where the question touches India — a block that
-defines a term or sets out a typology asserts nothing that could be false, so it
-substantiates nothing. The opening, signpost, pivot and close normally carry none
-either. A scholar's name is not evidence here; it belongs in "thinker".
-
-AN OPENING IS A CHOICE FROM SIX, AND YOU SAY WHICH YOU MADE. Vision IAS's deck
-names six ways into an answer, each one a real script:
-
-  "definition"  — define the central idea and move.
-  "event"       — a recent incident that sets the tone.
-  "report"      — a study or report of national or international standing.
-  "data"        — a figure or statistic that substantiates the issue.
-  "background"  — the shape of the issue, with an example or two.
-  "summarise"   — the essence of the question, restated as your thesis.
-
-Pick the one this question actually rewards and put its name in "openingType"
-on the opening part. Then write the opening two more times, each in a different
-one of the six, and put those in "altOpenings" — same argument, same length,
-different way in. The candidate is not being given a paragraph; they are being
-shown that the paragraph was a choice.
-
-A CLOSE IS A CHOICE FROM THREE. "summarised" gathers what was argued;
-"balanced" holds the two sides and says which weighs more; "reformist" names
-what should change. Put the one you used in "closeType" on the close part, and
-write the other two into "altCloses". Never the same argument three times in
-different words — a reformist close ends somewhere a summarised one does not.
-
-WHICH FACE OF THE QUESTION EACH BLOCK ARGUES FROM. Against every body block put
-"dimension": one of social, economic, political, cultural, environmental — or
-empty where the block is definitional or methodological and belongs to none.
-
-Be honest rather than tidy: do not relabel three social blocks as three
-different dimensions to look complete. The candidate is shown which of the five
-the answer touched, and a truthful gap there is worth more than a full row,
-because the gap is what they will fix.
-
-MARK IT UP, AND MARK THREE KINDS OF THING. In every part, list under "underline"
-the exact phrases from that part's own text that should be underlined in the
-answer booklet. Give each phrase exactly as it appears in the text or it cannot
-be marked.
-
-Aim at one of each kind rather than a count: the CONCEPT the part turns on
-(a technical term, a named idea), the EVIDENCE that proves it (an Act, a figure,
-a Census round, a committee, a scholar), and the CONSEQUENCE it lands on (the
-impact word — "erodes", "displaces", "reproduces inequality"). Three marks of
-three kinds tell an examiner skimming the page what the paragraph argued;
-five marks on five nouns tell him nothing.
-
-Two to five per part where the part carries that much, never every other word —
-underlining everything is the same as underlining nothing.
-
-DRAW ONE THING, IN THE RIGHT SHAPE, AND SAY WHERE IT GOES. Where a diagram
-would carry something faster than prose, give it: a label, three to five items,
-a "shape", and "after" — the keyword of the block it is drawn beside.
-
-"after" matters as much as the drawing. A diagram at the end of an answer reads
-as an afterthought and earns a fraction of what the same diagram earns beside
-the paragraph it explains; it is also the one thing on a page a candidate is
-most likely to copy into the wrong place. Name the block whose argument it
-carries, exactly as that block's keyword is written. If it genuinely belongs
-nowhere in particular, leave it empty rather than guessing.
+THE DIAGRAM → "diagram".
+  Where a picture would carry something faster than prose, give it: a label,
+  three to five items, a "shape", and "after" — the keyword of the block it is
+  drawn beside. "after" matters as much as the drawing: a diagram at the end of
+  an answer reads as an afterthought and earns a fraction of what the same
+  diagram earns beside the paragraph it explains. If it belongs nowhere in
+  particular, leave it empty.
 
 Six shapes, and they are the six that appear in real topper scripts rather than
 six a designer liked. Pick by what the content is:
@@ -720,208 +750,22 @@ written, and if you do change it, change it because the answer moved — not to
 show a different idea. A model answer whose diagram contradicts the skeleton it
 came from teaches the candidate to trust neither.
 
-${METHOD_RULES}
-THE NOTES COME FIRST, WHERE THEY ARE THERE. If the context carries "notes",
-that is the candidate's own study material — the exact pages they revise from,
-sent verbatim, with "notesCitation" naming the section and pages.
-
-Build the answer out of it. Its scholars, its definitions, its classifications
-and its framing take precedence over anything you would otherwise have reached
-for, even where your own version is broader or more current. The reason is not
-that the notes are better sociology: it is that this is what the candidate has
-read, will revise again the night before, and can check. An answer naming a
-scholar their notes name is one they can defend; one built from material they
-have never seen is one they must take on trust and cannot revise from.
-
-Use the names the notes use. Where the notes define a term, define it their way.
-Where they give a classification, follow it rather than substituting a tidier
-one. You may add an Indian fact, an Act or a figure the notes do not carry —
-that is the exam's general-studies ground — but do not import a rival framework
-or an outside scholar to improve on what is there.
-
-Where the notes are thin on something the question needs, say so in that part
-rather than papering over it, and fall back to the book below for that part
-only. Where "notes" is absent, the book below carries the answer on its own.
-
-THE BOOK ITSELF, WHERE IT IS THERE. If the context carries "book", that is the
-actual text of the chapter of Sangwan's Essential Sociology that covers this
-topic, with "bookCitation" naming the chapter and pages. Not a citation to a
-chapter — the chapter.
-
-Use it the way you would use a book open on the desk: its definitions, its
-classifications, the scholars it names, the Indian material it carries. Where it
-and the notes cover the same ground, the notes win, because those are what the
-candidate revises from; where the notes are silent or thin, this is the source
-and there is no need to fall back on general knowledge at all.
-
-It is OCR of a photographed book, so the text is imperfect: lines occasionally
-run into one another, a word is mangled here and there, and the page numbers and
-running headers are mixed into the prose. Read through that. Never quote a
-garbled string back at the candidate, never treat an OCR artefact as a technical
-term, and where a passage is too broken to trust, use the notes or leave the
-point out rather than guessing at what it said.
-
-SOURCES — THESE THREE BOOKS AND NOTHING ELSE. The context carries "books": the
-exact chapters of Sangwan's Essential Sociology, Haralambos and Heald's Themes
-and Perspectives and Shankar Rao's Principles of Sociology that cover this
-topic. Those three are the candidate's entire shelf. Take the sociology from
-what is in them — their thinkers, concepts, classifications and debates. Do not
-import a school, a framework or a named study from outside them, and do not
-cite a book, paper, report or website the candidate does not have: a reference
-they cannot open is one they cannot check, and an unverifiable one is worse
-than none. Indian facts, Acts, schemes, Census and survey figures are the
-exception — those are the exam's own general-studies ground and are expected.
-If "books" is empty, say so in one line and build the answer only from the
-syllabus topics, without inventing a citation to fill the hole.
-
-PLAIN EXAM ENGLISH, AND THE LINE IT DOES NOT CROSS. Write the way a well-prepared
-candidate writes under time, not the way a journal article reads. But keep every
-technical term, every thinker and every concept: those are what earn the marks,
-and the sociological vocabulary is the content, not the decoration. Simplify the
-sentences around them, never the substance. Plain and complete, not thin.
-
-MARK WHAT IS COMPULSORY. Against each part say whether it is "core" — the
-demand is not met without it, and leaving it out costs marks — or "yours",
-meaning the idea must appear but the example, the phrasing and the illustration
-should be the candidate's own. Most examples are "yours". The definition, the
-distinction the question actually asks for, and the position taken at the close
-are "core". Be honest about which is which: marking everything core tells
-nobody anything.
-
 LENGTH. Forty marks, about thirty-five minutes of writing: aim at 900 to 1100
 words across all parts. This is roughly triple a UPSC 250-word answer; do not
 write a compressed one.
 
-WHICH DEMAND EACH PART SERVES, AND IT HAS TO BE TRUE. "serves" is the index of
-the demand that part answers, and the screen builds the answer's sections out of
-it, so a careless number is not a small error — it shows the candidate a part
-one that does not answer the first thing the question asked.
+THE AUDIT → "method".
+  Fill it with all seven steps, in order, each "used" or "notNeeded", with
+  "where" saying in at most twelve words where that step landed — "opened with
+  the 2011 Census figure", "no thinker earns his line here".
 
-Two rules, and they are absolute:
+  Three are never rightly absent: demand, coreBody, conclusion. Define is
+  almost always present. Flow, example and thinker are judged on the question,
+  and a dash against one of those three is a judgement rather than a gap.
 
-  Every demand must have blocks of its own. If all the blocks come out under
-  one demand, you have not answered the other, and the answer is wrong before
-  the numbering is. Go back and write the body for it.
-
-  A block serves the demand it argues. A block on Davis and Moore explaining
-  why stratification is functionally necessary serves the demand about
-  universality, not the one about caste in India, however much caste is
-  mentioned in it.
-
-The opening, the signpost and the close belong to the whole answer rather than
-to any one demand, so set "serves" to 0 on them and do not count them as a
-demand's content.
-
-ONE SECTION PER THING THE QUESTION ASKS. List in "demands" each separate thing
-the question obliges — "the nature of it", "why it happened", "what should be
-done" — three to eight words each, in the order they should be answered, with
-the minutes each deserves out of the thirty-five. A question that asks one thing
-gets one demand, and that is the common case; do not manufacture parts that are
-not there.
-
-Then tag every part with "serves": the index of the demand it answers. The
-opening and the close serve the whole answer and take 0. A pivot takes the index
-of the demand it turns TOWARD.
-
-Say in "independent" whether the demands can be read separately or whether the
-answer genuinely runs through them as one argument. Be honest: three facets of
-one thing — nature, causes, remedies — are not independent, and saying they are
-lets the reader carve up an argument that was meant to flow.
-
-SHOW WHERE THE METHOD LANDED. Fill "method" with all seven steps, in order:
-demand, define, flow, coreBody, example, thinker, conclusion. These are Sandesh
-Jain's seven and the names are his — "define" is the definition and the setting
-of context, "coreBody" is the sub-dimensions written as per the demand. For each, say
-where it happened in the answer you just wrote — "the demand is unpacked in the
-opening", "block c moves what to why to how" — in at most twelve words.
-
-Two states only, and the second is not a failure. "used" means it is in the
-answer. "notNeeded" means this question did not call for it, and then "where"
-says why in the same breath: "no thinker — this is a policy question, not a
-theoretical one", "the demand is comparative, so the movement is A against B
-rather than what to why to how".
-
-NOT ALL SEVEN FIT EVERY QUESTION, BUT THREE ALWAYS DO. Judge each on the
-question in front of you rather than filling all seven to look complete — and
-judge honestly in both directions:
-
-  demand     — never absent. An answer that does not meet the demand has failed
-               whatever else it does.
-  coreBody   — never absent. It is the answer.
-  conclusion — never absent. An answer that stops rather than closes loses the
-               easiest marks on the page.
-  define     — almost always present, sometimes a single line. Absent only where
-               the question is wholly evaluative and a definition would delay it.
-  flow       — a manner of writing rather than a section. "notNeeded" where the
-               question's logic is comparative, or a straight enumeration, and
-               forcing what-why-how onto it would distort the argument.
-  example    — essential wherever the topic touches Indian society. "notNeeded"
-               only for a purely theoretical demand, where a contemporary
-               example would be decoration bolted to a concept.
-  thinker    — value addition, not foundation, and the most often rightly
-               absent. Never reach for a name to fill the field.
-
-Never mark a step "used" that is not actually there, and never mark one
-"notNeeded" to excuse having skipped it — the point of this list is that a
-candidate can hold their own answer against it, and a list that lies teaches
-them to tick boxes rather than to check.
-
-CURRENT INDIAN MATERIAL, DATED AND WRITTEN INTO THE ARGUMENT. Most blocks that
-touch Indian society carry one piece of datable material: an Act or amendment, a
-scheme, a Census or NSS or NFHS or LASI figure, a committee or commission report,
-a landmark judgment.
-
-THE TEST IS "SAYS WHO?", NOT A COUNT. Read each block back and ask whether a
-sceptical examiner could write "says who?" in the margin.
-
-He can, wherever the block asserts something about how the world actually is:
-that caste still fixes occupation, that families are nuclearising, that the aged
-are being abandoned, that a scheme is failing. Those are empirical claims, they
-can be false, and a claim that can be false and is not evidenced is an opinion.
-Those blocks carry an instance, in their own prose, and it is the datable thing
-where one exists — the Act with its year, the Census or LASI figure with its
-round, the judgment.
-
-He cannot, where the block explains what a term means, sets out a thinker's
-typology, or draws a conceptual distinction. Nothing about the world is being
-claimed, so there is nothing to substantiate, and an example bolted on is
-decoration that costs a sentence. A block explaining what anomie is does not
-need Punjab; a block claiming Indian farmers' suicides are anomic does.
-
-Which means, in practice, that most body blocks in a sociology answer carry one
-and some carry none — and the ones carrying none should be few, because a body
-block that asserts nothing about the world is usually a definition that belonged
-in the introduction. If a block turns out to need no example, check first that it
-should have been a block at all.
-
-AND THE ANSWER AS A WHOLE HAS TO SUBSTANTIATE SOMETHING. The test above is
-applied block by block, and applied only that way it has a failure mode: every
-block can honestly claim to be conceptual and the answer arrives with not one
-fact in a thousand words. An answer on the underclass that names Levitas and
-Murray and no Indian figure, no scheme, no Act, is a theory essay. It reads well
-and it is marked as thin.
-
-So: where the question touches Indian society at all — and in Paper II it always
-does, and in Paper I it does wherever the topic is asked about India — at least
-two or three of the body blocks must be the ones that make a claim about the
-world and substantiate it. If your draft has none, you have written around the
-question rather than at it: go back, find the two or three blocks that should
-have been empirical, and make them so.
-
-Never write a sentence that is shaped like an example but proves nothing: "this
-can be seen in many societies", "several studies confirm this", "there are
-numerous instances in India". Those are worse than no example, because they cost
-the words and earn nothing.
-
-Prefer what is datable and citable over what is merely topical: an Act with a
-year, a Census figure with its round. If you are not sure enough of a figure to
-put a year on it, leave it out and make the point without it — a wrong figure
-written confidently into an answer booklet costs more than no figure, and the
-candidate cannot tell which of yours are solid.
-
-Say nothing about how recent these are. Your knowledge stops at a training
-cutoff; the candidate is told on screen to verify every figure before it goes
-near an exam.
+  Never mark a step "used" that is not there, and never mark one "notNeeded" to
+  excuse having skipped it. The candidate holds their own answer against this
+  list, and a list that lies teaches them to tick boxes rather than to check.
 
 Reply with JSON and nothing else, in exactly this shape:
 
