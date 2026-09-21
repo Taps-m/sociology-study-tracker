@@ -578,7 +578,8 @@ argument stops and the proof begins. That is why it must be a whole sentence and
 why it must be verbatim: a fragment colours a fragment, and a paraphrase colours
 nothing at all.
 
-At most one per block, and empty where the block rightly has none — a block that
+At most one per block, empty where the block rightly has none, and never empty
+across the whole answer where the question touches India — a block that
 defines a term or sets out a typology asserts nothing that could be false, so it
 substantiates nothing. The opening, signpost, pivot and close normally carry none
 either. A scholar's name is not evidence here; it belongs in "thinker".
@@ -892,6 +893,20 @@ and some carry none — and the ones carrying none should be few, because a body
 block that asserts nothing about the world is usually a definition that belonged
 in the introduction. If a block turns out to need no example, check first that it
 should have been a block at all.
+
+AND THE ANSWER AS A WHOLE HAS TO SUBSTANTIATE SOMETHING. The test above is
+applied block by block, and applied only that way it has a failure mode: every
+block can honestly claim to be conceptual and the answer arrives with not one
+fact in a thousand words. An answer on the underclass that names Levitas and
+Murray and no Indian figure, no scheme, no Act, is a theory essay. It reads well
+and it is marked as thin.
+
+So: where the question touches Indian society at all — and in Paper II it always
+does, and in Paper I it does wherever the topic is asked about India — at least
+two or three of the body blocks must be the ones that make a claim about the
+world and substantiate it. If your draft has none, you have written around the
+question rather than at it: go back, find the two or three blocks that should
+have been empirical, and make them so.
 
 Never write a sentence that is shaped like an example but proves nothing: "this
 can be seen in many societies", "several studies confirm this", "there are
