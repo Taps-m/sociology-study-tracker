@@ -109,7 +109,7 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.6;
 }
-main { max-width: 1090px; margin: 0 auto; }
+main { max-width: 1210px; margin: 0 auto; }
 /*
  * The method checklist stays beside the answer here too, and sticks.
  *
@@ -126,18 +126,19 @@ main { max-width: 1090px; margin: 0 auto; }
   align-items: flex-start;
   justify-content: center;
 }
-.answer-main { flex: 1 1 760px; max-width: 760px; min-width: 0; }
+.answer-main { flex: 1 1 880px; max-width: 880px; min-width: 0; }
 /* A map is for moving around a page you scroll, not one you hold. */
 .answer-map { display: none; }
 .answer-aside { flex: 0 0 258px; position: sticky; top: 16px; }
 h1.sheet-title { font-size: 19px; line-height: 1.35; margin: 0 0 22px; }
-@media (max-width: 1000px) {
-  main { max-width: 760px; }
+@media (max-width: 1180px) {
+  main { max-width: 880px; }
   .answer-split { display: block; }
   .answer-main, .answer-aside { max-width: none; }
   .answer-aside { position: static; margin-top: 22px; }
 }
 @media print {
+  /* Paper has its own margins, set in the browser's dialog; ours would double them. */
   body { padding: 0; background: #fff; color: #000; }
   main { max-width: none; }
   /* Sticky and paper do not mix: on paper the list is a page of its own. */

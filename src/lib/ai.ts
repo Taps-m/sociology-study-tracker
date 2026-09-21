@@ -239,6 +239,17 @@ export interface Diagram {
    * flow, but the constraint has not moved.
    */
   shape?: "branch" | "flow" | "quadrant" | "pyramid" | "compare" | "circular";
+  /**
+   * The keyword of the block this is drawn beside.
+   *
+   * The answer already told the candidate to draw it where it falls rather
+   * than at the end, and then drew it at the end itself, because nothing in
+   * the reply said where it fell. A diagram after the conclusion reads as an
+   * afterthought and is the one thing on the page most likely to be copied in
+   * the wrong place. Empty, or naming a block that is not there, puts it back
+   * at the end — which is where it was, so nothing is lost by not knowing.
+   */
+  after?: string;
   items: {
     name: string;
     note: string;

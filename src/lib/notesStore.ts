@@ -130,10 +130,24 @@ function stems(text: string, weight: number, into: Map<string, number>): void {
   }
 }
 
-/** The heading the index gives this page, where it gives one. */
+/**
+ * The heading the index gives this page, where it gives one.
+ *
+ * Several sections can contain one page, and the useful one is not the first
+ * found: page 183 sits inside both "Chapter - 5", a one-page stub, and
+ * "Stratification & Mobility", which is what the pages are actually about.
+ * The citation said "Chapter - 5", which tells a candidate nothing about what
+ * was read. So the widest section wins, and a bare chapter number is taken
+ * only when there is nothing else.
+ */
 function headingAt(paper: number, page: number): string | null {
-  const hit = NOTE_SECTIONS.find((s) => s.paper === paper && s.from <= page && page <= s.to);
-  return hit?.heading ?? null;
+  const hits = NOTE_SECTIONS.filter((s) => s.paper === paper && s.from <= page && page <= s.to);
+  if (hits.length === 0) return null;
+  const named = hits.filter((s) => !/^chapter\b/i.test(s.heading.trim()));
+  const pick = (named.length > 0 ? named : hits).sort(
+    (a, b) => b.to - b.from - (a.to - a.from),
+  )[0]!;
+  return pick.heading;
 }
 
 /**

@@ -616,8 +616,16 @@ five marks on five nouns tell him nothing.
 Two to five per part where the part carries that much, never every other word —
 underlining everything is the same as underlining nothing.
 
-DRAW ONE THING, IN THE RIGHT SHAPE. Where a diagram would carry something
-faster than prose, give it: a label and three to five items, plus "shape".
+DRAW ONE THING, IN THE RIGHT SHAPE, AND SAY WHERE IT GOES. Where a diagram
+would carry something faster than prose, give it: a label, three to five items,
+a "shape", and "after" — the keyword of the block it is drawn beside.
+
+"after" matters as much as the drawing. A diagram at the end of an answer reads
+as an afterthought and earns a fraction of what the same diagram earns beside
+the paragraph it explains; it is also the one thing on a page a candidate is
+most likely to copy into the wrong place. Name the block whose argument it
+carries, exactly as that block's keyword is written. If it genuinely belongs
+nowhere in particular, leave it empty rather than guessing.
 
 Six shapes, and they are the six that appear in real topper scripts rather than
 six a designer liked. Pick by what the content is:
@@ -899,7 +907,7 @@ Reply with JSON and nothing else, in exactly this shape:
  "method":[{"step":"demand|define|flow|coreBody|example|thinker|conclusion","state":"used|notNeeded","where":"<at most 12 words>"}],
  "demands":[{"label":"<3-8 words>","minutes":0}],
  "independent":true,
- "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare|circular","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
+ "diagram":{"label":"<what it shows, or empty>","after":"<keyword of the block it is drawn beside, or empty>","shape":"branch|flow|quadrant|pyramid|compare|circular","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
  "usedTopics":["<syllabus topic id>"],
  "words":0}
 
@@ -1156,7 +1164,7 @@ Reply with JSON and nothing else, in exactly this shape:
             "thinker":"<name, or empty>","specific":"<number, Act, place, case, or empty>",
             "depth":"full|brief"}],
  "pivot":"<the turning sentence, or empty if the question has one part>",
- "diagram":{"label":"<what it shows, or empty>","shape":"branch|flow|quadrant|pyramid|compare|circular","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
+ "diagram":{"label":"<what it shows, or empty>","after":"<keyword of the block it is drawn beside, or empty>","shape":"branch|flow|quadrant|pyramid|compare|circular","items":[{"name":"<the group, stage or column>","note":"<short, for branch and flow>","points":["<for quadrant>"]}],"rows":[{"basis":"<what is being compared>","a":"<first column>","b":"<second column>"}]},
  "insteadOfDiagram":"<one line, only when there is no diagram>",
  "close":{"type":"two-sided|concessive|forward|answers-demand","text":"<the actual closing lines>"},
  "minutes":[{"section":"<name>","minutes":0}]}

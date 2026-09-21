@@ -1552,6 +1552,20 @@ export function ModelAnswerView({
       <DimensionStrip parts={answer.parts} />
 
       {(() => {
+        /*
+         * Where the diagram is drawn.
+         *
+         * The model names the block it belongs beside. Matched loosely on the
+         * keyword, because the reply writes the keyword twice and the two
+         * spellings drift — "Ritual Hierarchy" against "ritual hierarchy" is
+         * the same block and should not send the drawing back to the end.
+         */
+        const tidy = (x: string) => x.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+        const wants = tidy(answer.diagram?.after ?? "");
+        const drawAt = wants
+          ? answer.parts.findIndex((pt) => pt.kind === "block" && tidy(pt.keyword) === wants)
+          : -1;
+
         const rendered = answer.parts.map((part, i) => {
           if (part.kind === "block") blockIndex += 1;
           return (
@@ -1571,6 +1585,15 @@ export function ModelAnswerView({
             />
           );
         });
+
+        if (drawAt >= 0) {
+          rendered[drawAt] = (
+            <div key={`part-${drawAt}-with-diagram`}>
+              {rendered[drawAt]}
+              <Diagram diagram={answer.diagram} />
+            </div>
+          );
+        }
 
         /*
          * The frame belongs to the answer, not to a part of it.
@@ -1629,7 +1652,8 @@ export function ModelAnswerView({
         );
       })()}
 
-      <Diagram diagram={answer.diagram} />
+      {/* Only where the model would not say which block it belongs beside. */}
+      {!answer.diagram?.after && <Diagram diagram={answer.diagram} />}
 
       <Fold title="Where to check this, and what the marks mean">
       <Sources books={books} />
