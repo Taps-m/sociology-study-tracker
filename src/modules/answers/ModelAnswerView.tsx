@@ -1462,7 +1462,27 @@ export function ModelAnswerView({
 
 
   return (
-    <div className="answer-split" ref={sheet}>
+    <div className="answer-split" id="answer-top" ref={sheet}>
+      {/*
+        Back to the question, from anywhere in a thousand words.
+
+        An anchor rather than a button, and that is the whole trick: the new
+        tab is a clone of this markup with no JavaScript behind it, so a
+        button there would look like a control and do nothing. An href works
+        in both. React intercepts it here to scroll smoothly and leave the
+        address bar alone; the clone falls back to the plain jump.
+      */}
+      <a
+        className="to-top"
+        href="#answer-top"
+        title="Back to the question"
+        onClick={(e) => {
+          e.preventDefault();
+          document.getElementById("answer-top")?.scrollIntoView({ behavior: "smooth" });
+        }}
+      >
+        ↑ Top
+      </a>
       {map && (
         <aside className="answer-map">
           <AnswerMap parts={answer.parts} demands={answer.demands ?? []} />

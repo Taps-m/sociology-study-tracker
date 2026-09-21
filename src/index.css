@@ -1136,3 +1136,42 @@ details[open] > summary .fold-mark::before { content: "\2212"; }
 @media (prefers-reduced-motion: reduce) {
   .flow-step, .tree-branch, .diagram-item { animation: none; }
 }
+
+/*
+ * Back to the question.
+ *
+ * A forty-mark answer is five screens, and the question it answers is off the
+ * top of all but the first — which matters more here than on an ordinary long
+ * page, because the whole discipline being taught is answering the question
+ * rather than the topic, and you cannot check that against a question you
+ * cannot see.
+ *
+ * Bottom right, out of the text, and gone on paper where there is nothing to
+ * scroll.
+ */
+.to-top {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--raised);
+  color: var(--muted);
+  font-size: 12.5px;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+}
+
+.to-top:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+@media print {
+  .to-top { display: none; }
+}
