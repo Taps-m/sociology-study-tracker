@@ -709,7 +709,10 @@ function Part({
 /** A group of points inside a diagram: a heading, then what sits under it. */
 function Group({ item, tone }: { item: DiagramData["items"][number]; tone: string }) {
   return (
-    <div style={{ border: `1.5px solid ${tone}`, borderRadius: 9, padding: "9px 11px" }}>
+    <div
+      className="diagram-item"
+      style={{ border: `1.5px solid ${tone}`, borderRadius: 9, padding: "9px 11px" }}
+    >
       <div
         style={{
           fontFamily: C.mono,
@@ -786,6 +789,7 @@ function Pyramid({ diagram }: { diagram: DiagramData }) {
         {diagram.items.map((it, i) => (
           <div
             key={it.name}
+            className="diagram-item"
             style={{
               width: `${Math.round(46 + ((i + 1) / n) * 54)}%`,
               minWidth: 150,
@@ -966,6 +970,7 @@ function Circular({ diagram }: { diagram: DiagramData }) {
           return (
             <div
               key={it.name}
+              className="diagram-item diagram-item-fixed"
               style={{
                 position: "absolute",
                 left: `${pos.x}%`,

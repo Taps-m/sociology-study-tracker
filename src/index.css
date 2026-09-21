@@ -1087,3 +1087,52 @@ details[open] > summary .fold-mark::before { content: "\2212"; }
 @media (max-width: 560px) {
   .quad-4 { grid-template-columns: 1fr; gap: 12px; }
 }
+
+/*
+ * The diagram arriving a stage at a time.
+ *
+ * Not decoration and not a loop — a loop would be noise by the tenth viewing.
+ * It plays once, when the answer renders, because in a flow the order IS the
+ * argument and watching the stages land in order is what fixes the sequence.
+ * Three tenths of a second end to end, so it is over before it can be in the
+ * way of reading.
+ *
+ * Off on paper, and off for anyone who has asked their system for less motion
+ * — in both cases the whole diagram is simply there, which is what it was
+ * before this existed.
+ */
+@keyframes diagram-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* A node placed by a transform cannot be moved by one; it fades instead. */
+@keyframes diagram-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.flow-step,
+.tree-branch,
+.diagram-item {
+  animation: diagram-in 0.34s ease-out backwards;
+}
+
+.diagram-item-fixed {
+  animation-name: diagram-fade;
+}
+
+.flow-step:nth-child(1), .tree-branch:nth-child(1), .diagram-item:nth-child(1) { animation-delay: 0.04s; }
+.flow-step:nth-child(2), .tree-branch:nth-child(2), .diagram-item:nth-child(2) { animation-delay: 0.16s; }
+.flow-step:nth-child(3), .tree-branch:nth-child(3), .diagram-item:nth-child(3) { animation-delay: 0.28s; }
+.flow-step:nth-child(4), .tree-branch:nth-child(4), .diagram-item:nth-child(4) { animation-delay: 0.40s; }
+.flow-step:nth-child(5), .tree-branch:nth-child(5), .diagram-item:nth-child(5) { animation-delay: 0.52s; }
+.flow-step:nth-child(6), .tree-branch:nth-child(6), .diagram-item:nth-child(6) { animation-delay: 0.64s; }
+
+@media print {
+  .flow-step, .tree-branch, .diagram-item { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-step, .tree-branch, .diagram-item { animation: none; }
+}
