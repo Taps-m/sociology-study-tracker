@@ -290,6 +290,8 @@ export interface AnswerStructure {
    * because "no source shown" and "built from your notes" must not look alike.
    */
   notesFrom?: string;
+  /** Why no notes pages were found, where none were. Shown, not hidden. */
+  notesMiss?: string;
 }
 
 /**
@@ -506,6 +508,12 @@ export function forgetStructure(question: string) {
 }
 
 /** The notes citation a request carried, if it carried one. */
+/** Why no notes travelled, where none did — put there by notesContext. */
+function missOf(context: unknown): string | undefined {
+  const c = context as { notesMiss?: unknown } | null;
+  return typeof c?.notesMiss === "string" ? c.notesMiss : undefined;
+}
+
 function citationOf(context: unknown): string | undefined {
   const c = context as { notesCitation?: unknown } | null;
   return typeof c?.notesCitation === "string" ? c.notesCitation : undefined;
@@ -553,8 +561,7 @@ export async function answerStructure(
 
     // Stamp what it was actually built from, before it is cached.
     parsed.notesFrom = citationOf(context);
-    const miss = (context as { notesMiss?: unknown } | null)?.notesMiss;
-    parsed.notesMiss = typeof miss === "string" ? miss : undefined;
+    parsed.notesMiss = missOf(context);
 
     // An older reply, or an older cache, carried `diagram` as a sentence. Take
     // it as a label rather than letting a string reach a renderer expecting an
@@ -829,6 +836,7 @@ export async function modelAnswer(
     parsed.offSyllabus = (parsed.usedTopics ?? []).filter((id) => !allowed.has(id));
     parsed.diagram = parsed.diagram ?? { label: "", items: [] };
     parsed.notesFrom = citationOf(context);
+    parsed.notesMiss = missOf(context);
 
     // Sections are optional and must stay optional. An answer cached before
     // this existed has no demands and no serves, and renders flat — which is
