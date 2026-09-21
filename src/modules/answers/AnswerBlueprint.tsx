@@ -571,7 +571,7 @@ export function AnswerBlueprint({
                   cursor: busy ? "default" : "pointer",
                 }}
               >
-                {busy ? "Rebuilding…" : "Rebuild"}
+                {busy ? "Rebuilding…" : "Rebuild skeleton"}
               </button>
             </div>
           )}
@@ -650,27 +650,6 @@ export function AnswerBlueprint({
                   </p>
                 )}
 
-                {answer && !answerBusy && (
-                  <button
-                    onClick={() => void buildAnswer(true)}
-          title="Throw this answer away and write a new one. Use it if the answer is poor, or to see a change in the method."
-                    style={{
-                      display: "block",
-                      margin: "10px auto 0",
-                      padding: 0,
-                      border: "none",
-                      background: "transparent",
-                      color: C.muted,
-                      font: "inherit",
-                      fontSize: 12.5,
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Write a different one
-                  </button>
-                )}
 
                 {/*
                   Which of the three books the model can actually read.
@@ -756,6 +735,8 @@ export function AnswerBlueprint({
                   question={question}
                   topic={topic}
                   unit={unit}
+                  onRebuild={() => void buildAnswer(true)}
+                  rebuilding={answerBusy}
                 />
               </>
             )

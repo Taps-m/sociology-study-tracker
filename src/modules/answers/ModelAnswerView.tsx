@@ -1574,6 +1574,8 @@ export function ModelAnswerView({
   question = "A model answer",
   topic,
   unit,
+  onRebuild,
+  rebuilding = false,
 }: {
   answer: ModelAnswer;
   /** Chapter lines from standardBooks.ts — the app's map, not the model's claim. */
@@ -1583,6 +1585,9 @@ export function ModelAnswerView({
   /** Passed to the alternatives call, so it knows what is being argued. */
   topic?: string;
   unit?: string;
+  /** Throw this answer away and write another. Absent hides the control. */
+  onRebuild?: () => void;
+  rebuilding?: boolean;
 }) {
   let blockIndex = -1;
   const sheet = useRef<HTMLDivElement | null>(null);
@@ -1605,6 +1610,36 @@ export function ModelAnswerView({
         print dialog turns it into a PDF from there.
       */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginBottom: 4 }}>
+        {/*
+          The control that rewrites the answer, where the eye looks for it.
+
+          It was a grey underlined link at the foot of a thousand words, called
+          "Write a different one", while a prominent button higher up called
+          "Rebuild" threw away something else entirely — the skeleton. Two
+          controls with near-identical meaning, the important one hidden and
+          misnamed. Whole evenings went into wondering why an answer had not
+          changed.
+        */}
+        {onRebuild && (
+          <button
+            onClick={onRebuild}
+            disabled={rebuilding}
+            title="Throw this answer away and write another. Worth doing after a change in the method, or on anything written before your notes were loaded."
+            style={{
+              minHeight: 34,
+              padding: "0 13px",
+              borderRadius: 8,
+              border: `1px solid ${C.line}`,
+              background: C.raised,
+              color: rebuilding ? C.muted : C.text,
+              font: "inherit",
+              fontSize: 13,
+              cursor: rebuilding ? "default" : "pointer",
+            }}
+          >
+            {rebuilding ? "Rebuilding…" : "Rebuild answer"}
+          </button>
+        )}
         <button
           onClick={() => setMap((v) => !v)}
           title="Show the skeleton of this answer down the left — every block by its keyword, in order. Click one to jump to it."
