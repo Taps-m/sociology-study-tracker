@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import { openInTab, printToPdf } from "../../lib/printable";
+import { evidenceOptions } from "../../lib/ai";
 import type {
   CloseType,
+  EvidenceOption,
   Diagram as DiagramData,
   Dimension,
   EvidenceKind,
@@ -48,6 +50,7 @@ function marked(
   text: string,
   phrases: string[],
   evidence: { kind: EvidenceKind; text: string }[] = [],
+  onSwap?: (fact: { kind: EvidenceKind; text: string }) => void,
 ): ReactNode {
   /** Grow a match out to the sentence it sits in. */
   function sentenceAround(hay: string, from: number, to: number): [number, number] {
@@ -118,6 +121,25 @@ function marked(
           */}
           <span style={{ fontWeight: 700 }}>{EVIDENCE_LABELS[fact.kind]} </span>
           {piece.slice(a, b)}
+          {onSwap && (
+            <button
+              onClick={() => onSwap(fact)}
+              title="Two other ways to prove this point, easier to hold in your head"
+              style={{
+                marginLeft: 6,
+                padding: "0 5px",
+                border: "none",
+                background: "transparent",
+                color: C.warn,
+                font: "inherit",
+                fontSize: 13,
+                cursor: "pointer",
+                opacity: 0.75,
+              }}
+            >
+              ↻
+            </button>
+          )}
         </span>,
         piece.slice(b),
       );
@@ -482,6 +504,7 @@ function Part({
   alts = [],
   anchorId,
   practice = false,
+  about,
 }: {
   part: ModelAnswerPart;
   index: number | null;
@@ -491,9 +514,126 @@ function Part({
   anchorId?: string;
   /** Hide the prose until it is asked for, so the block can be attempted first. */
   practice?: boolean;
+  /** What the alternatives call needs to know. Absent means no ↻ is offered. */
+  about?: { question: string; topic?: string; unit?: string };
 }) {
   const [version, setVersion] = useState(0);
   const [shown, setShown] = useState(false);
+
+  /*
+   * The alternatives panel.
+   *
+   * It shows and it does not save. Nothing here writes back into the answer,
+   * because the moment a candidate's swaps and the model's output are mixed
+   * there is no way to tell, on the next rebuild, which judgements were whose.
+   * You read the two, decide which one you will actually remember in the hall,
+   * and write that one on paper. The screen keeps its opinion to itself.
+   */
+  const [swapOf, setSwapOf] = useState<string | null>(null);
+  const [options, setOptions] = useState<EvidenceOption[] | null>(null);
+  const [swapBusy, setSwapBusy] = useState(false);
+  const [swapError, setSwapError] = useState<string | null>(null);
+
+  async function askForOptions(fact: { kind: EvidenceKind; text: string }) {
+    if (!about) return;
+    setSwapOf(fact.text);
+    setOptions(null);
+    setSwapError(null);
+    setSwapBusy(true);
+    const res = await evidenceOptions(
+      about.question,
+      {
+        question: about.question,
+        topic: about.topic,
+        unit: about.unit,
+        block: part.keyword,
+        blockText: part.text,
+        evidence: fact,
+      },
+      fact.text,
+    );
+    setSwapBusy(false);
+    if (res.error) setSwapError(res.error);
+    else setOptions(res.result ?? []);
+  }
+
+  const swapPanel =
+    swapOf === null ? null : (
+      <div
+        style={{
+          marginTop: 9,
+          padding: "10px 12px",
+          borderRadius: 9,
+          border: `1px dashed ${C.line}`,
+          background: C.raised,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontFamily: C.mono,
+            fontSize: 10.5,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: C.muted,
+            marginBottom: 8,
+          }}
+        >
+          <span style={{ flex: 1 }}>Two other ways to prove this</span>
+          <button
+            onClick={() => setSwapOf(null)}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: C.muted,
+              font: "inherit",
+              fontSize: 11,
+              cursor: "pointer",
+            }}
+          >
+            close
+          </button>
+        </div>
+
+        {swapBusy && (
+          <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>Looking for easier ones…</p>
+        )}
+        {swapError && (
+          <p style={{ fontSize: 13, color: C.warn, margin: 0, lineHeight: 1.6 }}>{swapError}</p>
+        )}
+        {options && options.length === 0 && !swapBusy && (
+          <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.6 }}>
+            Nothing easier to hold than what is already there. Keep it.
+          </p>
+        )}
+        {options && options.length > 0 && (
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 11 }}>
+            {options.map((o) => (
+              <li key={o.text} style={{ paddingLeft: 11, borderLeft: `2px solid ${C.warn}` }}>
+                <p style={{ fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+                  <span style={{ fontWeight: 700, color: C.warn }}>
+                    {EVIDENCE_LABELS[o.kind]}{" "}
+                  </span>
+                  {o.text}
+                </p>
+                {o.why && (
+                  <p style={{ fontSize: 12, color: C.muted, margin: "3px 0 0", lineHeight: 1.5 }}>
+                    {o.why}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <p style={{ fontSize: 12, color: C.muted, margin: "10px 0 0", lineHeight: 1.55 }}>
+          The answer above is unchanged. Write down whichever of the three you will actually
+          remember.
+        </p>
+      </div>
+    );
 
   if (part.kind === "signpost") {
     return (
@@ -674,9 +814,10 @@ function Part({
         </button>
       ) : (
         <p style={{ fontSize: 15, lineHeight: 1.85, margin: 0 }}>
-          {marked(part.text, part.underline, part.evidence)}
+          {marked(part.text, part.underline, part.evidence, about ? askForOptions : undefined)}
         </p>
       )}
+      {(!practice || shown) && swapPanel}
       {(!practice || shown) && (part.thinker || part.specific) && (
         <p
           style={{
@@ -1431,12 +1572,17 @@ export function ModelAnswerView({
   answer,
   books = [],
   question = "A model answer",
+  topic,
+  unit,
 }: {
   answer: ModelAnswer;
   /** Chapter lines from standardBooks.ts — the app's map, not the model's claim. */
   books?: string[];
   /** Used as the heading of the printable copy. */
   question?: string;
+  /** Passed to the alternatives call, so it knows what is being argued. */
+  topic?: string;
+  unit?: string;
 }) {
   let blockIndex = -1;
   const sheet = useRef<HTMLDivElement | null>(null);
@@ -1575,6 +1721,7 @@ export function ModelAnswerView({
               }
               anchorId={`part-${i}`}
               practice={practice}
+              about={{ question, topic, unit }}
             />
           );
         });

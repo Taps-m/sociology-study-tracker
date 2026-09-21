@@ -750,7 +750,13 @@ export function AnswerBlueprint({
                   busy={answerBusy}
                   onPick={(s) => void buildAnswer(false, s)}
                 />
-                <ModelAnswerView answer={answer} books={books} question={question} />
+                <ModelAnswerView
+                  answer={answer}
+                  books={books}
+                  question={question}
+                  topic={topic}
+                  unit={unit}
+                />
               </>
             )
           )}

@@ -1009,6 +1009,97 @@ export function forgetCheatSheet(topicId: string) {
   }
 }
 
+/**
+ * Two other ways to prove the same point, for a fact that will not stick.
+ *
+ * The answer is never touched. This is a panel you open, read and close — the
+ * model answer stays exactly what the model wrote, because the moment your
+ * edits and its output are mixed you can no longer tell, on the next rebuild,
+ * which judgements were yours.
+ *
+ * Cached against the question and the sentence, so opening the panel again is
+ * free. Only the first ask on a given sentence spends a call, which matters at
+ * eight hundred a month.
+ */
+export interface EvidenceOption {
+  kind: EvidenceKind;
+  text: string;
+  why: string;
+}
+
+const SWAP_KEY = "wbcs.swaps.v1";
+
+function swapCache(): Record<string, EvidenceOption[]> {
+  try {
+    return JSON.parse(localStorage.getItem(SWAP_KEY) ?? "{}") as Record<string, EvidenceOption[]>;
+  } catch {
+    return {};
+  }
+}
+
+/** Stable, short, and independent of how long the sentence is. */
+function shortHash(text: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i += 1) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36);
+}
+
+export async function evidenceOptions(
+  question: string,
+  context: unknown,
+  original: string,
+): Promise<{ result: EvidenceOption[] | null; error: string | null }> {
+  const key = `${questionKey(question)}::${shortHash(original)}`;
+  const hit = swapCache()[key];
+  if (hit) return { result: hit, error: null };
+
+  const { status, payload, error: reachError } = await askService(
+    { task: "swap", context, deviceId: deviceId() },
+    60_000,
+  );
+  if (reachError) return { result: null, error: reachError };
+  if (status < 200 || status >= 300) {
+    return {
+      result: null,
+      error: [payload.error ?? `request failed (${status})`, payload.detail]
+        .filter(Boolean)
+        .join(" — "),
+    };
+  }
+
+  const text = (payload.body ?? "").replace(/^```(?:json)?|```$/gm, "").trim();
+  let parsed: { options?: unknown };
+  try {
+    parsed = JSON.parse(text) as { options?: unknown };
+  } catch {
+    return { result: null, error: "The reply was not the JSON this expects." };
+  }
+
+  const KINDS = new Set(["example", "data", "report", "law", "quote"]);
+  const options = (Array.isArray(parsed.options) ? parsed.options : [])
+    .filter(
+      (o): o is EvidenceOption =>
+        !!o &&
+        typeof o === "object" &&
+        typeof (o as EvidenceOption).text === "string" &&
+        (o as EvidenceOption).text.trim().length > 20 &&
+        typeof (o as EvidenceOption).kind === "string" &&
+        KINDS.has((o as EvidenceOption).kind),
+    )
+    .map((o) => ({ ...o, why: typeof o.why === "string" ? o.why : "" }))
+    .slice(0, 2);
+
+  try {
+    localStorage.setItem(SWAP_KEY, JSON.stringify({ ...swapCache(), [key]: options }));
+  } catch {
+    // Full or blocked; it will be fetched again next time.
+  }
+  return { result: options, error: null };
+}
+
 export async function cheatSheet(
   topicId: string,
   context: unknown,
