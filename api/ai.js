@@ -176,7 +176,7 @@ const TOKEN_BUDGET = {
   critique: 2048,
   insight: 2048,
   doubt: 2048,
-  evaluate: 3072, cheatsheet: 4096, drill: 1536,
+  evaluate: 3072, cheatsheet: 4096, drill: 1536, swap: 1280,
   structure: 8192,
   // A full 900-1100 word answer, plus the model's thinking before it.
   model: 18432,
@@ -1185,6 +1185,56 @@ Reply with JSON and nothing else, in exactly this shape:
 The minutes must total about 35. Write the opening, pivot and close as real
 sentences the candidate could put on the page, not descriptions of them. No
 praise, no prose outside the JSON.`;
+
+    case "swap":
+      return `${SYSTEM}
+
+One block of an answer carries one piece of evidence, and the candidate has to
+hold it in their head through three hours of writing. Offer two other ways to
+prove the same point:
+${json}
+
+WHAT IS IN FRONT OF YOU. "block" is the claim being made and "evidence" is the
+sentence currently proving it. The claim does not change. Only the proof does.
+
+WHAT "EASIER TO REMEMBER" MEANS, BECAUSE OTHERWISE YOU WILL RETURN DIFFERENT
+RATHER THAN EASIER:
+
+  - a round number beats a precise one: "about 70 per cent" over "70.34 per cent"
+  - one date beats a range
+  - a named Article or Act beats a survey table: "Article 17" is four
+    characters and a candidate already half-knows it
+  - a nationally known instance beats a state-specific one
+  - something already half-familiar beats something true but new
+
+GIVE EXACTLY TWO, AND MAKE THEM DIFFERENT IN KIND:
+
+  The first keeps the same evidence and makes it holdable — same Act, same
+  round of the same survey, said in the form it would be remembered in.
+
+  The second swaps the evidence for different evidence that proves the same
+  claim: a named provision standing in for a table, a well-known case standing
+  in for a statistic.
+
+If the notes are in the context, take the second from them by preference. A
+fact the candidate has already read and can look up beats one they must accept
+on trust.
+
+EACH ONE MUST SHOW WHAT IT CLAIMS TO BE. A "quote" carries quotation marks
+around a scholar's actual words. "data" carries a number. "law" names the
+provision. "report" names the body. "example" names something — a state, a
+community, a scheme, an event. An alternative that cannot do this is not an
+alternative; leave it out.
+
+IF NOTHING IS GENUINELY EASIER, SAY SO. Return an empty list rather than two
+rewordings of what is already there. The candidate is deciding what to carry
+into an exam hall, and a false choice costs them the minute they spend on it.
+
+Reply with JSON and nothing else:
+
+{"options":[{"kind":"example|data|report|law|quote","text":"<one sentence, ready to write>","why":"<at most 12 words on why it is easier to hold>"}]}
+
+No praise, no preamble, no prose outside the JSON.`;
 
     default:
       return null;
