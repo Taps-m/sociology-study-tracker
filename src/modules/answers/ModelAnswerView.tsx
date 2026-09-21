@@ -1556,25 +1556,61 @@ export function ModelAnswerView({
           );
         });
 
-        // One demand, or none, is the common case — most questions ask one
-        // thing, and an answer to one thing is not improved by being put in a
-        // box with a heading on it.
+        /*
+         * The frame belongs to the answer, not to a part of it.
+         *
+         * An opening introduces the whole question and a conclusion closes the
+         * whole question — so neither can sit inside "part 1 of 2", whatever
+         * the model said about which demand it serves. It did say so, once,
+         * and the result was a first part made of the opening, the signpost
+         * and the conclusion, 124 words with no argument in it, and a second
+         * part holding every block including the ones answering the first
+         * half. The reader is told the answer is in two parts and then shown
+         * something that is not.
+         *
+         * So the split is applied to the body alone: opening and signpost
+         * above the sections, close below them, blocks and pivots inside.
+         */
         const demands = answer.demands ?? [];
-        if (demands.length < 2) return <div style={{ marginTop: 18 }}>{rendered}</div>;
+        const kindOf = (i: number) => answer.parts[i]?.kind;
+        const isFrame = (i: number) =>
+          kindOf(i) === "opening" || kindOf(i) === "signpost" || kindOf(i) === "close";
 
-        return demands.map((demand, di) => (
-          <Section
-            key={demand.label}
-            demand={demand}
-            index={di}
-            total={demands.length}
-            words={answer.parts
-              .filter((pt) => (pt.serves ?? 0) === di)
-              .reduce((n, pt) => n + pt.text.trim().split(/\s+/).length, 0)}
-          >
-            {rendered.filter((_, i) => (answer.parts[i]?.serves ?? 0) === di)}
-          </Section>
-        ));
+        /*
+         * And a split only survives if every part of it has something in it.
+         *
+         * A section heading over an empty section is a worse lie than no
+         * headings at all: it tells a candidate the answer covers two things
+         * and then shows them one. Where the model has put every block under
+         * one demand, the honest rendering is flat.
+         */
+        const blocksIn = (di: number) =>
+          answer.parts.filter((pt) => pt.kind === "block" && (pt.serves ?? 0) === di).length;
+        const split = demands.length > 1 && demands.every((_, di) => blocksIn(di) > 0);
+
+        if (!split) return <div style={{ marginTop: 18 }}>{rendered}</div>;
+
+        return (
+          <>
+            {rendered.filter(
+              (_, i) => kindOf(i) === "opening" || kindOf(i) === "signpost",
+            )}
+            {demands.map((demand, di) => (
+              <Section
+                key={demand.label}
+                demand={demand}
+                index={di}
+                total={demands.length}
+                words={answer.parts
+                  .filter((pt, i) => !isFrame(i) && (pt.serves ?? 0) === di)
+                  .reduce((n, pt) => n + pt.text.trim().split(/\s+/).length, 0)}
+              >
+                {rendered.filter((_, i) => !isFrame(i) && (answer.parts[i]?.serves ?? 0) === di)}
+              </Section>
+            ))}
+            {rendered.filter((_, i) => kindOf(i) === "close")}
+          </>
+        );
       })()}
 
       <Diagram diagram={answer.diagram} />

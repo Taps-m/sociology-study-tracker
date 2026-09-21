@@ -770,6 +770,26 @@ LENGTH. Forty marks, about thirty-five minutes of writing: aim at 900 to 1100
 words across all parts. This is roughly triple a UPSC 250-word answer; do not
 write a compressed one.
 
+WHICH DEMAND EACH PART SERVES, AND IT HAS TO BE TRUE. "serves" is the index of
+the demand that part answers, and the screen builds the answer's sections out of
+it, so a careless number is not a small error — it shows the candidate a part
+one that does not answer the first thing the question asked.
+
+Two rules, and they are absolute:
+
+  Every demand must have blocks of its own. If all the blocks come out under
+  one demand, you have not answered the other, and the answer is wrong before
+  the numbering is. Go back and write the body for it.
+
+  A block serves the demand it argues. A block on Davis and Moore explaining
+  why stratification is functionally necessary serves the demand about
+  universality, not the one about caste in India, however much caste is
+  mentioned in it.
+
+The opening, the signpost and the close belong to the whole answer rather than
+to any one demand, so set "serves" to 0 on them and do not count them as a
+demand's content.
+
 ONE SECTION PER THING THE QUESTION ASKS. List in "demands" each separate thing
 the question obliges — "the nature of it", "why it happened", "what should be
 done" — three to eight words each, in the order they should be answered, with
