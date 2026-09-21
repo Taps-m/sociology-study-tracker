@@ -1386,19 +1386,9 @@ function Sources({ books }: { books: string[] }) {
  * that goes to a new tab or a printer opens it again, because nothing there
  * can be clicked.
  */
-function Fold({
-  title,
-  tone = "quiet",
-  children,
-}: {
-  title: string;
-  /** A caution still has to be seen while shut, so it keeps its colour. */
-  tone?: "quiet" | "warn";
-  children: ReactNode;
-}) {
-  const warn = tone === "warn";
+function Fold({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <details className="fold-aside" style={{ marginTop: warn ? 12 : 22 }}>
+    <details className="fold-aside" style={{ marginTop: 22 }}>
       <summary
         style={{
           cursor: "pointer",
@@ -1406,17 +1396,13 @@ function Fold({
           display: "flex",
           alignItems: "center",
           gap: 8,
-          fontFamily: warn ? "inherit" : C.mono,
-          fontSize: warn ? 13 : 11,
-          fontWeight: warn ? 650 : 400,
-          letterSpacing: warn ? "normal" : "0.1em",
-          textTransform: warn ? "none" : "uppercase",
-          color: warn ? C.warn : C.muted,
-          padding: warn ? "8px 11px" : "7px 0",
-          borderTop: warn ? "none" : `1px solid ${C.line}`,
-          borderLeft: warn ? `2px solid ${C.warn}` : "none",
-          borderRadius: warn ? 8 : 0,
-          background: warn ? C.warnSoft : "transparent",
+          fontFamily: C.mono,
+          fontSize: 11,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: C.muted,
+          padding: "7px 0",
+          borderTop: `1px solid ${C.line}`,
         }}
       >
         <span
@@ -1429,16 +1415,14 @@ function Fold({
             width: 17,
             height: 17,
             borderRadius: 5,
-            border: `1px solid ${warn ? C.warn : C.line}`,
+            border: `1px solid ${C.line}`,
             lineHeight: 1,
             flex: "0 0 auto",
           }}
         />
         {title}
       </summary>
-      <div style={warn ? { padding: "2px 13px 0", fontSize: 13, lineHeight: 1.7 } : undefined}>
-        {children}
-      </div>
+      <div>{children}</div>
     </details>
   );
 }
@@ -1538,21 +1522,6 @@ export function ModelAnswerView({
       )}
 
       <BuiltFrom from={answer.notesFrom} miss={answer.notesMiss} />
-      {/*
-        The caution folds, because it does not change.
-        It was five lines of the same warning above every answer ever opened,
-        which is how a warning stops being read: the eye learns its shape and
-        skips it, and it pushes the first paragraph of the answer below the
-        fold on a laptop. Shut it is one amber line — still the first thing on
-        the page, still amber, and still there on the twentieth answer.
-      */}
-      <Fold tone="warn" title="A model answer — change it, and check every figure">
-        The question will be worded differently on the day, and an answer reproduced from memory
-        reads like one. Take the shape, the underlining and the way the facts are placed; put your
-        own phrasing through it. And check every figure, Act and report before you write it in the
-        hall — they are drafted by a model whose knowledge has a cutoff, and wrong-and-confident
-        costs more marks than absent.
-      </Fold>
 
       <DimensionStrip parts={answer.parts} />
 
@@ -1671,7 +1640,8 @@ export function ModelAnswerView({
           </>
         )}
         Underlined phrases are what to underline in the booklet: technical terms, named Acts,
-        figures. Underlining everything is the same as underlining nothing.
+        figures. Underlining everything is the same as underlining nothing. Check any figure
+        before you write it in the hall — the model's knowledge has a cutoff.
       </p>
       <p style={{ fontSize: 12.5, color: C.muted, margin: "8px 0 0", lineHeight: 1.65 }}>
         <strong style={{ color: C.warn }}>Must include</strong> marks what the demand cannot be
